@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Offline — Agranusa Engineering System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f7faf9; color: #181c1c; }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-6 text-center">
+  <div class="w-16 h-16 rounded-2xl bg-[#004d40] text-[#6cf8bb] flex items-center justify-center mb-6 shadow-md text-2xl font-bold">
+    ⚡
+  </div>
+  <h1 class="text-2xl font-bold text-[#00342b] mb-2">Anda Sedang Offline</h1>
+  <p class="text-sm text-gray-600 max-w-sm mb-6 leading-relaxed">
+    Koneksi internet terputus. Data telemetri terakhir yang tersimpan di cache lokal tetap dapat Anda lihat saat koneksi kembali stabil.
+  </p>
+  <button onclick="window.location.reload()" class="px-5 py-2.5 rounded-xl bg-[#00342b] text-white font-semibold text-sm hover:bg-[#004d40] transition-all shadow-sm">
+    Coba Hubungkan Ulang
+  </button>
+  <div class="mt-8 text-xs text-gray-400">
+    Agranusa Signature Villa • PWA Offline Mode
+  </div>
+</body>
+</html>

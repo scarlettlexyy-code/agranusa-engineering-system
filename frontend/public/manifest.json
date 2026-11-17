@@ -1,0 +1,87 @@
+{
+  "id": "com.agranusa.engineeringsystem.v2",
+  "name": "Agranusa Engineering System",
+  "short_name": "Agranusa Eng",
+  "description": "Sistem Monitoring Operasional, Capex Proyek, dan Telemetri Energi Agranusa Signature Villa",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#00342b",
+  "background_color": "#f7faf9",
+  "lang": "id",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icons/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard Telemetri Engineering Agranusa"
+    },
+    {
+      "src": "/icons/screenshot-mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Laporan Aktivitas Pekerjaan Teknisi"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Aktivitas Pekerjaan",
+      "short_name": "Aktivitas",
+      "description": "Buka modul laporan aktivitas pekerjaan teknisi",
+      "url": "/#activity-report",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Konsumsi Energi",
+      "short_name": "Energi",
+      "description": "Buka telemetri konsumsi listrik, air, gas & genset",
+      "url": "/#energy-consumption",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Monitoring Capex",
+      "short_name": "Proyek",
+      "description": "Buka monitoring proyek dan deviasi anggaran",
+      "url": "/#project-monitoring",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
+}
