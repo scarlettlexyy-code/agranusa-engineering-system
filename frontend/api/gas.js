@@ -20,14 +20,9 @@ export default async function handler(req, res) {
     return;
   }
 
-  const gasUrl = process.env.GAS_API_URL || process.env.VITE_GAS_API_URL;
-
-  if (!gasUrl) {
-    return res.status(500).json({
-      success: false,
-      error: 'Environment variable GAS_API_URL belum dikonfigurasi di Vercel.'
-    });
-  }
+  const gasUrl = process.env.GAS_API_URL || 
+                 process.env.VITE_GAS_API_URL || 
+                 'https://script.google.com/macros/s/AKfycbz3_7M_QIaSdxnehCc1c7bgc0kvBNNnoa0XztcvE6g6sUgU-H99tpf2iMEBb1VgUybb9Q/exec';
 
   try {
     let response;

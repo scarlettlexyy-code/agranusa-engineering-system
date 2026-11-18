@@ -1,0 +1,53 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/gas",
+      "destination": "/frontend/api/gas.js"
+    },
+    {
+      "source": "/sw.js",
+      "destination": "/frontend/public/sw.js"
+    },
+    {
+      "source": "/manifest.json",
+      "destination": "/frontend/public/manifest.json"
+    },
+    {
+      "source": "/icons/(.*)",
+      "destination": "/frontend/public/icons/$1"
+    },
+    {
+      "source": "/((?!api/|icons/|src/|public/|sw.js|manifest.json|offline.html).*)",
+      "destination": "/frontend/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json; charset=utf-8"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    }
+  ]
+}

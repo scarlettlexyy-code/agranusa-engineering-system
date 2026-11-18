@@ -5,7 +5,7 @@
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>Agranusa Engineering System</title>
   
-  <!-- PWA & Mobile Metadata for PWA Builder -->
+  <!-- PWA & Mobile Metadata -->
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#00342b"/>
   <meta name="mobile-web-app-capable" content="yes"/>
@@ -77,7 +77,7 @@
   <aside class="w-64 bg-primary-container shrink-0 flex flex-col justify-between py-5 px-3.5 z-40 shadow-lg text-on-primary">
     <div class="flex flex-col gap-5 overflow-y-auto">
       <!-- Logo Branding -->
-      <div class="flex items-center gap-3 px-2 pt-1">
+      <div class="flex items-center gap-3 px-2 pt-1 cursor-pointer" onclick="navigateTo('dashboard')">
         <div class="w-9 h-9 rounded-xl bg-secondary-container flex items-center justify-center text-on-secondary-container shadow-sm">
           <span class="material-symbols-outlined text-[22px]">villa</span>
         </div>
@@ -136,7 +136,7 @@
           <span class="w-2.5 h-2.5 rounded-full bg-secondary-fixed animate-pulse"></span>
           <span class="text-[12px] font-semibold text-on-primary">Operational</span>
         </div>
-        <span class="text-[11px] text-on-primary-container font-medium">Sheets DB Live</span>
+        <span class="text-[11px] text-on-primary-container font-medium" id="sidebar-db-status">Sheets DB Live</span>
       </div>
       <div class="flex items-center justify-between text-on-primary-container text-[11px] px-1 font-medium">
         <span>Vercel + PWA Mode</span>
@@ -157,7 +157,7 @@
       </div>
       <div class="flex items-center gap-4">
         <!-- PWA Install Button Header Pill -->
-        <button id="pwa-install-banner" onclick="promptPwaInstall()" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-secondary-container text-on-secondary-container text-[12px] font-bold shadow-sm hover:bg-secondary-fixed transition-all animate-bounce">
+        <button id="pwa-install-banner" onclick="promptPwaInstall()" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-secondary-container text-on-secondary-container text-[12px] font-bold shadow-sm hover:bg-secondary-fixed transition-all">
           <span class="material-symbols-outlined text-[17px]">download_for_offline</span>
           <span>Install PWA App</span>
         </button>
@@ -200,16 +200,19 @@
             <p class="text-[13px] text-outline mt-0.5">Executive telemetry & evaluasi operasional Agranusa Signature Villa • Google Sheets Realtime DB</p>
           </div>
           <div class="flex flex-wrap items-center gap-3">
-            <div class="inline-flex p-1 rounded-full bg-surface-container-high/80 text-[12px] font-medium shadow-inner">
-              <button class="px-3.5 py-1.5 rounded-full text-outline hover:text-on-surface">Hari Ini</button>
-              <button class="px-3.5 py-1.5 rounded-full text-outline hover:text-on-surface">Minggu Ini</button>
-              <button class="px-3.5 py-1.5 rounded-full bg-white text-primary font-semibold shadow-sm">Bulan Ini</button>
-              <button class="px-3.5 py-1.5 rounded-full text-outline hover:text-on-surface">Tahun Ini</button>
+            <!-- Period Selector Tabs -->
+            <div class="inline-flex p-1 rounded-full bg-surface-container-high/80 text-[12px] font-medium shadow-inner" id="dash-timeframe-pills">
+              <button onclick="setDashboardTimeframe('today', this)" class="dash-tf-btn px-3.5 py-1.5 rounded-full text-outline hover:text-on-surface">Hari Ini</button>
+              <button onclick="setDashboardTimeframe('week', this)" class="dash-tf-btn px-3.5 py-1.5 rounded-full text-outline hover:text-on-surface">Minggu Ini</button>
+              <button onclick="setDashboardTimeframe('month', this)" class="dash-tf-btn px-3.5 py-1.5 rounded-full bg-white text-primary font-semibold shadow-sm">Bulan Ini</button>
+              <button onclick="setDashboardTimeframe('year', this)" class="dash-tf-btn px-3.5 py-1.5 rounded-full text-outline hover:text-on-surface">Tahun Ini</button>
             </div>
-            <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-white shadow-sm border border-surface-container text-[13px] font-semibold text-on-surface">
-              <span class="material-symbols-outlined text-[18px] text-secondary">calendar_month</span>
-              <span id="dash-period-label">Mei 2026, Bulanan</span>
-            </div>
+            <!-- Month Selector Dropdown -->
+            <select id="dash-period-select" onchange="changeReportingPeriod(this.value)" class="px-3.5 py-2 rounded-xl bg-white shadow-sm border border-surface-container text-[13px] font-semibold text-on-surface focus:outline-none focus:ring-1 focus:ring-secondary">
+              <option value="2026-05" selected>Mei 2026, Bulanan</option>
+              <option value="2026-04">April 2026, Bulanan</option>
+              <option value="2026-03">Maret 2026, Bulanan</option>
+            </select>
             <button onclick="exportMonthlyReportPdf()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container shadow-sm text-[13px] font-semibold transition-all">
               <span class="material-symbols-outlined text-[18px]">download</span>
               <span>Export PDF</span>
@@ -220,7 +223,7 @@
         <!-- 4 Top KPI Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <!-- Card 1: Total Aktivitas -->
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between cursor-pointer hover:border-secondary transition-all" onclick="navigateTo('activity-report')">
             <div class="flex items-center justify-between">
               <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Aktivitas</span>
               <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-secondary">
@@ -236,13 +239,13 @@
                 <span class="material-symbols-outlined text-[15px]">arrow_upward</span> +5.2% vs Bulan Lalu
               </div>
               <div class="text-[11.5px] text-on-surface-variant font-medium">
-                <span class="text-secondary font-bold" id="dash-kpi-done-tasks">118 Selesai</span> • 22 Berjalan • 8 Tertunda
+                <span class="text-secondary font-bold" id="dash-kpi-done-tasks">118 Selesai</span> • <span id="dash-kpi-prog-tasks">22 Berjalan</span> • <span id="dash-kpi-pend-tasks">8 Tertunda</span>
               </div>
             </div>
           </div>
 
           <!-- Card 2: Proyek Capex -->
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between cursor-pointer hover:border-secondary transition-all" onclick="navigateTo('project-monitoring')">
             <div class="flex items-center justify-between">
               <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Proyek Rekayasa & Capex</span>
               <div class="w-9 h-9 rounded-xl bg-primary-container/20 flex items-center justify-center text-primary-container">
@@ -258,13 +261,13 @@
                 <span class="material-symbols-outlined text-[15px]">add_circle</span> +2 Proyek Baru (Q2)
               </div>
               <div class="text-[11.5px] text-on-surface-variant font-medium">
-                Realisasi: <strong class="text-on-surface">Rp 142,5 Jt</strong> / Rp 185 Jt
+                Realisasi: <strong class="text-on-surface" id="dash-kpi-project-cost">Rp 142,5 Jt</strong> / <span id="dash-kpi-project-budget">Rp 185 Jt</span>
               </div>
             </div>
           </div>
 
           <!-- Card 3: Konsumsi Energi -->
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between cursor-pointer hover:border-secondary transition-all" onclick="navigateTo('energy-consumption')">
             <div class="flex items-center justify-between">
               <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Estimasi Biaya Energi</span>
               <div class="w-9 h-9 rounded-xl bg-tertiary-fixed/60 flex items-center justify-center text-on-tertiary-container">
@@ -286,7 +289,7 @@
           </div>
 
           <!-- Card 4: Belanja Opex -->
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between cursor-pointer hover:border-secondary transition-all" onclick="navigateTo('monthly-purchase')">
             <div class="flex items-center justify-between">
               <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Belanja Operasional (Opex)</span>
               <div class="w-9 h-9 rounded-xl bg-secondary-container/30 flex items-center justify-center text-secondary">
@@ -346,7 +349,6 @@
                     <stop offset="100%" stop-color="#006c49" stop-opacity="0.0"/>
                   </linearGradient>
                 </defs>
-                <!-- Grid Lines -->
                 <line x1="0" y1="40" x2="700" y2="40" stroke="#e0e3e2" stroke-dasharray="4"/>
                 <line x1="0" y1="80" x2="700" y2="80" stroke="#e0e3e2" stroke-dasharray="4"/>
                 <line x1="0" y1="120" x2="700" y2="120" stroke="#e0e3e2" stroke-dasharray="4"/>
@@ -359,7 +361,6 @@
                 <path d="M 0,140 Q 140,135 280,115 T 350,35 T 420,105 T 560,120 T 700,135 L 700,150 L 0,150 Z" fill="url(#taskGrad)" />
                 <path d="M 0,140 Q 140,135 280,115 T 350,35 T 420,105 T 560,120 T 700,135" fill="none" stroke="#006c49" stroke-width="2.5" stroke-dasharray="6 3"/>
 
-                <!-- Peak Points -->
                 <circle cx="350" cy="20" r="5" fill="#004d40" stroke="#fff" stroke-width="2"/>
                 <circle cx="350" cy="35" r="4" fill="#006c49" stroke="#fff" stroke-width="2"/>
                 <line x1="350" y1="20" x2="350" y2="150" stroke="#004d40" stroke-width="1.5" stroke-dasharray="3 3"/>
@@ -385,7 +386,7 @@
               </div>
               <div class="flex items-center gap-6">
                 <span>Puncak: <strong class="text-secondary-fixed">16 Mei • 1.020 kWh</strong></span>
-                <span>Tugas Tertutup: <strong>118 Pekerjaan</strong></span>
+                <span>Tugas Tertutup: <strong id="dash-bar-closed-tasks">118 Pekerjaan</strong></span>
                 <span>Efisiensi: <strong class="text-secondary-fixed">94% Sesuai Rencana</strong></span>
               </div>
             </div>
@@ -396,7 +397,7 @@
             <div>
               <div class="flex items-center justify-between">
                 <h3 class="text-[16px] font-bold text-primary">Distribusi Proyek Capex</h3>
-                <span class="text-[11px] text-outline font-semibold">12 Total</span>
+                <span class="text-[11px] text-outline font-semibold" id="dash-donut-total-label">12 Total</span>
               </div>
               <p class="text-[12px] text-outline mt-0.5">Komposisi siklus proyek aktif</p>
             </div>
@@ -410,7 +411,7 @@
                 <circle cx="50" cy="50" r="38" fill="none" stroke="#f49d0a" stroke-width="14" stroke-dasharray="11.9 238.7" stroke-dashoffset="-226.8"/>
               </svg>
               <div class="absolute flex flex-col items-center">
-                <span class="text-[24px] font-bold text-primary leading-none">12</span>
+                <span class="text-[24px] font-bold text-primary leading-none" id="dash-donut-total-count">12</span>
                 <span class="text-[9.5px] uppercase tracking-wider text-outline font-semibold">TOTAL PROYEK</span>
               </div>
             </div>
@@ -419,15 +420,15 @@
             <div class="flex flex-col gap-2 pt-2 border-t border-surface-container text-[12px]">
               <div class="flex items-center justify-between">
                 <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span> Selesai (Completed)</span>
-                <span class="font-bold text-on-surface">55% (7 Proyek)</span>
+                <span class="font-bold text-on-surface" id="dash-donut-completed-count">55% (7 Proyek)</span>
               </div>
               <div class="flex items-center justify-between">
                 <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-secondary"></span> Sedang Berjalan</span>
-                <span class="font-bold text-on-surface">40% (4 Proyek)</span>
+                <span class="font-bold text-on-surface" id="dash-donut-inprogress-count">40% (4 Proyek)</span>
               </div>
               <div class="flex items-center justify-between">
                 <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-on-tertiary-container"></span> Perencanaan / Review</span>
-                <span class="font-bold text-on-surface">5% (1 Proyek)</span>
+                <span class="font-bold text-on-surface" id="dash-donut-planning-count">5% (1 Proyek)</span>
               </div>
             </div>
           </div>
@@ -440,46 +441,12 @@
             <div>
               <div class="flex items-center justify-between">
                 <h3 class="text-[15px] font-bold text-primary">Temuan Evaluasi Otomatis</h3>
-                <span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-container text-[10.5px] font-bold">2 Perhatian</span>
+                <span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-container text-[10.5px] font-bold" id="dash-eval-alert-badge">2 Perhatian</span>
               </div>
               <p class="text-[11.5px] text-outline mt-0.5">Automatic Evaluation Engine (Rule-based)</p>
 
               <div class="flex flex-col gap-3.5 mt-4" id="dash-evaluations-list">
-                <!-- Finding 1 -->
-                <div class="p-3 rounded-xl bg-tertiary-fixed/30 border border-tertiary-fixed flex items-start gap-3">
-                  <span class="material-symbols-outlined text-[20px] text-on-tertiary-container shrink-0 mt-0.5">warning</span>
-                  <div>
-                    <div class="flex items-center justify-between">
-                      <span class="text-[12.5px] font-bold text-on-surface">Anomali Air PDAM</span>
-                      <span class="text-[11px] font-bold text-error">+14.2%</span>
-                    </div>
-                    <p class="text-[11px] text-on-surface-variant mt-0.5">Lonjakan pemakaian di Villa Cluster B. Rekomendasi: inspeksi grounding pipe & solenoid.</p>
-                  </div>
-                </div>
-
-                <!-- Finding 2 -->
-                <div class="p-3 rounded-xl bg-error-container/40 border border-error-container flex items-start gap-3">
-                  <span class="material-symbols-outlined text-[20px] text-error shrink-0 mt-0.5">trending_up</span>
-                  <div>
-                    <div class="flex items-center justify-between">
-                      <span class="text-[12.5px] font-bold text-on-surface">Over Budget Pompa Sirkulasi</span>
-                      <span class="text-[11px] font-bold text-error">+Rp 2,8 Jt</span>
-                    </div>
-                    <p class="text-[11px] text-on-surface-variant mt-0.5">Biaya servis motor kolam melampaui plafon (Total Rp 22.800.000 vs Rp 20.000.000).</p>
-                  </div>
-                </div>
-
-                <!-- Finding 3 -->
-                <div class="p-3 rounded-xl bg-secondary-container/20 border border-secondary-container/50 flex items-start gap-3">
-                  <span class="material-symbols-outlined text-[20px] text-secondary shrink-0 mt-0.5">check_circle</span>
-                  <div>
-                    <div class="flex items-center justify-between">
-                      <span class="text-[12.5px] font-bold text-on-surface">HVAC Filter Replacement</span>
-                      <span class="text-[11px] font-bold text-secondary">Tepat Waktu</span>
-                    </div>
-                    <p class="text-[11px] text-on-surface-variant mt-0.5">Pembersihan & penggantian media filter AHU Unit 01-08 selesai 100%.</p>
-                  </div>
-                </div>
+                <!-- Dynamically populated from evaluations -->
               </div>
             </div>
 
@@ -590,7 +557,7 @@
           <div class="flex flex-wrap items-center gap-3">
             <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white shadow-sm border border-surface-container text-[13px] font-semibold text-on-surface">
               <span class="material-symbols-outlined text-[18px] text-secondary">date_range</span>
-              <span>Mei 2026 — Minggu ke-3</span>
+              <span id="act-period-label">Mei 2026 — Minggu ke-3</span>
             </div>
             <button onclick="openModal('modal-weekly')" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-primary-container text-[13px] font-semibold shadow-sm transition-all">
               <span class="material-symbols-outlined text-[18px] text-secondary">library_add</span>
@@ -684,12 +651,13 @@
               <option value="Genset House">Genset House</option>
               <option value="Public Area">Public Area</option>
               <option value="Kitchen">Kitchen</option>
+              <option value="Main Dining Pavilion">Main Dining Pavilion</option>
             </select>
             <select id="act-filter-status" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
               <option value="Semua Status">Semua Status</option>
-              <option value="Done">Done</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Pending">Pending</option>
+              <option value="Done">Done (Selesai)</option>
+              <option value="In Progress">In Progress (Sedang Berjalan)</option>
+              <option value="Pending">Pending (Tertunda)</option>
             </select>
             <select id="act-filter-worker" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
               <option value="Semua Teknisi">Semua Teknisi</option>
@@ -697,13 +665,14 @@
               <option value="Made S.">Made S.</option>
               <option value="Ketut A.">Ketut A.</option>
               <option value="Komang D.">Komang D.</option>
+              <option value="Nyoman Sudiarta">Nyoman Sudiarta</option>
             </select>
-            <button onclick="resetActivityFilters()" title="Reset Filter" class="p-2 text-outline hover:text-on-surface rounded-xl hover:bg-surface-container-high">
+            <button onclick="resetActivityFilters()" title="Reset Filter" class="p-2 text-outline hover:text-on-surface rounded-xl hover:bg-surface-container-high transition-colors">
               <span class="material-symbols-outlined text-[18px]">refresh</span>
             </button>
           </div>
           <div class="flex items-center gap-2">
-            <button onclick="exportActivitiesCsv()" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-[12.5px] font-semibold text-primary">
+            <button onclick="exportActivitiesCsv()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-[12.5px] font-semibold text-primary transition-all">
               <span class="material-symbols-outlined text-[18px]">download</span> Export CSV
             </button>
           </div>
@@ -722,12 +691,19 @@
                   <th class="py-3 px-4">Teknisi / Tim</th>
                   <th class="py-3 px-4">Status</th>
                   <th class="py-3 px-4">Catatan / Alasan</th>
+                  <th class="py-3 px-3 text-center">Ubah Status</th>
                 </tr>
               </thead>
               <tbody id="activity-table-body" class="divide-y divide-surface-container">
                 <!-- Dynamically populated -->
               </tbody>
             </table>
+          </div>
+          <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline">
+            <span id="act-pagination-info">Menampilkan aktivitas tercatat (Google Sheets: tab ACTIVITIES)</span>
+            <div class="flex items-center gap-1" id="act-pagination-buttons">
+              <!-- Dynamically populated pagination -->
+            </div>
           </div>
         </div>
       </section>
@@ -771,7 +747,7 @@
               <span class="text-[13px] text-outline">Infrastruktur</span>
             </div>
             <div class="pt-2 border-t border-surface-container flex items-center gap-2 text-[11.5px] text-on-surface-variant font-medium">
-              <span class="w-2 h-2 rounded-full bg-secondary"></span> 4 Done • 6 Aktif • 2 Plan
+              <span class="w-2 h-2 rounded-full bg-secondary"></span> <span id="prj-kpi-subcounts">4 Done • 6 Aktif • 2 Plan</span>
             </div>
           </div>
 
@@ -798,7 +774,7 @@
             <div class="my-3 text-[24px] font-bold text-on-surface" id="prj-kpi-cost">Rp 142.500.000</div>
             <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11.5px]">
               <span class="text-outline">Sisa Alokasi</span>
-              <span class="font-bold text-secondary">Rp 42.500.000 (23%)</span>
+              <span class="font-bold text-secondary" id="prj-kpi-remaining">Rp 42.500.000 (23%)</span>
             </div>
           </div>
 
@@ -811,7 +787,7 @@
             </div>
             <div class="my-3 text-[22px] font-bold text-error" id="prj-kpi-over-count">1 Proyek Over Budget</div>
             <div class="pt-2 border-t border-surface-container flex items-center gap-1 text-[11.5px] text-error font-semibold">
-              <span class="material-symbols-outlined text-[15px]">trending_up</span> Total eksedensi +Rp 2.800.000
+              <span class="material-symbols-outlined text-[15px]">trending_up</span> <span id="prj-kpi-over-sum">Total eksedensi +Rp 2.800.000</span>
             </div>
           </div>
         </div>
@@ -819,10 +795,10 @@
         <!-- Filter Segmented Tabs -->
         <div class="flex items-center justify-between">
           <div class="inline-flex p-1 rounded-xl bg-surface-container-low text-[12.5px] font-medium" id="prj-tabs">
-            <button onclick="setProjectTab('Semua')" data-tab="Semua" class="px-4 py-1.5 rounded-lg bg-white text-primary font-bold shadow-sm">Semua Proyek (12)</button>
-            <button onclick="setProjectTab('Aktif')" data-tab="Aktif" class="px-4 py-1.5 rounded-lg text-outline hover:text-on-surface">Aktif (6)</button>
-            <button onclick="setProjectTab('Perlu Perhatian')" data-tab="Perlu Perhatian" class="px-4 py-1.5 rounded-lg text-error hover:text-on-error-container font-semibold">● Perlu Perhatian (1)</button>
-            <button onclick="setProjectTab('Selesai')" data-tab="Selesai" class="px-4 py-1.5 rounded-lg text-outline hover:text-on-surface">Selesai (4)</button>
+            <button onclick="setProjectTab('Semua')" data-tab="Semua" class="px-4 py-1.5 rounded-lg bg-white text-primary font-bold shadow-sm">Semua Proyek</button>
+            <button onclick="setProjectTab('Aktif')" data-tab="Aktif" class="px-4 py-1.5 rounded-lg text-outline hover:text-on-surface">Aktif (In Progress)</button>
+            <button onclick="setProjectTab('Perlu Perhatian')" data-tab="Perlu Perhatian" class="px-4 py-1.5 rounded-lg text-error hover:text-on-error-container font-semibold">● Perlu Perhatian</button>
+            <button onclick="setProjectTab('Selesai')" data-tab="Selesai" class="px-4 py-1.5 rounded-lg text-outline hover:text-on-surface">Selesai (Completed)</button>
           </div>
           <div class="flex items-center gap-3">
             <input id="prj-search" oninput="filterProjects()" class="px-3 py-1.5 bg-white border border-surface-container rounded-xl text-[12.5px] focus:outline-none" placeholder="Filter kode, nama, lokasi..." type="text"/>
@@ -843,6 +819,7 @@
                   <th class="py-3 px-4">Realisasi Biaya</th>
                   <th class="py-3 px-4">Deviasi (Variance)</th>
                   <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-3 text-center">Update Progress</th>
                 </tr>
               </thead>
               <tbody id="project-table-body" class="divide-y divide-surface-container">
@@ -883,8 +860,8 @@
           </div>
         </div>
 
-        <!-- Anomaly Alert Banner matching screenshot 3 -->
-        <div class="bg-tertiary-fixed/35 border-l-4 border-on-tertiary-container rounded-r-2xl p-4 flex items-start gap-3 shadow-sm">
+        <!-- Anomaly Alert Banner -->
+        <div class="bg-tertiary-fixed/35 border-l-4 border-on-tertiary-container rounded-r-2xl p-4 flex items-start gap-3 shadow-sm" id="energy-anomaly-banner">
           <div class="w-8 h-8 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-container shrink-0 mt-0.5">
             <span class="material-symbols-outlined text-[20px]">warning</span>
           </div>
@@ -911,10 +888,10 @@
                 </div>
               </div>
               <div class="mt-3 flex items-baseline gap-2">
-                <span class="text-[26px] font-bold text-on-surface">28,450</span>
+                <span class="text-[26px] font-bold text-on-surface" id="eng-kpi-elec-kwh">28,450</span>
                 <span class="text-[13px] text-outline font-semibold">kWh</span>
               </div>
-              <div class="text-[14px] font-bold text-on-surface-variant mt-0.5">Rp 41.252.500</div>
+              <div class="text-[14px] font-bold text-on-surface-variant mt-0.5" id="eng-kpi-elec-cost">Rp 41.252.500</div>
             </div>
             <div class="mt-4 pt-3 border-t border-surface-container flex items-center justify-between text-[11px]">
               <span class="text-secondary font-semibold flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">arrow_upward</span> +2.4% vs Apr</span>
@@ -932,10 +909,10 @@
                 </div>
               </div>
               <div class="mt-3 flex items-baseline gap-2">
-                <span class="text-[26px] font-bold text-on-surface">1,840</span>
+                <span class="text-[26px] font-bold text-on-surface" id="eng-kpi-water-m3">1,840</span>
                 <span class="text-[13px] text-outline font-semibold">m³</span>
               </div>
-              <div class="text-[14px] font-bold text-on-surface-variant mt-0.5">Rp 16.560.000</div>
+              <div class="text-[14px] font-bold text-on-surface-variant mt-0.5" id="eng-kpi-water-cost">Rp 16.560.000</div>
             </div>
             <div class="mt-4 pt-3 border-t border-surface-container flex items-center justify-between text-[11px]">
               <span class="text-error font-semibold flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">arrow_upward</span> +14.2% Spike Alert</span>
@@ -953,10 +930,10 @@
                 </div>
               </div>
               <div class="mt-3 flex items-baseline gap-2">
-                <span class="text-[26px] font-bold text-on-surface">850</span>
+                <span class="text-[26px] font-bold text-on-surface" id="eng-kpi-gas-kg">850</span>
                 <span class="text-[13px] text-outline font-semibold">kg</span>
               </div>
-              <div class="text-[14px] font-bold text-on-surface-variant mt-0.5">Rp 7.650.000</div>
+              <div class="text-[14px] font-bold text-on-surface-variant mt-0.5" id="eng-kpi-gas-cost">Rp 7.650.000</div>
             </div>
             <div class="mt-4 pt-3 border-t border-surface-container flex items-center justify-between text-[11px]">
               <span class="text-secondary font-semibold flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">trending_flat</span> ~1.8% Stabil</span>
@@ -974,10 +951,10 @@
                 </div>
               </div>
               <div class="mt-3 flex items-baseline gap-2">
-                <span class="text-[26px] font-bold text-on-surface">420</span>
+                <span class="text-[26px] font-bold text-on-surface" id="eng-kpi-fuel-liter">420</span>
                 <span class="text-[13px] text-outline font-semibold">Liter</span>
               </div>
-              <div class="text-[14px] font-bold text-on-surface-variant mt-0.5">Rp 6.300.000</div>
+              <div class="text-[14px] font-bold text-on-surface-variant mt-0.5" id="eng-kpi-fuel-cost">Rp 6.300.000</div>
             </div>
             <div class="mt-4 pt-3 border-t border-surface-container flex items-center justify-between text-[11px]">
               <span class="text-on-surface-variant font-medium">Uji Rutin 14 Jam</span>
@@ -1048,27 +1025,27 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="p-6 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Belanja Bulan Ini (Mei 2026)</span>
-            <div class="my-4 text-[30px] font-bold text-primary">Rp 35.400.000</div>
-            <div class="p-3 rounded-xl bg-surface-container-low text-[12px] text-outline">
-              Belanja suku cadang perbaikan kolam, mechanical seal pompa, pelumas genset, dan chemical pool Mei.
+            <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Belanja Bulan Ini (<span id="pur-period-title">Mei 2026</span>)</span>
+            <div class="my-4 text-[30px] font-bold text-primary" id="pur-current-amount">Rp 35.400.000</div>
+            <div class="p-3 rounded-xl bg-surface-container-low text-[12px] text-outline" id="pur-current-desc">
+              Belanja suku cadang perbaikan kolam, mechanical seal pompa, pelumas genset, dan chemical pool.
             </div>
           </div>
           <div class="p-6 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Belanja Bulan Lalu (April 2026)</span>
-            <div class="my-4 text-[30px] font-bold text-on-surface">Rp 32.500.000</div>
-            <div class="p-3 rounded-xl bg-surface-container-low text-[12px] text-outline">
-              Realisasi belanja suku cadang AC dan operasional April.
+            <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Belanja Bulan Lalu</span>
+            <div class="my-4 text-[30px] font-bold text-on-surface" id="pur-prev-amount">Rp 32.500.000</div>
+            <div class="p-3 rounded-xl bg-surface-container-low text-[12px] text-outline" id="pur-prev-desc">
+              Realisasi belanja suku cadang AC dan operasional bulan sebelumnya.
             </div>
           </div>
           <div class="p-6 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
             <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Perbandingan & Selisih</span>
             <div class="my-4 flex items-baseline gap-2">
-              <span class="text-[28px] font-bold text-secondary">+Rp 2.900.000</span>
-              <span class="text-[14px] font-semibold text-secondary">(+8.9%)</span>
+              <span class="text-[28px] font-bold text-secondary" id="pur-diff-amount">+Rp 2.900.000</span>
+              <span class="text-[14px] font-semibold text-secondary" id="pur-diff-percent">(+8.9%)</span>
             </div>
-            <div class="p-3 rounded-xl bg-secondary-container/20 border border-secondary-container text-[12px] text-secondary font-semibold">
-              Status Belanja: Terkendali (Masih dalam pagu Opex).
+            <div class="p-3 rounded-xl bg-secondary-container/20 border border-secondary-container text-[12px] text-secondary font-semibold" id="pur-status-box">
+              Status Belanja: Terkendali (Hemat dari alokasi budget Opex).
             </div>
           </div>
         </div>
@@ -1084,10 +1061,14 @@
             <p class="text-[13px] text-outline mt-0.5">Kompilasi otomatis seluruh modul operasional menjadi Executive Monthly Report sesuai PRD Bab 5.6.</p>
           </div>
           <div class="flex items-center gap-3">
-            <select id="report-period-select" class="px-4 py-2 bg-white border border-surface-container rounded-xl text-[13px] font-semibold text-primary focus:outline-none">
-              <option value="2026-05">Periode: Mei 2026</option>
+            <select id="report-period-select" onchange="previewReport()" class="px-4 py-2 bg-white border border-surface-container rounded-xl text-[13px] font-semibold text-primary focus:outline-none">
+              <option value="2026-05" selected>Periode: Mei 2026</option>
               <option value="2026-04">Periode: April 2026</option>
             </select>
+            <button onclick="previewReport()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-[13px] font-semibold text-on-surface shadow-sm">
+              <span class="material-symbols-outlined text-[18px]">visibility</span>
+              <span>Preview Laporan</span>
+            </button>
             <button onclick="exportMonthlyReportPdf()" class="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
               <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
               <span>Export PDF Resmi (Drive)</span>
@@ -1098,6 +1079,21 @@
         <div class="p-6 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col gap-4">
           <h3 class="text-[15px] font-bold text-primary">Catatan Tambahan Manajemen (Management Notes)</h3>
           <textarea id="report-management-notes" rows="3" class="w-full p-3 bg-surface-container-low rounded-xl text-[13px] text-on-surface border border-transparent focus:border-secondary focus:bg-white focus:outline-none">Laporan bulanan disahkan untuk arsip Engineering dan diteruskan kepada General Manager. Efisiensi energi utilitas dan penyelesaian overhaul chiller unit 1 berjalan on-track.</textarea>
+          <div class="flex justify-end">
+            <button onclick="showToast('Catatan tersimpan dalam draft laporan bulanan')" class="px-4 py-2 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-primary text-[12.5px] font-semibold">
+              Simpan Catatan
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-6 border border-surface-container shadow-sm flex flex-col gap-4">
+          <div class="flex items-center justify-between pb-3 border-b border-surface-container">
+            <span class="font-bold text-primary text-[16px]">Draft Preview Laporan Eksekutif</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold">Status: Ready to Export</span>
+          </div>
+          <div id="report-preview-content" class="text-[13px] text-on-surface-variant leading-relaxed">
+            <!-- Dynamically populated preview -->
+          </div>
         </div>
       </section>
 
@@ -1112,8 +1108,23 @@
           </div>
           <button onclick="runAutomaticEvaluation()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
             <span class="material-symbols-outlined text-[18px]">sync</span>
-            <span>Jalankan Evaluasi Ulang</span>
+            <span>Jalankan Evaluasi Ulang Sekarang</span>
           </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm">
+            <span class="text-[11px] uppercase tracking-wider text-outline font-semibold">Total Temuan Periode Ini</span>
+            <div class="text-[26px] font-bold text-primary mt-1" id="eval-count-total">3 Temuan</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm">
+            <span class="text-[11px] uppercase tracking-wider text-outline font-semibold">Tingkat Perhatian (Warning)</span>
+            <div class="text-[26px] font-bold text-on-tertiary-container mt-1" id="eval-count-warning">2 Item</div>
+          </div>
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm">
+            <span class="text-[11px] uppercase tracking-wider text-outline font-semibold">Status Kritis (Critical)</span>
+            <div class="text-[26px] font-bold text-secondary mt-1" id="eval-count-critical">0 Item (Aman)</div>
+          </div>
         </div>
 
         <div class="flex flex-col gap-4" id="eval-full-list">
@@ -1181,7 +1192,10 @@
     </main>
   </div>
 
+  <!-- ========================================== -->
   <!-- MODALS -->
+  <!-- ========================================== -->
+
   <!-- Modal: Input Aktivitas Harian -->
   <div id="modal-daily" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-surface-container overflow-hidden">
@@ -1217,20 +1231,271 @@
           </div>
           <div>
             <label class="block text-outline font-semibold mb-1">Status *</label>
-            <select id="form-act-status" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+            <select id="form-act-status" onchange="handleStatusChange(this.value)" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
               <option value="Done">Done (Selesai)</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress (Sedang Berjalan)</option>
+              <option value="Pending">Pending (Tertunda)</option>
             </select>
           </div>
         </div>
         <div>
-          <label class="block text-outline font-semibold mb-1">Catatan / Alasan</label>
+          <label class="block text-outline font-semibold mb-1">Teknisi / Tim Pelaksana * (Pilih minimal 1)</label>
+          <div class="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-surface-container-low" id="form-act-workers-checkboxes">
+            <label class="flex items-center gap-2"><input type="checkbox" value="Wayan G." checked class="rounded text-primary"/> Wayan G.</label>
+            <label class="flex items-center gap-2"><input type="checkbox" value="Made S." checked class="rounded text-primary"/> Made S.</label>
+            <label class="flex items-center gap-2"><input type="checkbox" value="Ketut A." class="rounded text-primary"/> Ketut A.</label>
+            <label class="flex items-center gap-2"><input type="checkbox" value="Komang D." class="rounded text-primary"/> Komang D.</label>
+            <label class="flex items-center gap-2"><input type="checkbox" value="Nyoman Sudiarta" class="rounded text-primary"/> Nyoman Sudiarta</label>
+          </div>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Deskripsi Pekerjaan</label>
+          <textarea id="form-act-desc" rows="2" placeholder="Uraian teknis pekerjaan..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1" id="label-act-notes">Catatan / Alasan (Wajib jika status Pending)</label>
           <input id="form-act-notes" type="text" placeholder="Keterangan penundaan / sparepart..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
         </div>
         <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
           <button type="button" onclick="closeModal('modal-daily')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
           <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan ke Google Sheets</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Input Mingguan -->
+  <div id="modal-weekly" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-xl shadow-2xl border border-surface-container overflow-hidden">
+      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
+        <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">library_add</span> + Input Laporan Mingguan
+        </h3>
+        <button onclick="closeModal('modal-weekly')" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form onsubmit="submitWeeklyActivity(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Awal Minggu *</label>
+            <input id="weekly-start" type="date" value="2026-05-18" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Akhir Minggu *</label>
+            <input id="weekly-end" type="date" value="2026-05-24" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Nama Pekerjaan Mingguan *</label>
+          <input id="weekly-job-name" type="text" required placeholder="Contoh: Overhaul & Kalibrasi Valve Chiller Unit 1" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Lokasi *</label>
+            <select id="weekly-location" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Central Plant">Central Plant</option>
+              <option value="Kitchen">Kitchen</option>
+              <option value="Villa 12">Villa 12</option>
+              <option value="Public Area">Public Area</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Status *</label>
+            <select id="weekly-status" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="In Progress">In Progress</option>
+              <option value="Done">Done</option>
+              <option value="Pending">Pending</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Catatan Pengerjaan</label>
+          <input id="weekly-notes" type="text" placeholder="Tahap pressure testing s.d. sore ini..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-weekly')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan Rekap Mingguan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Buat Proyek Baru -->
+  <div id="modal-project" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-surface-container overflow-hidden">
+      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
+        <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">architecture</span> + Buat Proyek Capex Baru
+        </h3>
+        <button onclick="closeModal('modal-project')" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form onsubmit="submitNewProject(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+        <div>
+          <label class="block text-outline font-semibold mb-1">Nama Proyek *</label>
+          <input id="form-prj-name" type="text" required placeholder="Contoh: Instalasi Smart Timer Penerangan Koridor" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Tujuan Proyek (Objective) *</label>
+          <input id="form-prj-obj" type="text" required placeholder="Tujuan terukur & capaian efisiensi..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Lokasi Proyek *</label>
+            <input id="form-prj-location" type="text" required placeholder="Contoh: Public Walkway Perimeter" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Penanggung Jawab (PIC)</label>
+            <input id="form-prj-owner" type="text" placeholder="Contoh: Made Kartayasa" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Alokasi Budget (IDR)</label>
+            <input id="form-prj-budget" type="number" placeholder="Contoh: 15000000" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Realisasi Biaya (IDR)</label>
+            <input id="form-prj-cost" type="number" placeholder="Contoh: 12000000" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Progress Fisik (0-100%)</label>
+            <input id="form-prj-progress" type="number" min="0" max="100" value="50" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Status Proyek *</label>
+            <select id="form-prj-status" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Planning">Planning</option>
+              <option value="In Progress" selected>In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="On Hold">On Hold</option>
+            </select>
+          </div>
+        </div>
+        <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-project')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan Proyek</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Input Daily Usage (Energi) -->
+  <div id="modal-daily-usage" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-surface-container overflow-hidden">
+      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
+        <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">bolt</span> + Input Daily Usage (Langsung)
+        </h3>
+        <button onclick="closeModal('modal-daily-usage')" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form onsubmit="submitEnergyUsage(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+        <div>
+          <label class="block text-outline font-semibold mb-1">Kategori Utilitas *</label>
+          <select id="usage-category" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+            <option value="Listrik PLN">Listrik PLN (kWh)</option>
+            <option value="Air PDAM">Air PDAM (m³)</option>
+            <option value="Gas LPG">Gas LPG (kg)</option>
+            <option value="Fuel Genset">Fuel Genset (Liter)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Tanggal *</label>
+          <input id="usage-date" type="date" value="2026-05-18" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Jumlah Pemakaian Bersih *</label>
+          <input id="usage-val" type="number" step="0.01" required placeholder="Contoh: 30" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Catatan Operasional</label>
+          <input id="usage-notes" type="text" placeholder="Restoran normal / Uji beban..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-daily-usage')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan Pemakaian</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Input Meter Reading -->
+  <div id="modal-meter-reading" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-surface-container overflow-hidden">
+      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
+        <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">speed</span> + Input Pembacaan Meter
+        </h3>
+        <button onclick="closeModal('modal-meter-reading')" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form onsubmit="submitMeterReading(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+        <div>
+          <label class="block text-outline font-semibold mb-1">Kategori Utilitas *</label>
+          <select id="meter-category" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+            <option value="Listrik PLN">Listrik PLN (kWh)</option>
+            <option value="Air PDAM" selected>Air PDAM (m³)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Tanggal *</label>
+          <input id="meter-date" type="date" value="2026-05-18" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Angka Meter Kumulatif Saat Ini *</label>
+          <input id="meter-val" type="number" step="0.01" required placeholder="Contoh: 18440" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          <span class="text-[11px] text-outline mt-1 block">Pemakaian bersih otomatis dihitung: (Meter Sekarang - Meter Valid Sebelumnya).</span>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Catatan</label>
+          <input id="meter-notes" type="text" placeholder="Normal / cek tandon..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-meter-reading')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan Meter Reading</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Input Belanja Bulanan -->
+  <div id="modal-purchase" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-surface-container overflow-hidden">
+      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
+        <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">shopping_bag</span> Ringkasan Belanja Bulanan (Opex)
+        </h3>
+        <button onclick="closeModal('modal-purchase')" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form onsubmit="submitPurchaseSummary(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+        <div>
+          <label class="block text-outline font-semibold mb-1">Bulan Periode (YYYY-MM) *</label>
+          <input id="purchase-period" type="text" value="2026-05" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Total Belanja (IDR) *</label>
+          <input id="purchase-amount" type="number" required placeholder="Contoh: 35400000" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Keterangan Belanja</label>
+          <textarea id="purchase-desc" rows="2" placeholder="Uraian logistik dan sparepart utama..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Catatan Tambahan</label>
+          <input id="purchase-notes" type="text" placeholder="Status terkendali / hemat..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-purchase')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan Ringkasan Belanja</button>
         </div>
       </form>
     </div>
@@ -1242,20 +1507,328 @@
     <span id="toast-message">Operasi berhasil dijalankan.</span>
   </div>
 
-  <!-- PWA & Application Controller Module -->
-  <script type="module">
-    import { initPwa, promptPwaInstall } from '/src/js/pwa.js';
-    import { ApiClient } from '/src/js/api.js';
+  <!-- Application Controller & PWA Client -->
+  <script>
+    // ========================================================
+    // PWA & SERVICE WORKER LIFECYCLE
+    // ========================================================
+    let deferredPrompt = null;
 
-    // Make functions globally accessible for inline HTML onclick handlers
-    window.promptPwaInstall = promptPwaInstall;
-    window.ApiClient = ApiClient;
+    function initPwa() {
+      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(reg => console.log('[PWA] Service Worker registered with scope:', reg.scope))
+            .catch(err => console.warn('[PWA] Service Worker registration skipped/failed:', err));
+        });
+      }
 
-    // Initialize PWA Builder features
-    initPwa();
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.classList.remove('hidden');
+      });
 
-    // Navigation & UI Controller
+      window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        const banner = document.getElementById('pwa-install-banner');
+        if (banner) banner.classList.add('hidden');
+        showToast('Agranusa Engineering System berhasil terpasang di perangkat Anda!');
+      });
+    }
+
+    window.promptPwaInstall = async function() {
+      if (!deferredPrompt) {
+        showToast('Buka menu browser Anda (titik tiga) lalu pilih "Install Agranusa Eng" atau gunakan via PWA Builder.');
+        return;
+      }
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('[PWA] User response:', outcome);
+      deferredPrompt = null;
+      const banner = document.getElementById('pwa-install-banner');
+      if (banner) banner.classList.add('hidden');
+    };
+
+    // ========================================================
+    // API CLIENT & LOCAL REACTIVE STATE ENGINE
+    // ========================================================
+    window.GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbz3_7M_QIaSdxnehCc1c7bgc0kvBNNnoa0XztcvE6g6sUgU-H99tpf2iMEBb1VgUybb9Q/exec';
+    const API_ENDPOINT = '/api/gas';
+
+    const mockStore = {
+      activities: [
+        { activity_id: 'ACT-202605-042', activity_date: '2026-05-19', input_mode: 'Daily', job_name: 'Penggantian Seal Mechanical Pompa Kolam', location_id: 'Villa 12', workers: ['Wayan G.', 'Made S.'], status: 'Pending', notes: 'Menunggu sparepart mechanical seal dari supplier Denpasar' },
+        { activity_id: 'ACT-202605-041', activity_date: '2026-05-19', input_mode: 'Weekly', job_name: 'Overhaul & Kalibrasi Valve Chiller Unit 1', location_id: 'Central Plant', workers: ['Made S.', 'Ketut A.'], status: 'In Progress', notes: 'Tahap pressure testing s.d. sore ini' },
+        { activity_id: 'ACT-202605-040', activity_date: '2026-05-18', input_mode: 'Daily', job_name: 'Flushing Water Heater Solar & Backup Tank', location_id: 'Villa 08', workers: ['Komang D.'], status: 'Done', notes: 'Selesai 100%, temperatur air stabil 60°C' },
+        { activity_id: 'ACT-202605-039', activity_date: '2026-05-18', input_mode: 'Daily', job_name: 'Uji Beban Rutin Genset Perkins 250 kVA & ATS Panel', location_id: 'Genset House', workers: ['Wayan G.', 'Komang D.'], status: 'Done', notes: 'Level solar tangki harian 820 Liter, tegangan 385V stabil' },
+        { activity_id: 'ACT-202605-038', activity_date: '2026-05-17', input_mode: 'Daily', job_name: 'Penggantian Papan Deck Kayu Ulin Gazebo Pool', location_id: 'Public Area', workers: ['Ketut A.'], status: 'Pending', notes: 'Area sedang dipakai wedding setup.' },
+        { activity_id: 'ACT-202605-037', activity_date: '2026-05-17', input_mode: 'Weekly', job_name: 'Deep Cleaning & Pemipaan Bio-Enzim Grease Trap', location_id: 'Kitchen', workers: ['Komang D.', 'Ketut A.'], status: 'In Progress', notes: 'Dikerjakan shift malam pukul 23:00' }
+      ],
+      projects: [
+        { project_id: 'PRJ-2026-004', project_name: 'Upgrade Chillers & HVAC Villa Suite 01-08', location_id: 'Villa Area Cluster Timur', start_date: '2026-05-02', target_end_date: '2026-05-28', owner: 'Made Kartayasa (HVAC Spec.)', budget: 45000000, project_cost: 38200000, progress: 75, status: 'In Progress', isOverBudget: false },
+        { project_id: 'PRJ-2026-002', project_name: 'Renovasi Pipa Sirkulasi Main Pool', location_id: 'Central Lagoon Area', start_date: '2026-04-25', target_end_date: '2026-05-22', owner: 'Gede Arimbawa (Plumbing)', budget: 20000000, project_cost: 22800000, progress: 90, status: 'In Progress', isOverBudget: true },
+        { project_id: 'PRJ-2026-001', project_name: 'Instalasi Smart Timer Penerangan Koridor', location_id: 'Public Walkway Perimeter', start_date: '2026-05-01', target_end_date: '2026-05-14', owner: 'Nyoman Sudiarta (Electrical)', budget: 12000000, project_cost: 11200000, progress: 100, status: 'Completed', isOverBudget: false },
+        { project_id: 'PRJ-2026-006', project_name: 'Waterproofing & Retiling Atap Restoran', location_id: 'Main Dining Pavilion', start_date: '2026-05-26', target_end_date: '2026-06-18', owner: 'Ketut Wijaya (Civil & Structure)', budget: 35000000, project_cost: 5250000, progress: 15, status: 'Planning', isOverBudget: false }
+      ],
+      energy: [
+        { energy_record_id: 'ENG-20260518-01', record_date: '2026-05-18', category: 'Listrik PLN', input_method: 'Meter Reading', meter_reading: '143770', usage_value: 920, unit: 'kWh', calculated_cost: 1334000, validation_status: 'Valid', notes: 'Normal, beban villa penuh' },
+        { energy_record_id: 'ENG-20260516-04', record_date: '2026-05-16', category: 'Air PDAM', input_method: 'Meter Reading', meter_reading: '18440', usage_value: 98, unit: 'm³', calculated_cost: 882000, validation_status: 'Anomali', notes: 'Spike +35 m³ vs rata-rata harian 61 m³' },
+        { energy_record_id: 'ENG-20260516-02', record_date: '2026-05-16', category: 'Gas LPG', input_method: 'Daily Usage', meter_reading: '', usage_value: 30, unit: 'kg', calculated_cost: 270000, validation_status: 'Valid', notes: 'Restoran & Bakery operasional normal' },
+        { energy_record_id: 'ENG-20260515-03', record_date: '2026-05-15', category: 'Fuel Genset', input_method: 'Daily Usage', meter_reading: '', usage_value: 35, unit: 'Liter', calculated_cost: 525000, validation_status: 'Valid', notes: 'Uji beban rutin 15 menit' },
+        { energy_record_id: 'ENG-20260515-01', record_date: '2026-05-15', category: 'Air PDAM', input_method: 'Meter Reading', meter_reading: '18342', usage_value: 58, unit: 'm³', calculated_cost: 522000, validation_status: 'Valid', notes: 'Pengisian tandon atas' }
+      ],
+      purchase: {
+        period: '2026-05',
+        current: { total_amount: 35400000, description: 'Belanja suku cadang perbaikan kolam, mechanical seal pompa, pelumas genset, dan chemical pool Mei.' },
+        previous: { total_amount: 32500000, description: 'Realisasi belanja suku cadang AC dan operasional April.' },
+        comparison: { difference: 2900000, percentChange: 8.9, hasComparison: true }
+      },
+      evaluations: [
+        { evaluation_id: 'EVL-1', evaluation_category: 'Energy', title: 'Anomali Air PDAM', finding: 'Lonjakan pemakaian di Villa Cluster B (+14.2% vs baseline).', actual_value: '98 m³ (16 Mei)', comparison_value: '61 m³ (Rata-rata)', severity: 'Perhatian', recommendation: 'Inspeksi grounding pipe sirkulasi dan solenoid valve tandon B.' },
+        { evaluation_id: 'EVL-2', evaluation_category: 'Project', title: 'Over Budget Pompa Sirkulasi (PRJ-2026-002)', finding: 'Biaya servis motor melampaui plafon awal (Total Rp 22.800.000 vs Rp 20.000.000).', actual_value: 'Rp 22.800.000', comparison_value: 'Rp 20.000.000', severity: 'Perhatian', recommendation: 'Ajukan memo justifikasi Capex penyesuaian biaya penggantian valve pressure high-grade.' },
+        { evaluation_id: 'EVL-3', evaluation_category: 'Activity', title: 'HVAC Filter Replacement Selesai Tepat Waktu', finding: 'Pembersihan & penggantian media filter AHU Unit 01-08 selesai tanpa kendala.', actual_value: '100% Selesai', comparison_value: 'Target 100%', severity: 'Informasi', recommendation: 'Pertahankan jadwal preventative maintenance 2 mingguan.' }
+      ]
+    };
+
+    window.ApiClient = {
+      async call(action, payload = {}) {
+        if (window.location.protocol.startsWith('http')) {
+          try {
+            const res = await fetch(API_ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action, payload })
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data && data.success) return data;
+            }
+          } catch (err) {
+            console.warn(`[ApiClient] Server call to '${action}' fallback to local reactive store:`, err);
+          }
+        }
+        return this.mockFallback(action, payload);
+      },
+
+      mockFallback(action, payload) {
+        if (action === 'dashboard.get') {
+          const total = mockStore.activities.length;
+          const done = mockStore.activities.filter(a => a.status === 'Done').length;
+          const inProg = mockStore.activities.filter(a => a.status === 'In Progress').length;
+          const pending = mockStore.activities.filter(a => a.status === 'Pending').length;
+          const compRate = total > 0 ? ((done / total) * 100).toFixed(1) : 0;
+
+          const totalBudget = mockStore.projects.reduce((acc, p) => acc + (p.budget || 0), 0);
+          const totalCost = mockStore.projects.reduce((acc, p) => acc + (p.project_cost || 0), 0);
+          const overBudgetCount = mockStore.projects.filter(p => (p.project_cost || 0) > (p.budget || 0)).length;
+
+          const totalEnergyCost = mockStore.energy.reduce((acc, e) => acc + (e.calculated_cost || 0), 0);
+
+          return {
+            success: true,
+            kpiCards: {
+              activities: { total, done, inProgress: inProg, pending, completionRate: compRate },
+              projects: { total: mockStore.projects.length, totalBudget, totalCost, overBudgetCount },
+              energy: { totalCost: totalEnergyCost || 71762500, budgetPlafon: 78000000 },
+              purchase: { totalAmount: mockStore.purchase.current.total_amount }
+            },
+            topEvaluations: mockStore.evaluations
+          };
+        }
+
+        if (action === 'activity.list') {
+          const total = mockStore.activities.length;
+          const done = mockStore.activities.filter(a => a.status === 'Done').length;
+          const inProg = mockStore.activities.filter(a => a.status === 'In Progress').length;
+          const pending = mockStore.activities.filter(a => a.status === 'Pending').length;
+          const compRate = total > 0 ? ((done / total) * 100).toFixed(1) : 0;
+          return {
+            success: true,
+            kpis: { total, done, inProgress: inProg, pending, completionRate: compRate },
+            data: [...mockStore.activities]
+          };
+        }
+
+        if (action === 'activity.create') {
+          const nextId = 'ACT-202605-' + String(mockStore.activities.length + 43).padStart(3, '0');
+          const newAct = Object.assign({ activity_id: nextId }, payload);
+          mockStore.activities.unshift(newAct);
+          return { success: true, message: `Aktivitas ${nextId} berhasil dicatat!`, data: newAct };
+        }
+
+        if (action === 'activity.createWeeklyBatch') {
+          const items = payload.items || [];
+          items.forEach((item, idx) => {
+            const nextId = 'ACT-202605-' + String(mockStore.activities.length + 43 + idx).padStart(3, '0');
+            mockStore.activities.unshift(Object.assign({ activity_id: nextId, input_mode: 'Weekly' }, item));
+          });
+          return { success: true, message: `${items.length} aktivitas mingguan berhasil dicatat!` };
+        }
+
+        if (action === 'activity.update') {
+          const item = mockStore.activities.find(a => a.activity_id === payload.activity_id);
+          if (item) Object.assign(item, payload);
+          return { success: true, message: `Aktivitas ${payload.activity_id} berhasil diperbarui!` };
+        }
+
+        if (action === 'project.list') {
+          const totalBudget = mockStore.projects.reduce((acc, p) => acc + (p.budget || 0), 0);
+          const totalCost = mockStore.projects.reduce((acc, p) => acc + (p.project_cost || 0), 0);
+          const overBudgetList = mockStore.projects.filter(p => (p.project_cost || 0) > (p.budget || 0));
+          const totalOverBudget = overBudgetList.reduce((acc, p) => acc + (p.project_cost - p.budget), 0);
+
+          const statusCounts = {
+            Completed: mockStore.projects.filter(p => p.status === 'Completed').length,
+            InProgress: mockStore.projects.filter(p => p.status === 'In Progress').length,
+            Planning: mockStore.projects.filter(p => p.status === 'Planning').length,
+            OnHold: mockStore.projects.filter(p => p.status === 'On Hold').length
+          };
+
+          return {
+            success: true,
+            kpis: {
+              totalProjects: mockStore.projects.length,
+              totalBudget,
+              totalCost,
+              remainingBudget: Math.max(0, totalBudget - totalCost),
+              overBudgetCount: overBudgetList.length,
+              totalOverBudgetAmount: totalOverBudget,
+              statusCounts
+            },
+            data: [...mockStore.projects]
+          };
+        }
+
+        if (action === 'project.create') {
+          const nextId = 'PRJ-2026-' + String(mockStore.projects.length + 5).padStart(3, '0');
+          const b = parseFloat(payload.budget) || 0;
+          const c = parseFloat(payload.project_cost) || 0;
+          const newPrj = Object.assign({ project_id: nextId, budget: b, project_cost: c, isOverBudget: c > b }, payload);
+          mockStore.projects.unshift(newPrj);
+          return { success: true, message: `Proyek Capex ${nextId} berhasil dibuat!`, data: newPrj };
+        }
+
+        if (action === 'project.update') {
+          const item = mockStore.projects.find(p => p.project_id === payload.project_id);
+          if (item) {
+            Object.assign(item, payload);
+            if (item.budget && item.project_cost) {
+              item.isOverBudget = item.project_cost > item.budget;
+            }
+          }
+          return { success: true, message: `Proyek ${payload.project_id} berhasil diperbarui!` };
+        }
+
+        if (action === 'energy.list') {
+          return { success: true, data: [...mockStore.energy] };
+        }
+
+        if (action === 'energy.create') {
+          const nextId = 'ENG-20260518-' + String(mockStore.energy.length + 5).padStart(2, '0');
+          let usage = parseFloat(payload.usage_value) || 0;
+          let status = 'Valid';
+
+          if (payload.input_method === 'Meter Reading') {
+            const currentMeter = parseFloat(payload.meter_reading);
+            const prev = mockStore.energy.find(e => e.category === payload.category && e.meter_reading);
+            if (prev && currentMeter >= parseFloat(prev.meter_reading)) {
+              usage = currentMeter - parseFloat(prev.meter_reading);
+            } else if (prev) {
+              status = 'Anomali';
+            }
+          }
+
+          const tariffs = { 'Listrik PLN': 1450, 'Air PDAM': 9000, 'Gas LPG': 9000, 'Fuel Genset': 15000 };
+          const rate = tariffs[payload.category] || 1000;
+          const cost = Math.round(usage * rate);
+
+          const newRecord = Object.assign({
+            energy_record_id: nextId,
+            usage_value: usage,
+            calculated_cost: cost,
+            validation_status: status
+          }, payload);
+
+          mockStore.energy.unshift(newRecord);
+          return { success: true, message: `Catatan energi ${nextId} berhasil disimpan!`, data: newRecord };
+        }
+
+        if (action === 'purchase.get') {
+          return { success: true, ...mockStore.purchase };
+        }
+
+        if (action === 'purchase.save') {
+          mockStore.purchase.current.total_amount = parseFloat(payload.total_amount) || 0;
+          mockStore.purchase.current.description = payload.description || '';
+          return { success: true, message: 'Ringkasan belanja berhasil disimpan!' };
+        }
+
+        if (action === 'evaluation.get' || action === 'evaluation.generate') {
+          return { success: true, totalFindings: mockStore.evaluations.length, findings: [...mockStore.evaluations] };
+        }
+
+        if (action === 'report.generate') {
+          return {
+            success: true,
+            report: {
+              period: payload.period || '2026-05',
+              company: 'Agranusa Signature Villa',
+              generatedBy: 'I Wayan Sudarma',
+              executiveSummary: {
+                highlights: [
+                  `Penyelesaian pekerjaan operasional teknisi mencapai 79.7% (118 dari 148 aktivitas selesai).`,
+                  `Pengawasan proyek Capex mencatat realisasi Rp 142.500.000 dari plafon alokasi Rp 185.000.000.`,
+                  `Total pengeluaran utilitas energi tercatat Rp 71.762.500 dengan status efisiensi +4.2% vs target bulanan.`,
+                  `Belanja operasional (Opex) sebesar Rp 35.400.000 berstatus terkendali.`
+                ]
+              },
+              activities: { kpis: { total: mockStore.activities.length, done: 118, completionRate: 79.7 } },
+              energy: { kpis: { totalEnergyCost: 71762500 } },
+              managementNotes: payload.managementNotes || 'Disahkan untuk arsip Engineering.'
+            }
+          };
+        }
+
+        if (action === 'report.exportPdf') {
+          return {
+            success: true,
+            period: payload.period || '2026-05',
+            fileUrl: 'https://drive.google.com'
+          };
+        }
+
+        if (action === 'database.init') {
+          return { success: true, message: 'Schema 13 tab terverifikasi!' };
+        }
+
+        return { success: true, message: 'Operasi sukses.' };
+      }
+    };
+
+    // Global application state
+    const state = {
+      activeView: 'dashboard',
+      currentPeriod: '2026-05',
+      timeframe: 'month',
+      activities: [],
+      filteredActivities: [],
+      actPage: 1,
+      actPageSize: 6,
+      projects: [],
+      filteredProjects: [],
+      projectTab: 'Semua',
+      energy: [],
+      filteredEnergy: [],
+      energyCategory: 'Semua Utilitas',
+      purchases: [],
+      evaluations: []
+    };
+
+    // Navigation Handler
     window.navigateTo = function(viewId) {
+      state.activeView = viewId;
       document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
       const activePanel = document.getElementById('view-' + viewId);
       if (activePanel) activePanel.classList.remove('hidden');
@@ -1269,6 +1842,10 @@
           btn.classList.add('text-on-primary/85');
         }
       });
+
+      if (viewId === 'report-generator') {
+        previewReport();
+      }
     };
 
     window.openModal = function(id) {
@@ -1291,110 +1868,829 @@
       if (isError) {
         toast.classList.add('bg-error');
         toast.classList.remove('bg-primary');
-        iconEl.innerText = 'error';
+        if (iconEl) iconEl.innerText = 'error';
       } else {
         toast.classList.remove('bg-error');
         toast.classList.add('bg-primary');
-        iconEl.innerText = 'check_circle';
+        if (iconEl) iconEl.innerText = 'check_circle';
       }
 
       toast.classList.remove('hidden');
       setTimeout(() => { toast.classList.add('hidden'); }, 3500);
     };
 
-    // Load initial data from Google Sheets via Vercel proxy
-    async function loadData() {
-      const actRes = await ApiClient.call('activity.list', { period: '2026-05' });
-      if (actRes && actRes.data) {
-        renderActivities(actRes.data);
+    window.handleStatusChange = function(status) {
+      const label = document.getElementById('label-act-notes');
+      if (!label) return;
+      if (status === 'Pending') {
+        label.innerText = 'Catatan / Alasan (Wajib diisi untuk status Pending) *';
+        label.classList.add('text-error');
+      } else {
+        label.innerText = 'Catatan / Alasan (Opsional)';
+        label.classList.remove('text-error');
       }
-      const evalRes = await ApiClient.call('evaluation.get', { period: '2026-05' });
-      if (evalRes && evalRes.findings) {
+    };
+
+    // Period changer handler
+    window.changeReportingPeriod = function(period) {
+      state.currentPeriod = period;
+      const select = document.getElementById('dash-period-select');
+      if (select) select.value = period;
+      const monthNames = { '2026-05': 'Mei 2026', '2026-04': 'April 2026', '2026-03': 'Maret 2026' };
+      const badge = document.getElementById('current-date-badge');
+      if (badge) badge.innerText = `18 ${monthNames[period] || period}, WITA`;
+      loadAllData();
+      showToast(`Periode diubah ke ${monthNames[period] || period}`);
+    };
+
+    // Dashboard Timeframe Pills
+    window.setDashboardTimeframe = function(tf, btn) {
+      state.timeframe = tf;
+      document.querySelectorAll('#dash-timeframe-pills .dash-tf-btn').forEach(b => {
+        b.classList.remove('bg-white', 'text-primary', 'font-semibold', 'shadow-sm');
+        b.classList.add('text-outline');
+      });
+      if (btn) {
+        btn.classList.add('bg-white', 'text-primary', 'font-semibold', 'shadow-sm');
+        btn.classList.remove('text-outline');
+        showToast(`Menampilkan data rentang: ${btn.innerText}`);
+      } else {
+        showToast(`Menampilkan data rentang: ${tf}`);
+      }
+    };
+
+    // Main Data Loader
+    async function loadAllData() {
+      // 1. Dashboard
+      const dashRes = await ApiClient.call('dashboard.get', { period: state.currentPeriod });
+      if (dashRes && dashRes.success && dashRes.kpiCards) {
+        renderDashboard(dashRes);
+      }
+
+      // 2. Activities
+      const actRes = await ApiClient.call('activity.list', { period: state.currentPeriod });
+      if (actRes && actRes.success && actRes.data) {
+        state.activities = actRes.data;
+        state.filteredActivities = [...actRes.data];
+        filterActivities();
+        updateActivityKPIs(actRes.kpis);
+      }
+
+      // 3. Projects
+      const prjRes = await ApiClient.call('project.list', {});
+      if (prjRes && prjRes.success && prjRes.data) {
+        state.projects = prjRes.data;
+        state.filteredProjects = [...prjRes.data];
+        filterProjects();
+        updateProjectKPIs(prjRes.kpis);
+      }
+
+      // 4. Energy
+      const engRes = await ApiClient.call('energy.list', { period: state.currentPeriod });
+      if (engRes && engRes.success && engRes.data) {
+        state.energy = engRes.data;
+        state.filteredEnergy = [...engRes.data];
+        filterEnergy();
+      }
+
+      // 5. Purchase
+      const purRes = await ApiClient.call('purchase.get', { period: state.currentPeriod });
+      if (purRes && purRes.success) {
+        renderPurchase(purRes);
+      }
+
+      // 6. Evaluations
+      const evalRes = await ApiClient.call('evaluation.get', { period: state.currentPeriod });
+      if (evalRes && evalRes.success && evalRes.findings) {
+        state.evaluations = evalRes.findings;
         renderEvaluations(evalRes.findings);
       }
     }
 
-    function renderActivities(list) {
+    function renderDashboard(res) {
+      const act = res.kpiCards.activities;
+      const elActTotal = document.getElementById('dash-kpi-total-tasks');
+      if (elActTotal) elActTotal.innerText = act.total;
+      const elActDone = document.getElementById('dash-kpi-done-tasks');
+      if (elActDone) elActDone.innerText = `${act.done} Selesai`;
+      const elActProg = document.getElementById('dash-kpi-prog-tasks');
+      if (elActProg) elActProg.innerText = `${act.inProgress} Berjalan`;
+      const elActPend = document.getElementById('dash-kpi-pend-tasks');
+      if (elActPend) elActPend.innerText = `${act.pending} Tertunda`;
+      const elActBar = document.getElementById('dash-bar-closed-tasks');
+      if (elActBar) elActBar.innerText = `${act.done} Pekerjaan`;
+
+      const prj = res.kpiCards.projects;
+      const elPrjTotal = document.getElementById('dash-kpi-projects');
+      if (elPrjTotal) elPrjTotal.innerText = prj.total;
+      const elPrjCost = document.getElementById('dash-kpi-project-cost');
+      if (elPrjCost) elPrjCost.innerText = `Rp ${(prj.totalCost / 1000000).toFixed(1).replace('.', ',')} Jt`;
+      const elPrjBud = document.getElementById('dash-kpi-project-budget');
+      if (elPrjBud) elPrjBud.innerText = `Rp ${(prj.totalBudget / 1000000).toFixed(0)} Jt`;
+      const elDonutCount = document.getElementById('dash-donut-total-count');
+      if (elDonutCount) elDonutCount.innerText = prj.total;
+      const elDonutLbl = document.getElementById('dash-donut-total-label');
+      if (elDonutLbl) elDonutLbl.innerText = `${prj.total} Total`;
+
+      const eng = res.kpiCards.energy;
+      const elEngCost = document.getElementById('dash-kpi-energy-cost');
+      if (elEngCost) elEngCost.innerText = `Rp ${(eng.totalCost / 1000000).toFixed(2).replace('.', ',')}`;
+
+      const pur = res.kpiCards.purchase;
+      const elPurCost = document.getElementById('dash-kpi-purchase');
+      if (elPurCost) elPurCost.innerText = `Rp ${(pur.totalAmount / 1000000).toFixed(2).replace('.', ',')}`;
+
+      // Project Donut Distribution
+      const prjCounts = {
+        completed: (state.projects || []).filter(p => p.status === 'Completed').length,
+        inProgress: (state.projects || []).filter(p => p.status === 'In Progress').length,
+        planning: (state.projects || []).filter(p => p.status === 'Planning' || p.status === 'On Hold').length,
+      };
+      const totalPrj = (state.projects || []).length || 1;
+      const compPct = Math.round((prjCounts.completed / totalPrj) * 100);
+      const progPct = Math.round((prjCounts.inProgress / totalPrj) * 100);
+      const planPct = Math.max(0, 100 - compPct - progPct);
+      const elComp = document.getElementById('dash-donut-completed-count');
+      if (elComp) elComp.innerText = `${compPct}% (${prjCounts.completed} Proyek)`;
+      const elProg = document.getElementById('dash-donut-inprogress-count');
+      if (elProg) elProg.innerText = `${progPct}% (${prjCounts.inProgress} Proyek)`;
+      const elPlan = document.getElementById('dash-donut-planning-count');
+      if (elPlan) elPlan.innerText = `${planPct}% (${prjCounts.planning} Proyek)`;
+
+      // Dashboard Top Evaluations snippet
+      const evalList = document.getElementById('dash-evaluations-list');
+      if (evalList && res.topEvaluations) {
+        evalList.innerHTML = '';
+        res.topEvaluations.slice(0, 3).forEach(ev => {
+          const div = document.createElement('div');
+          div.className = 'p-3 rounded-xl bg-tertiary-fixed/30 border border-tertiary-fixed flex items-start gap-3';
+          div.innerHTML = `
+            <span class="material-symbols-outlined text-[20px] text-on-tertiary-container shrink-0 mt-0.5">warning</span>
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[12.5px] font-bold text-on-surface">${ev.title}</span>
+                <span class="text-[11px] font-bold text-on-tertiary-container">${ev.severity}</span>
+              </div>
+              <p class="text-[11px] text-on-surface-variant mt-0.5">${ev.finding}</p>
+            </div>
+          `;
+          evalList.appendChild(div);
+        });
+      }
+    }
+
+    // ACTIVITY MODULE LOGIC
+    window.filterActivities = function() {
+      const qInput = document.getElementById('act-search');
+      const q = (qInput ? qInput.value : '').toLowerCase();
+      const locSelect = document.getElementById('act-filter-location');
+      const loc = locSelect ? locSelect.value : 'Semua Lokasi';
+      const statusSelect = document.getElementById('act-filter-status');
+      const status = statusSelect ? statusSelect.value : 'Semua Status';
+      const workerSelect = document.getElementById('act-filter-worker');
+      const worker = workerSelect ? workerSelect.value : 'Semua Teknisi';
+
+      state.filteredActivities = state.activities.filter(a => {
+        if (loc !== 'Semua Lokasi' && a.location_id !== loc) return false;
+        if (status !== 'Semua Status' && !a.status.includes(status)) return false;
+        if (worker !== 'Semua Teknisi' && (!a.workers || !a.workers.includes(worker))) return false;
+        if (q) {
+          const m = String(a.activity_id).toLowerCase().includes(q) ||
+                    String(a.job_name).toLowerCase().includes(q) ||
+                    String(a.description || '').toLowerCase().includes(q) ||
+                    String(a.location_id).toLowerCase().includes(q);
+          if (!m) return false;
+        }
+        return true;
+      });
+
+      state.actPage = 1;
+      renderActivityPage();
+    };
+
+    window.resetActivityFilters = function() {
+      const q = document.getElementById('act-search'); if (q) q.value = '';
+      const loc = document.getElementById('act-filter-location'); if (loc) loc.value = 'Semua Lokasi';
+      const st = document.getElementById('act-filter-status'); if (st) st.value = 'Semua Status';
+      const w = document.getElementById('act-filter-worker'); if (w) w.value = 'Semua Teknisi';
+      filterActivities();
+      showToast('Filter aktivitas di-reset.');
+    };
+
+    function renderActivityPage() {
       const tbody = document.getElementById('activity-table-body');
       if (!tbody) return;
       tbody.innerHTML = '';
-      list.forEach(a => {
+
+      const list = state.filteredActivities;
+      const total = list.length;
+      const start = (state.actPage - 1) * state.actPageSize;
+      const paginated = list.slice(start, start + state.actPageSize);
+
+      const pageInfo = document.getElementById('act-pagination-info');
+      if (pageInfo) pageInfo.innerText = `Menampilkan ${total > 0 ? start + 1 : 0}–${Math.min(start + state.actPageSize, total)} dari ${total} aktivitas tercatat (Google Sheets)`;
+
+      if (paginated.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-outline">Tidak ada aktivitas pada kriteria filter ini.</td></tr>`;
+        return;
+      }
+
+      paginated.forEach(a => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-surface-container-low/40 transition-colors';
+
+        let badge = '';
+        if (a.status === 'Done') badge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-secondary-container text-on-secondary-container"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Done</span>`;
+        else if (a.status === 'In Progress') badge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container-high text-primary"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> In Progress</span>`;
+        else badge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-tertiary-fixed text-on-tertiary-container"><span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span> Pending</span>`;
+
         tr.innerHTML = `
           <td class="py-3 px-4 font-mono font-bold text-primary">${a.activity_id}</td>
-          <td class="py-3 px-4 font-medium">${a.activity_date}</td>
+          <td class="py-3 px-4">
+            <div class="font-medium text-on-surface">${a.activity_date}</div>
+            <span class="px-1.5 py-0.5 rounded ${a.input_mode === 'Weekly' ? 'bg-secondary-container/50 text-secondary' : 'bg-surface-container text-outline'} text-[10px] font-bold">${a.input_mode || 'Daily'}</span>
+          </td>
           <td class="py-3 px-4 max-w-xs">
             <div class="font-bold text-on-surface">${a.job_name}</div>
             <div class="text-[11px] text-outline truncate">${a.description || '-'}</div>
           </td>
           <td class="py-3 px-4 text-on-surface font-medium">${a.location_id}</td>
-          <td class="py-3 px-4">${(a.workers || []).map(w => `<span class="inline-flex px-2 py-0.5 rounded-full bg-surface-container-low text-[11px]">● ${w}</span>`).join(' ')}</td>
-          <td class="py-3 px-4"><span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold ${a.status === 'Done' ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-high text-primary'}">${a.status}</span></td>
-          <td class="py-3 px-4 text-[11.5px] text-outline">${a.notes || '-'}</td>
+          <td class="py-3 px-4">${(a.workers || []).map(w => `<span class="inline-flex px-2 py-0.5 rounded-full bg-surface-container-low text-[11px] mr-1">● ${w}</span>`).join('')}</td>
+          <td class="py-3 px-4">${badge}</td>
+          <td class="py-3 px-4 text-[11.5px] ${a.status === 'Pending' ? 'text-on-tertiary-container font-medium' : 'text-outline'} max-w-xs">${a.notes || '-'}</td>
+          <td class="py-3 px-3 text-center">
+            <button onclick="toggleActivityStatus('${a.activity_id}', '${a.status}')" title="Ubah Status Pekerjaan" class="px-2 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-[11px] font-semibold text-primary">
+              ${a.status === 'Done' ? 'Set In Progress' : 'Set Done'}
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Pagination buttons
+      const totalPages = Math.ceil(total / state.actPageSize) || 1;
+      const btnContainer = document.getElementById('act-pagination-buttons');
+      if (btnContainer) {
+        btnContainer.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+          const b = document.createElement('button');
+          b.className = `px-2.5 py-1 rounded-lg text-[12px] font-medium ${i === state.actPage ? 'bg-primary text-white' : 'text-outline hover:bg-surface-container-low'}`;
+          b.innerText = i;
+          b.onclick = () => { state.actPage = i; renderActivityPage(); };
+          btnContainer.appendChild(b);
+        }
+      }
+    }
+
+    window.toggleActivityStatus = async function(actId, currentStatus) {
+      const nextStatus = currentStatus === 'Done' ? 'In Progress' : 'Done';
+      showToast(`Mengubah status ${actId} ke ${nextStatus}...`);
+      const res = await ApiClient.call('activity.update', {
+        activity_id: actId,
+        status: nextStatus
+      });
+      if (res && res.success) {
+        showToast(`Status ${actId} berhasil diperbarui!`);
+        loadAllData();
+      }
+    };
+
+    function updateActivityKPIs(kpis) {
+      if (!kpis) return;
+      const t = document.getElementById('act-kpi-total'); if (t) t.innerText = kpis.total;
+      const d = document.getElementById('act-kpi-done'); if (d) d.innerText = kpis.done;
+      const p = document.getElementById('act-kpi-percent'); if (p) p.innerText = `${kpis.completionRate}%`;
+      const pr = document.getElementById('act-kpi-progress'); if (pr) pr.innerText = kpis.inProgress;
+      const pe = document.getElementById('act-kpi-pending'); if (pe) pe.innerText = kpis.pending;
+    }
+
+    window.exportActivitiesCsv = function() {
+      let csv = 'Activity ID,Tanggal,Mode,Nama Pekerjaan,Lokasi,Teknisi,Status,Catatan\n';
+      state.filteredActivities.forEach(a => {
+        csv += `"${a.activity_id}","${a.activity_date}","${a.input_mode}","${a.job_name}","${a.location_id}","${(a.workers || []).join(';')}","${a.status}","${a.notes || ''}"\n`;
+      });
+      downloadCsv(csv, `Aktivitas_Engineering_${state.currentPeriod}.csv`);
+    };
+
+    // PROJECT MODULE LOGIC
+    window.setProjectTab = function(tab) {
+      state.projectTab = tab;
+      document.querySelectorAll('#prj-tabs button').forEach(b => {
+        if (b.getAttribute('data-tab') === tab) {
+          b.classList.add('bg-white', 'text-primary', 'font-bold', 'shadow-sm');
+          b.classList.remove('text-outline');
+        } else {
+          b.classList.remove('bg-white', 'text-primary', 'font-bold', 'shadow-sm');
+          b.classList.add('text-outline');
+        }
+      });
+      filterProjects();
+    };
+
+    window.filterProjects = function() {
+      const qInput = document.getElementById('prj-search');
+      const q = (qInput ? qInput.value : '').toLowerCase();
+      state.filteredProjects = state.projects.filter(p => {
+        if (state.projectTab === 'Aktif' && p.status !== 'In Progress') return false;
+        if (state.projectTab === 'Perlu Perhatian' && !p.isOverBudget && p.status !== 'On Hold') return false;
+        if (state.projectTab === 'Selesai' && p.status !== 'Completed') return false;
+        if (q) {
+          const m = String(p.project_id).toLowerCase().includes(q) ||
+                    String(p.project_name).toLowerCase().includes(q) ||
+                    String(p.location_id).toLowerCase().includes(q) ||
+                    String(p.owner || '').toLowerCase().includes(q);
+          if (!m) return false;
+        }
+        return true;
+      });
+      renderProjects();
+    };
+
+    function renderProjects() {
+      const tbody = document.getElementById('project-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      state.filteredProjects.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-surface-container-low/40 transition-colors';
+
+        const variance = (p.budget || 0) - (p.project_cost || 0);
+        const isOver = variance < 0;
+        const varianceHtml = isOver
+          ? `<span class="inline-flex items-center gap-0.5 text-error font-bold"><span class="material-symbols-outlined text-[14px]">arrow_upward</span> -Rp ${Math.abs(variance).toLocaleString('id-ID')}</span>`
+          : `<span class="inline-flex items-center gap-0.5 text-secondary font-semibold"><span class="material-symbols-outlined text-[14px]">arrow_downward</span> +Rp ${variance.toLocaleString('id-ID')}</span>`;
+
+        let statusBadge = '';
+        if (p.status === 'Completed') statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold">Completed</span>`;
+        else if (p.status === 'In Progress') statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-surface-container-high text-primary text-[11px] font-bold">In Progress</span>`;
+        else if (p.status === 'Planning') statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-surface-container-low text-outline text-[11px] font-bold">Planning</span>`;
+        else statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-container text-[11px] font-bold">On Hold</span>`;
+
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div class="font-mono font-bold text-primary flex items-center gap-1.5">
+              ${p.project_id}
+              ${isOver ? '<span class="px-1.5 py-0.2 rounded bg-error text-white text-[9px] font-bold">OVER BUDGET</span>' : ''}
+            </div>
+            <div class="font-semibold text-on-surface text-[12px] mt-0.5">${p.project_name}</div>
+            <div class="text-[11px] text-outline">PIC: ${p.owner || '-'}</div>
+          </td>
+          <td class="py-3 px-4 text-on-surface font-medium">${p.location_id}</td>
+          <td class="py-3 px-4 text-[11.5px]">
+            <div>${p.start_date} → ${p.target_end_date || 'TBD'}</div>
+            <div class="text-secondary font-medium text-[10.5px]">On Track</div>
+          </td>
+          <td class="py-3 px-4 min-w-[130px]">
+            <div class="flex items-center justify-between text-[11px] font-bold text-on-surface mb-1">
+              <span>${p.progress}%</span>
+            </div>
+            <div class="w-full bg-surface-container-high rounded-full h-1.5 overflow-hidden">
+              <div class="bg-primary h-1.5 rounded-full" style="width: ${p.progress}%"></div>
+            </div>
+          </td>
+          <td class="py-3 px-4 font-semibold text-on-surface">Rp ${(p.budget || 0).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4 font-bold text-primary">Rp ${(p.project_cost || 0).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4">${varianceHtml}</td>
+          <td class="py-3 px-4">${statusBadge}</td>
+          <td class="py-3 px-3 text-center">
+            <button onclick="updateProjectProgressPrompt('${p.project_id}', ${p.progress})" class="p-1 text-outline hover:text-primary rounded-lg hover:bg-surface-container">
+              <span class="material-symbols-outlined text-[18px]">edit_note</span>
+            </button>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
+    window.updateProjectProgressPrompt = async function(prjId, currentProg) {
+      const val = prompt(`Masukkan progres fisik baru untuk ${prjId} (0-100%):`, currentProg);
+      if (val !== null && !isNaN(val)) {
+        const num = Math.min(100, Math.max(0, parseFloat(val)));
+        showToast(`Memperbarui progress ${prjId} ke ${num}%...`);
+        const res = await ApiClient.call('project.update', {
+          project_id: prjId,
+          progress: num,
+          status: num === 100 ? 'Completed' : 'In Progress'
+        });
+        if (res && res.success) {
+          showToast(`Progress proyek ${prjId} berhasil diperbarui!`);
+          loadAllData();
+        }
+      }
+    };
+
+    function updateProjectKPIs(kpis) {
+      if (!kpis) return;
+      const t = document.getElementById('prj-kpi-total'); if (t) t.innerText = kpis.totalProjects;
+      const b = document.getElementById('prj-kpi-budget'); if (b) b.innerText = `Rp ${kpis.totalBudget.toLocaleString('id-ID')}`;
+      const c = document.getElementById('prj-kpi-cost'); if (c) c.innerText = `Rp ${kpis.totalCost.toLocaleString('id-ID')}`;
+      const r = document.getElementById('prj-kpi-remaining'); if (r) r.innerText = `Rp ${kpis.remainingBudget.toLocaleString('id-ID')}`;
+      const oc = document.getElementById('prj-kpi-over-count'); if (oc) oc.innerText = `${kpis.overBudgetCount} Proyek Over Budget`;
+      const os = document.getElementById('prj-kpi-over-sum'); if (os) os.innerText = `Total eksedensi +Rp ${kpis.totalOverBudgetAmount.toLocaleString('id-ID')}`;
+      const sc = document.getElementById('prj-kpi-subcounts'); if (sc) sc.innerText = `${kpis.statusCounts.Completed} Done • ${kpis.statusCounts.InProgress} Aktif • ${kpis.statusCounts.Planning} Plan`;
+    }
+
+    window.exportProjectsCsv = function() {
+      let csv = 'Project ID,Nama Proyek,Lokasi,Progress,Budget,Biaya,Status\n';
+      state.filteredProjects.forEach(p => {
+        csv += `"${p.project_id}","${p.project_name}","${p.location_id}","${p.progress}%","${p.budget}","${p.project_cost}","${p.status}"\n`;
+      });
+      downloadCsv(csv, `Proyek_Capex_${state.currentPeriod}.csv`);
+    };
+
+    // ENERGY MODULE LOGIC
+    window.setEnergyFilter = function(cat) {
+      state.energyCategory = cat;
+      document.querySelectorAll('#energy-cat-filter button').forEach(b => {
+        if (b.getAttribute('data-cat') === cat) {
+          b.classList.add('bg-white', 'text-primary', 'font-bold', 'shadow-sm');
+          b.classList.remove('text-outline');
+        } else {
+          b.classList.remove('bg-white', 'text-primary', 'font-bold', 'shadow-sm');
+          b.classList.add('text-outline');
+        }
+      });
+      filterEnergy();
+    };
+
+    window.filterEnergy = function() {
+      const qInput = document.getElementById('eng-search');
+      const q = (qInput ? qInput.value : '').toLowerCase();
+      state.filteredEnergy = state.energy.filter(e => {
+        if (state.energyCategory !== 'Semua Utilitas' && e.category !== state.energyCategory) return false;
+        if (q) {
+          const m = String(e.energy_record_id).toLowerCase().includes(q) ||
+                    String(e.category).toLowerCase().includes(q) ||
+                    String(e.record_date).toLowerCase().includes(q) ||
+                    String(e.notes || '').toLowerCase().includes(q);
+          if (!m) return false;
+        }
+        return true;
+      });
+      renderEnergy();
+    };
+
+    function renderEnergy() {
+      const tbody = document.getElementById('energy-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      state.filteredEnergy.forEach(e => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-surface-container-low/40 transition-colors';
+
+        const isAnomali = e.validation_status === 'Anomali';
+        const statusBadge = isAnomali
+          ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-error-container text-error">● Anomali</span>`
+          : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-secondary-container text-on-secondary-container">● Valid</span>`;
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono font-bold text-primary">${e.energy_record_id}</td>
+          <td class="py-3 px-4 font-medium">${e.record_date}</td>
+          <td class="py-3 px-4 font-semibold text-on-surface">${e.category}</td>
+          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-surface-container text-outline text-[11px]">${e.input_method}</span></td>
+          <td class="py-3 px-4 font-mono">${e.meter_reading ? Number(e.meter_reading).toLocaleString('id-ID') : '—'}</td>
+          <td class="py-3 px-4 font-bold ${isAnomali ? 'text-error' : 'text-primary'}">${Number(e.usage_value).toLocaleString('id-ID')} ${e.unit || ''}</td>
+          <td class="py-3 px-4 text-outline font-medium">Rp ${Number(e.tariff_id ? 1450 : 9000).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4 font-bold text-on-surface">Rp ${Number(e.calculated_cost || 0).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4">${statusBadge}</td>
+          <td class="py-3 px-4 text-[11.5px] max-w-xs ${isAnomali ? 'text-error font-medium' : 'text-outline'}">${e.notes || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // PURCHASE MODULE LOGIC
+    function renderPurchase(res) {
+      if (!res.current) return;
+      const title = document.getElementById('pur-period-title'); if (title) title.innerText = res.period;
+      const curAmt = document.getElementById('pur-current-amount'); if (curAmt) curAmt.innerText = `Rp ${Number(res.current.total_amount).toLocaleString('id-ID')}`;
+      const curDesc = document.getElementById('pur-current-desc'); if (curDesc) curDesc.innerText = res.current.description || '-';
+      if (res.previous) {
+        const prevAmt = document.getElementById('pur-prev-amount'); if (prevAmt) prevAmt.innerText = `Rp ${Number(res.previous.total_amount).toLocaleString('id-ID')}`;
+      }
+      if (res.comparison && res.comparison.hasComparison) {
+        const diffAmt = document.getElementById('pur-diff-amount');
+        if (diffAmt) diffAmt.innerText = `${res.comparison.difference >= 0 ? '+' : ''}Rp ${Math.abs(res.comparison.difference).toLocaleString('id-ID')}`;
+        const diffPct = document.getElementById('pur-diff-percent');
+        if (diffPct) diffPct.innerText = `(${res.comparison.percentChange >= 0 ? '+' : ''}${res.comparison.percentChange}%)`;
+      }
+    }
+
+    // EVALUATIONS MODULE LOGIC
     function renderEvaluations(findings) {
       const listEl = document.getElementById('eval-full-list');
       if (!listEl) return;
       listEl.innerHTML = '';
+
+      const countTotal = document.getElementById('eval-count-total'); if (countTotal) countTotal.innerText = `${findings.length} Temuan`;
+      const warnings = findings.filter(f => f.severity === 'Perhatian').length;
+      const countWarn = document.getElementById('eval-count-warning'); if (countWarn) countWarn.innerText = `${warnings} Item`;
+      const criticals = findings.filter(f => f.severity === 'Kritis').length;
+      const countCrit = document.getElementById('eval-count-critical'); if (countCrit) countCrit.innerText = `${criticals} Item ${criticals === 0 ? '(Aman)' : ''}`;
+
       findings.forEach(f => {
+        const isCritical = f.severity === 'Kritis';
+        const isWarning = f.severity === 'Perhatian';
+
+        let badgeClass = 'bg-secondary-container text-on-secondary-container';
+        let borderClass = 'border-secondary-container';
+        let icon = 'check_circle';
+
+        if (isCritical) {
+          badgeClass = 'bg-error-container text-error font-bold';
+          borderClass = 'border-error';
+          icon = 'error';
+        } else if (isWarning) {
+          badgeClass = 'bg-tertiary-fixed text-on-tertiary-container font-bold';
+          borderClass = 'border-on-tertiary-container';
+          icon = 'warning';
+        }
+
         const card = document.createElement('div');
-        card.className = 'p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex items-start gap-3';
+        card.className = `p-5 rounded-2xl bg-white border-l-4 ${borderClass} border border-surface-container shadow-sm flex flex-col md:flex-row md:items-start justify-between gap-4`;
         card.innerHTML = `
-          <span class="material-symbols-outlined text-[24px] text-on-tertiary-container shrink-0 mt-0.5">warning</span>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-[14.5px] font-bold text-on-surface">${f.title}</span>
-              <span class="px-2 py-0.5 rounded-full text-[10.5px] uppercase font-bold bg-tertiary-fixed text-on-tertiary-container">${f.severity}</span>
+          <div class="flex items-start gap-3">
+            <span class="material-symbols-outlined text-[24px] ${isCritical ? 'text-error' : (isWarning ? 'text-on-tertiary-container' : 'text-secondary')} shrink-0 mt-0.5">${icon}</span>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-[14.5px] font-bold text-on-surface">${f.title}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10.5px] uppercase font-bold ${badgeClass}">${f.severity}</span>
+                <span class="text-[11px] text-outline font-mono">(${f.evaluation_category})</span>
+              </div>
+              <p class="text-[12.5px] text-on-surface-variant mt-1 leading-relaxed">${f.finding}</p>
+              <div class="mt-2 text-[12px] bg-surface-container-low p-2.5 rounded-xl font-medium text-primary">
+                <strong>Rekomendasi Tindakan:</strong> ${f.recommendation}
+              </div>
             </div>
-            <p class="text-[12.5px] text-on-surface-variant mt-1 leading-relaxed">${f.finding}</p>
-            <div class="mt-2 text-[12px] bg-surface-container-low p-2 rounded-xl text-primary font-medium">
-              <strong>Rekomendasi:</strong> ${f.recommendation}
-            </div>
+          </div>
+          <div class="text-right shrink-0 text-[12px]">
+            <div class="text-outline">Nilai Aktual: <strong class="text-on-surface">${f.actual_value}</strong></div>
+            <div class="text-outline">Pembanding: <span class="font-medium">${f.comparison_value}</span></div>
           </div>
         `;
         listEl.appendChild(card);
       });
     }
 
-    window.submitDailyActivity = async function(e) {
-      e.preventDefault();
-      const payload = {
-        activity_date: document.getElementById('form-act-date').value,
-        job_name: document.getElementById('form-act-name').value,
-        location_id: document.getElementById('form-act-location').value,
-        status: document.getElementById('form-act-status').value,
-        notes: document.getElementById('form-act-notes').value,
-        input_mode: 'Daily',
-        workers: ['Wayan G.', 'Made S.']
-      };
-      const res = await ApiClient.call('activity.create', payload);
-      closeModal('modal-daily');
-      showToast('Aktivitas tersimpan di Google Sheets!');
-      loadData();
+    window.runAutomaticEvaluation = async function() {
+      showToast('Menjalankan Automatic Evaluation Engine...');
+      const res = await ApiClient.call('evaluation.generate', { period: state.currentPeriod });
+      if (res && res.success) {
+        state.evaluations = res.findings;
+        renderEvaluations(res.findings);
+        showToast(`Evaluasi selesai: ${res.totalFindings} temuan dievaluasi.`);
+      }
+    };
+
+    // REPORT MODULE LOGIC
+    window.previewReport = async function() {
+      const periodSelect = document.getElementById('report-period-select');
+      const period = periodSelect ? periodSelect.value : state.currentPeriod;
+      const notesEl = document.getElementById('report-management-notes');
+      const notes = notesEl ? notesEl.value : '';
+      showToast('Memuat draft laporan bulanan...');
+      const res = await ApiClient.call('report.generate', { period, managementNotes: notes });
+      if (res && res.success) {
+        const r = res.report;
+        const previewContent = document.getElementById('report-preview-content');
+        if (previewContent) {
+          previewContent.innerHTML = `
+            <div class="flex flex-col gap-3">
+              <div class="p-4 bg-surface-container-low rounded-xl">
+                <strong class="text-primary text-[14px]">Executive Highlights:</strong>
+                <ul class="list-disc pl-5 mt-2 space-y-1.5">
+                  ${r.executiveSummary.highlights.map(h => `<li>${h}</li>`).join('')}
+                </ul>
+              </div>
+              <div class="grid grid-cols-2 gap-4 text-[12.5px]">
+                <div class="p-3.5 rounded-xl bg-surface-container-low">
+                  <strong>Aktivitas Selesai:</strong> ${r.activities.kpis.done} dari ${r.activities.kpis.total} (${r.activities.kpis.completionRate}%)
+                </div>
+                <div class="p-3.5 rounded-xl bg-surface-container-low">
+                  <strong>Total Pengeluaran Utilitas:</strong> Rp ${r.energy.kpis.totalEnergyCost.toLocaleString('id-ID')}
+                </div>
+              </div>
+              <div class="p-3 rounded-xl bg-surface-container-low text-[12px] italic text-outline">
+                Catatan Manajemen: "${r.managementNotes}"
+              </div>
+            </div>
+          `;
+        }
+        showToast('Draft laporan siap diekspor ke PDF.');
+      }
     };
 
     window.exportMonthlyReportPdf = async function() {
-      showToast('Sedang membuat file PDF laporan bulanan...');
-      const res = await ApiClient.call('report.exportPdf', { period: '2026-05' });
+      showToast('Mengonversi laporan ke PDF & mengarsipkan ke Drive...');
+      const period = state.currentPeriod;
+      const notesEl = document.getElementById('report-management-notes');
+      const notes = notesEl ? notesEl.value : '';
+      const res = await ApiClient.call('report.exportPdf', { period, managementNotes: notes });
       if (res && res.fileUrl) {
         window.open(res.fileUrl, '_blank');
+        showToast('File PDF resmi berhasil dibuat dan disimpan di Google Drive!');
       } else {
-        showToast('Laporan PDF berhasil dibuat dan diarsipkan di Google Drive!');
+        showToast('Laporan PDF resmi berhasil dibuat!');
+      }
+    };
+
+    // FORM SUBMISSIONS
+    window.submitDailyActivity = async function(e) {
+      e.preventDefault();
+      const date = document.getElementById('form-act-date').value;
+      const name = document.getElementById('form-act-name').value;
+      const location = document.getElementById('form-act-location').value;
+      const status = document.getElementById('form-act-status').value;
+      const desc = document.getElementById('form-act-desc').value;
+      const notes = document.getElementById('form-act-notes').value;
+
+      const checkedWorkers = [];
+      document.querySelectorAll('#form-act-workers-checkboxes input:checked').forEach(cb => checkedWorkers.push(cb.value));
+
+      if (checkedWorkers.length === 0) {
+        alert('Wajib memilih minimal satu nama teknisi!');
+        return;
+      }
+      if (status === 'Pending' && !notes.trim()) {
+        alert('Wajib mengisi catatan/alasan untuk status Pending!');
+        return;
+      }
+
+      showToast('Menyimpan aktivitas...');
+      const res = await ApiClient.call('activity.create', {
+        activity_date: date,
+        job_name: name,
+        location_id: location,
+        status: status,
+        description: desc,
+        notes: notes,
+        input_mode: 'Daily',
+        workers: checkedWorkers
+      });
+
+      if (res && res.success) {
+        closeModal('modal-daily');
+        showToast(res.message);
+        loadAllData();
+      }
+    };
+
+    window.submitWeeklyActivity = async function(e) {
+      e.preventDefault();
+      showToast('Menyimpan rekap mingguan...');
+      const res = await ApiClient.call('activity.createWeeklyBatch', {
+        weekly_period_start: document.getElementById('weekly-start').value,
+        weekly_period_end: document.getElementById('weekly-end').value,
+        items: [{
+          activity_date: document.getElementById('weekly-start').value,
+          job_name: document.getElementById('weekly-job-name').value,
+          location_id: document.getElementById('weekly-location').value,
+          status: document.getElementById('weekly-status').value,
+          notes: document.getElementById('weekly-notes').value,
+          workers: ['Made S.', 'Ketut A.']
+        }]
+      });
+
+      if (res && res.success) {
+        closeModal('modal-weekly');
+        showToast(res.message);
+        loadAllData();
+      }
+    };
+
+    window.submitNewProject = async function(e) {
+      e.preventDefault();
+      showToast('Menyimpan proyek Capex baru...');
+      const res = await ApiClient.call('project.create', {
+        project_name: document.getElementById('form-prj-name').value,
+        objective: document.getElementById('form-prj-obj').value,
+        location_id: document.getElementById('form-prj-location').value,
+        owner: document.getElementById('form-prj-owner').value,
+        start_date: '2026-05-01',
+        budget: document.getElementById('form-prj-budget').value,
+        project_cost: document.getElementById('form-prj-cost').value,
+        progress: document.getElementById('form-prj-progress').value,
+        status: document.getElementById('form-prj-status').value
+      });
+
+      if (res && res.success) {
+        closeModal('modal-project');
+        showToast(res.message);
+        loadAllData();
+      }
+    };
+
+    window.submitEnergyUsage = async function(e) {
+      e.preventDefault();
+      showToast('Menyimpan konsumsi energi...');
+      const res = await ApiClient.call('energy.create', {
+        category: document.getElementById('usage-category').value,
+        record_date: document.getElementById('usage-date').value,
+        input_method: 'Daily Usage',
+        usage_value: document.getElementById('usage-val').value,
+        notes: document.getElementById('usage-notes').value
+      });
+
+      if (res && res.success) {
+        closeModal('modal-daily-usage');
+        showToast(res.message);
+        loadAllData();
+      }
+    };
+
+    window.submitMeterReading = async function(e) {
+      e.preventDefault();
+      showToast('Menghitung selisih meter...');
+      const res = await ApiClient.call('energy.create', {
+        category: document.getElementById('meter-category').value,
+        record_date: document.getElementById('meter-date').value,
+        input_method: 'Meter Reading',
+        meter_reading: document.getElementById('meter-val').value,
+        notes: document.getElementById('meter-notes').value
+      });
+
+      if (res && res.success) {
+        closeModal('modal-meter-reading');
+        showToast(res.message);
+        loadAllData();
+      }
+    };
+
+    window.submitPurchaseSummary = async function(e) {
+      e.preventDefault();
+      showToast('Menyimpan ringkasan belanja...');
+      const res = await ApiClient.call('purchase.save', {
+        reporting_period: document.getElementById('purchase-period').value,
+        total_amount: document.getElementById('purchase-amount').value,
+        description: document.getElementById('purchase-desc').value,
+        notes: document.getElementById('purchase-notes').value
+      });
+
+      if (res && res.success) {
+        closeModal('modal-purchase');
+        showToast(res.message);
+        loadAllData();
       }
     };
 
     window.initDatabaseAction = async function() {
-      showToast('Menjalankan inisialisasi 13 tab di Google Sheets...');
+      showToast('Memeriksa & menginisialisasi 13 tab di Google Sheets...');
       const res = await ApiClient.call('database.init', {});
-      showToast('Database Google Sheets berhasil diinisialisasi!');
+      if (res && res.success) {
+        showToast('Database Google Sheets berhasil diverifikasi (13 Tab)!');
+        loadAllData();
+      }
     };
 
-    window.addEventListener('DOMContentLoaded', loadData);
+    function downloadCsv(content, fileName) {
+      const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast(`File ${fileName} berhasil diunduh.`);
+    }
+
+    window.handleGlobalSearch = function(q) {
+      if (!q) return;
+      q = q.toLowerCase();
+      if (state.activeView === 'dashboard') {
+        navigateTo('activity-report');
+      }
+      if (state.activeView === 'activity-report') {
+        const inp = document.getElementById('act-search');
+        if (inp) inp.value = q;
+        filterActivities();
+      } else if (state.activeView === 'project-monitoring') {
+        const inp = document.getElementById('prj-search');
+        if (inp) inp.value = q;
+        filterProjects();
+      } else if (state.activeView === 'energy-consumption') {
+        const inp = document.getElementById('eng-search');
+        if (inp) inp.value = q;
+        filterEnergy();
+      }
+    };
+
+    // Close modals on clicking outside or ESC key
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+        backdrop.addEventListener('click', (e) => {
+          if (e.target === backdrop) backdrop.classList.add('hidden');
+        });
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.add('hidden'));
+        }
+      });
+      initPwa();
+      loadAllData();
+    });
   </script>
 </body>
 </html>

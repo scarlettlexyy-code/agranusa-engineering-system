@@ -14,7 +14,7 @@
       "destination": "/manifest.json"
     },
     {
-      "source": "/((?!api/|icons/|sw.js|manifest.json|offline.html).*)",
+      "source": "/((?!api/|icons/|src/|public/|sw.js|manifest.json|offline.html).*)",
       "destination": "/index.html"
     }
   ],

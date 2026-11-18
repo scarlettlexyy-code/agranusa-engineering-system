@@ -1,0 +1,14 @@
+{
+  "name": "agranusa-engineering-system",
+  "version": "2.4.0",
+  "private": true,
+  "description": "Agranusa Signature Villa - Engineering Monthly Report System (Google Sheets DB + Vercel PWA)",
+  "scripts": {
+    "dev": "vite frontend",
+    "build": "vite build frontend",
+    "preview": "vite preview frontend"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
