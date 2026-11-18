@@ -72,11 +72,31 @@ function dispatchAction(action, payload) {
 
   switch (action) {
     case 'auth.login':
-    case 'auth.me':
+    case 'auth.me': {
+      const users = getTableData('USERS');
+      const activeUser = users.find(u => String(u.is_active).toUpperCase() === 'TRUE' || u.user_id === 'USR-001') || (users.length > 0 ? users[0] : null);
       return {
         success: true,
-        user: { userId: 'USR-001', email: 'wayan.sudarma@agranusa.com', displayName: 'I Wayan Sudarma', role: 'Head of Engineering' }
+        user: {
+          userId: activeUser ? activeUser.user_id : 'USR-001',
+          email: activeUser ? activeUser.email : 'rizqi.mashuda@agranusa.com',
+          displayName: activeUser ? (activeUser.display_name || activeUser.displayName) : 'Rizqi Mashuda',
+          role: activeUser ? activeUser.role : 'Head of Engineering'
+        }
       };
+    }
+
+    case 'master.get': {
+      const employees = getTableData('EMPLOYEES');
+      const locations = getTableData('LOCATIONS');
+      const users = getTableData('USERS');
+      return {
+        success: true,
+        employees: employees,
+        locations: locations,
+        users: users
+      };
+    }
 
     case 'dashboard.get': {
       const activities = getTableData('ACTIVITIES');

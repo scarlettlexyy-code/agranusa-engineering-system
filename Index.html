@@ -172,8 +172,8 @@
         </button>
         <div class="flex items-center gap-3 pl-2 border-l border-surface-container-high">
           <div class="text-right hidden md:block">
-            <div class="text-[13.5px] font-semibold text-on-surface leading-tight">I Wayan Sudarma</div>
-            <div class="text-[11px] text-outline font-medium">Engineering Head</div>
+            <div id="header-user-name" class="text-[13.5px] font-semibold text-on-surface leading-tight">Rizqi Mashuda</div>
+            <div id="header-user-role" class="text-[11px] text-outline font-medium">Head of Engineering</div>
           </div>
           <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white shadow-sm">
             <span class="material-symbols-outlined text-[19px]">person</span>
@@ -1919,8 +1919,52 @@
       }
     };
 
+    function updateEmployeeList(employees) {
+      const filterSelect = document.getElementById('act-filter-worker');
+      if (filterSelect) {
+        const curVal = filterSelect.value;
+        filterSelect.innerHTML = '<option value="Semua Teknisi">Semua Teknisi</option>';
+        employees.forEach(emp => {
+          const name = emp.employee_id || emp.employee_name;
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.innerText = name;
+          filterSelect.appendChild(opt);
+        });
+        filterSelect.value = curVal;
+      }
+
+      const checkContainer = document.getElementById('form-act-workers-checkboxes');
+      if (checkContainer) {
+        checkContainer.innerHTML = '';
+        employees.forEach((emp, i) => {
+          const name = emp.employee_id || emp.employee_name;
+          const label = document.createElement('label');
+          label.className = 'flex items-center gap-2';
+          label.innerHTML = `<input type="checkbox" value="${name}" ${i < 2 ? 'checked' : ''} class="rounded text-primary"/> ${name}`;
+          checkContainer.appendChild(label);
+        });
+      }
+    }
+
     // Main Data Loader
     async function loadAllData() {
+      // 0. User Profile & Master Data (Realtime from Google Sheets)
+      const meRes = await ApiClient.call('auth.me', {});
+      if (meRes && meRes.success && meRes.user) {
+        const elName = document.getElementById('header-user-name');
+        const elRole = document.getElementById('header-user-role');
+        if (elName && meRes.user.displayName) elName.innerText = meRes.user.displayName;
+        if (elRole && meRes.user.role) elRole.innerText = meRes.user.role;
+      }
+
+      const masterRes = await ApiClient.call('master.get', {});
+      if (masterRes && masterRes.success) {
+        if (masterRes.employees && masterRes.employees.length > 0) {
+          updateEmployeeList(masterRes.employees);
+        }
+      }
+
       // 1. Dashboard
       const dashRes = await ApiClient.call('dashboard.get', { period: state.currentPeriod });
       if (dashRes && dashRes.success && dashRes.kpiCards) {
