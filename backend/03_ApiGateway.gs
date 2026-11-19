@@ -737,9 +737,26 @@ function dispatchAction(action, payload) {
 
 /**
  * FUNGSI SETUP UPDATE: Membuat sheet ENERGY_LISTRIK, ENERGY_AIR, ENERGY_FUEL, ENERGY_GAS, dan WORK_ORDERS
- * Jalankan sekali ini di editor Google Apps Script untuk membuat tab-tab baru.
+ * Bisa dijalankan langsung dari editor Apps Script (pilih fungsi 'updateStrukturTabBaru' lalu klik Run/Jalankan),
+ * atau lewat menu khusus di Google Sheets: "⚡ Agranusa Engineering" -> "🚀 Buat Tab Baru".
  */
+function onOpen() {
+  try {
+    const ui = SpreadsheetApp.getUi();
+    ui.createMenu('⚡ Agranusa Engineering')
+      .addItem('🚀 Buat Tab Baru (Energy & Work Orders)', 'updateStrukturTabBaru')
+      .addToUi();
+  } catch (e) {
+    Logger.log('onOpen skipped in headless mode: ' + e.message);
+  }
+}
+
 function updateStrukturTabBaru() {
   ensureAllNewTabs();
   Logger.log("SUKSES: Tab ENERGY_LISTRIK, ENERGY_AIR, ENERGY_FUEL, ENERGY_GAS, dan WORK_ORDERS telah siap!");
+  try {
+    SpreadsheetApp.getUi().alert('Sukses!\n\n5 Tab baru berhasil dibuat di spreadsheet ini:\n1. ENERGY_LISTRIK\n2. ENERGY_AIR\n3. ENERGY_FUEL\n4. ENERGY_GAS\n5. WORK_ORDERS\n\nAnda sekarang dapat menyalin data lama ke sheet masing-masing!');
+  } catch (e) {
+    Logger.log('Alert skipped: ' + e.message);
+  }
 }
