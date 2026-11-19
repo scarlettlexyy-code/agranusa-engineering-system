@@ -94,6 +94,10 @@
           <span class="material-symbols-outlined text-[20px]">grid_view</span>
           <span>Dashboard</span>
         </button>
+        <button onclick="navigateTo('work-orders')" data-path="work-orders" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
+          <span class="material-symbols-outlined text-[20px]">task_alt</span>
+          <span>Work Order (WO)</span>
+        </button>
         <button onclick="navigateTo('activity-report')" data-path="activity-report" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
           <span class="material-symbols-outlined text-[20px]">assignment</span>
           <span>Activity Report</span>
@@ -541,6 +545,188 @@
       </section>
 
       <!-- ========================================== -->
+      <!-- VIEW: WORK ORDER (WO) MANAGEMENT -->
+      <!-- ========================================== -->
+      <section id="view-work-orders" class="view-panel hidden flex flex-col gap-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h1 class="text-[26px] font-bold text-primary tracking-tight">Work Order (WO) Management</h1>
+              <span class="px-2.5 py-0.5 rounded-full bg-secondary-container/50 text-on-secondary-container text-[11px] font-semibold">
+                Sistem Tiket Lintas Departemen
+              </span>
+            </div>
+            <p class="text-[13px] text-outline mt-0.5">Monitoring dan tindak lanjut permintaan kerja dari Housekeeping, Front Office, Security, Villa Manager, dan departemen lain.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <button onclick="exportWorkOrdersCsv()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-on-surface text-[13px] font-semibold shadow-sm transition-all">
+              <span class="material-symbols-outlined text-[18px] text-primary">download</span>
+              <span>Export CSV</span>
+            </button>
+            <button onclick="openModal('modal-work-order')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
+              <span class="material-symbols-outlined text-[18px] text-secondary-fixed">add_task</span>
+              <span>+ Buat Work Order Baru</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 KPI Cards (Work Orders) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Work Orders</span>
+              <div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
+                <span class="material-symbols-outlined text-[20px]">assignment</span>
+              </div>
+            </div>
+            <div class="my-3 text-[28px] font-bold text-on-surface" id="wo-kpi-total">0</div>
+            <div class="pt-2 border-t border-surface-container flex items-center gap-1.5 text-[11px] text-outline">
+              Semua tiket terdaftar bulan ini
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Menunggu (Open)</span>
+              <div class="w-9 h-9 rounded-xl bg-error-container/50 flex items-center justify-center text-error">
+                <span class="material-symbols-outlined text-[20px]">pending_actions</span>
+              </div>
+            </div>
+            <div class="my-3 flex items-baseline justify-between">
+              <span class="text-[28px] font-bold text-error" id="wo-kpi-open">0</span>
+              <span class="text-[12px] font-semibold text-outline" id="wo-kpi-open-pct">0%</span>
+            </div>
+            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
+              <span class="px-2 py-0.5 rounded-full bg-error-container text-error font-semibold">Perlu Tindakan Cepat</span>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Dikerjakan (In Progress)</span>
+              <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[20px]">engineering</span>
+              </div>
+            </div>
+            <div class="my-3 flex items-baseline justify-between">
+              <span class="text-[28px] font-bold text-primary" id="wo-kpi-progress">0</span>
+              <span class="text-[12px] font-semibold text-outline" id="wo-kpi-progress-pct">0%</span>
+            </div>
+            <div class="pt-2 border-t border-surface-container flex items-center gap-1 text-[11px] text-outline">
+              Sedang dalam penanganan teknisi
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Selesai (Completed)</span>
+              <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-on-secondary-container">
+                <span class="material-symbols-outlined text-[20px]">check_circle</span>
+              </div>
+            </div>
+            <div class="my-3 flex items-baseline justify-between">
+              <span class="text-[28px] font-bold text-secondary" id="wo-kpi-completed">0</span>
+              <span class="text-[12px] font-semibold text-secondary" id="wo-kpi-completed-pct">0%</span>
+            </div>
+            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
+              <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-semibold">Closed / Done</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Department Breakdown Summary -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+            <div class="text-[11px] text-outline font-semibold uppercase">Housekeeping</div>
+            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-hk">0</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+            <div class="text-[11px] text-outline font-semibold uppercase">Front Office</div>
+            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-fo">0</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+            <div class="text-[11px] text-outline font-semibold uppercase">Security</div>
+            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-sec">0</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+            <div class="text-[11px] text-outline font-semibold uppercase">Villa Manager</div>
+            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-vm">0</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+            <div class="text-[11px] text-outline font-semibold uppercase">F&B / Kitchen</div>
+            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-fb">0</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+            <div class="text-[11px] text-outline font-semibold uppercase">Internal Eng</div>
+            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-eng">0</div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white rounded-2xl p-4 border border-surface-container shadow-sm flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-3 flex-1">
+            <div class="relative min-w-[220px]">
+              <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[18px]">search</span>
+              <input id="wo-search" oninput="filterWorkOrders()" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] focus:outline-none focus:bg-white border border-transparent focus:border-secondary/40" placeholder="Cari WO ID, judul, lokasi, PIC..." type="text"/>
+            </div>
+            <select id="wo-filter-dept" onchange="filterWorkOrders()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+              <option value="Semua Departemen">Semua Departemen</option>
+              <option value="Housekeeping">Housekeeping</option>
+              <option value="Front Office">Front Office</option>
+              <option value="Security">Security</option>
+              <option value="Villa Manager">Villa Manager</option>
+              <option value="F&B / Kitchen">F&B / Kitchen</option>
+              <option value="Engineering Internal">Engineering Internal</option>
+            </select>
+            <select id="wo-filter-cat" onchange="filterWorkOrders()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+              <option value="Semua Tipikal">Semua Tipikal</option>
+              <option value="IT">IT</option>
+              <option value="Electrical">Electrical</option>
+              <option value="Plumbing">Plumbing</option>
+              <option value="Civil">Civil</option>
+              <option value="Mechanical">Mechanical</option>
+            </select>
+            <select id="wo-filter-status" onchange="filterWorkOrders()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+              <option value="Semua Status">Semua Status</option>
+              <option value="Open">Open (Menunggu)</option>
+              <option value="In Progress">In Progress (Dikerjakan)</option>
+              <option value="Completed">Completed (Selesai)</option>
+              <option value="Pending">Pending (Tertunda)</option>
+            </select>
+          </div>
+          <button onclick="resetWorkOrderFilters()" class="text-[12px] text-outline hover:text-primary underline">Reset Filter</button>
+        </div>
+
+        <!-- Work Orders Table -->
+        <div class="bg-white rounded-2xl border border-surface-container shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-[12.5px] border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
+                  <th class="py-3 px-4">WO ID</th>
+                  <th class="py-3 px-4">Tanggal</th>
+                  <th class="py-3 px-4">Pengaju (Dept)</th>
+                  <th class="py-3 px-4">Lokasi</th>
+                  <th class="py-3 px-4">Uraian Masalah</th>
+                  <th class="py-3 px-4">Tipikal</th>
+                  <th class="py-3 px-4">Prioritas</th>
+                  <th class="py-3 px-4">PIC Teknisi</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="workorder-table-body" class="divide-y divide-surface-container">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+          <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline bg-surface-container-low/30">
+            <span id="wo-table-count">Menampilkan 0 Work Orders</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
       <!-- VIEW 2: ACTIVITY REPORT (MODUL B) -->
       <!-- ========================================== -->
       <section id="view-activity-report" class="view-panel hidden flex flex-col gap-6">
@@ -658,6 +844,14 @@
               <option value="Done">Done (Selesai)</option>
               <option value="In Progress">In Progress (Sedang Berjalan)</option>
               <option value="Pending">Pending (Tertunda)</option>
+            </select>
+            <select id="act-filter-category" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+              <option value="Semua Tipikal">Semua Tipikal</option>
+              <option value="IT">IT</option>
+              <option value="Electrical">Electrical</option>
+              <option value="Plumbing">Plumbing</option>
+              <option value="Civil">Civil</option>
+              <option value="Mechanical">Mechanical</option>
             </select>
             <select id="act-filter-worker" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
               <option value="Semua Teknisi">Semua Teknisi</option>
@@ -895,7 +1089,7 @@
             </div>
             <div class="mt-4 pt-3 border-t border-surface-container flex items-center justify-between text-[11px]">
               <span class="text-secondary font-semibold flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">arrow_upward</span> +2.4% vs Apr</span>
-              <span class="text-outline">Tarif: Rp 1.450/kWh</span>
+              <span class="text-outline">Tarif: Rp 2.005/kWh (+7% PPJU)</span>
             </div>
           </div>
 
@@ -916,7 +1110,7 @@
             </div>
             <div class="mt-4 pt-3 border-t border-surface-container flex items-center justify-between text-[11px]">
               <span class="text-error font-semibold flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">arrow_upward</span> +14.2% Spike Alert</span>
-              <span class="text-outline">Tarif: Rp 9.000/m³</span>
+              <span class="text-outline">Tarif: Rp 18.862/m³</span>
             </div>
           </div>
 
@@ -937,7 +1131,7 @@
             </div>
             <div class="mt-4 pt-3 border-t border-surface-container flex items-center justify-between text-[11px]">
               <span class="text-secondary font-semibold flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">trending_flat</span> ~1.8% Stabil</span>
-              <span class="text-outline">Tarif: Rp 9.000/kg</span>
+              <span class="text-outline">Tarif: TBD (Manual)</span>
             </div>
           </div>
 
@@ -958,7 +1152,7 @@
             </div>
             <div class="mt-4 pt-3 border-t border-surface-container flex items-center justify-between text-[11px]">
               <span class="text-on-surface-variant font-medium">Uji Rutin 14 Jam</span>
-              <span class="text-outline">Tarif: Rp 15.000/L</span>
+              <span class="text-outline">Tarif: Rp 22.000/Liter</span>
             </div>
           </div>
         </div>
@@ -1196,6 +1390,93 @@
   <!-- MODALS -->
   <!-- ========================================== -->
 
+  <!-- Modal: Buat Work Order (WO) -->
+  <div id="modal-work-order" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-surface-container overflow-hidden">
+      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
+        <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">add_task</span> Buat Work Order (WO) Baru
+        </h3>
+        <button onclick="closeModal('modal-work-order')" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form onsubmit="submitWorkOrder(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Tanggal *</label>
+            <input id="form-wo-date" type="date" required value="2026-05-19" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Work Order Dari *</label>
+            <select id="form-wo-dept" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Housekeeping">Housekeeping</option>
+              <option value="Front Office">Front Office</option>
+              <option value="Security">Security</option>
+              <option value="Villa Manager">Villa Manager</option>
+              <option value="F&B / Kitchen">F&B / Kitchen</option>
+              <option value="Engineering Internal">Engineering Internal</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Lokasi (Input Manual) *</label>
+            <input id="form-wo-location" type="text" required placeholder="Contoh: Villa 05, Lobby, Pool..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Tipikal Pekerjaan *</label>
+            <select id="form-wo-category" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Electrical">Electrical</option>
+              <option value="Plumbing">Plumbing</option>
+              <option value="Mechanical">Mechanical</option>
+              <option value="Civil">Civil</option>
+              <option value="IT">IT</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Judul / Uraian Masalah *</label>
+          <input id="form-wo-title" type="text" required placeholder="Contoh: AC kamar utama tidak dingin / lampu kolam mati" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Deskripsi Detail Permintaan</label>
+          <textarea id="form-wo-desc" rows="2" placeholder="Detail keluhan tamu / informasi tambahan..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"></textarea>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Prioritas</label>
+            <select id="form-wo-priority" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Normal">Normal</option>
+              <option value="High">High</option>
+              <option value="Urgent">Urgent (Tamu In-House)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">PIC / Teknisi</label>
+            <input id="form-wo-pic" type="text" placeholder="Nama Teknisi" value="Wayan G." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Status Awal</label>
+            <select id="form-wo-status" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Open">Open</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Catatan Tambahan</label>
+          <input id="form-wo-notes" type="text" placeholder="Catatan part / instruksi khusus..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-work-order')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan Work Order</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Modal: Input Aktivitas Harian -->
   <div id="modal-daily" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-surface-container overflow-hidden">
@@ -1218,25 +1499,27 @@
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-outline font-semibold mb-1">Lokasi *</label>
-            <select id="form-act-location" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
-              <option value="Villa 12">Villa 12</option>
-              <option value="Central Plant">Central Plant</option>
-              <option value="Villa 08">Villa 08</option>
-              <option value="Genset House">Genset House</option>
-              <option value="Public Area">Public Area</option>
-              <option value="Kitchen">Kitchen</option>
-              <option value="Main Dining Pavilion">Main Dining Pavilion</option>
-            </select>
+            <label class="block text-outline font-semibold mb-1">Lokasi (Input Manual) *</label>
+            <input id="form-act-location" type="text" required placeholder="Contoh: Villa 12, Main Pool, Genset..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
           </div>
           <div>
-            <label class="block text-outline font-semibold mb-1">Status *</label>
-            <select id="form-act-status" onchange="handleStatusChange(this.value)" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
-              <option value="Done">Done (Selesai)</option>
-              <option value="In Progress">In Progress (Sedang Berjalan)</option>
-              <option value="Pending">Pending (Tertunda)</option>
+            <label class="block text-outline font-semibold mb-1">Tipikal Pekerjaan *</label>
+            <select id="form-act-category" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Electrical">Electrical</option>
+              <option value="Plumbing">Plumbing</option>
+              <option value="Mechanical">Mechanical</option>
+              <option value="Civil">Civil</option>
+              <option value="IT">IT</option>
             </select>
           </div>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Status Pekerjaan *</label>
+          <select id="form-act-status" onchange="handleStatusChange(this.value)" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+            <option value="Done">Done (Selesai)</option>
+            <option value="In Progress">In Progress (Sedang Berjalan)</option>
+            <option value="Pending">Pending (Tertunda)</option>
+          </select>
         </div>
         <div>
           <label class="block text-outline font-semibold mb-1">Teknisi / Tim Pelaksana * (Pilih minimal 1)</label>
@@ -1589,6 +1872,13 @@
         { evaluation_id: 'EVL-1', evaluation_category: 'Energy', title: 'Anomali Air PDAM', finding: 'Lonjakan pemakaian di Villa Cluster B (+14.2% vs baseline).', actual_value: '98 m³ (16 Mei)', comparison_value: '61 m³ (Rata-rata)', severity: 'Perhatian', recommendation: 'Inspeksi grounding pipe sirkulasi dan solenoid valve tandon B.' },
         { evaluation_id: 'EVL-2', evaluation_category: 'Project', title: 'Over Budget Pompa Sirkulasi (PRJ-2026-002)', finding: 'Biaya servis motor melampaui plafon awal (Total Rp 22.800.000 vs Rp 20.000.000).', actual_value: 'Rp 22.800.000', comparison_value: 'Rp 20.000.000', severity: 'Perhatian', recommendation: 'Ajukan memo justifikasi Capex penyesuaian biaya penggantian valve pressure high-grade.' },
         { evaluation_id: 'EVL-3', evaluation_category: 'Activity', title: 'HVAC Filter Replacement Selesai Tepat Waktu', finding: 'Pembersihan & penggantian media filter AHU Unit 01-08 selesai tanpa kendala.', actual_value: '100% Selesai', comparison_value: 'Target 100%', severity: 'Informasi', recommendation: 'Pertahankan jadwal preventative maintenance 2 mingguan.' }
+      ],
+      workOrders: [
+        { wo_id: 'WO-202605-001', order_date: '2026-05-19', department: 'Housekeeping', location_id: 'Villa 05', title: 'AC Kamar Tidur Utama Bocor Air', description: 'Tetesan air dari indoor unit mengenai meja samping tempat tidur tamu.', job_category: 'Mechanical', priority: 'Urgent', pic_technician: 'Wayan G.', status: 'In Progress', notes: 'Pembersihan pipa drainase sedang dikerjakan' },
+        { wo_id: 'WO-202605-002', order_date: '2026-05-18', department: 'Front Office', location_id: 'Lobby Area', title: 'Lampu Sorot Drop-off Padam', description: '2 spot downlight di area drop-off mobil kedip-kedip lalu mati.', job_category: 'Electrical', priority: 'High', pic_technician: 'Nyoman Sudiarta', status: 'Completed', notes: 'Penggantian driver LED selesai' },
+        { wo_id: 'WO-202605-003', order_date: '2026-05-18', department: 'Villa Manager', location_id: 'Villa 12', title: 'Kran Sink Kitchenette Macet', description: 'Handle kran air panas tidak bisa diputar ke kanan.', job_category: 'Plumbing', priority: 'Normal', pic_technician: 'Made S.', status: 'Open', notes: 'Menunggu tamu checkout jam 12:00' },
+        { wo_id: 'WO-202605-004', order_date: '2026-05-17', department: 'Security', location_id: 'Pos Jaga Timur', title: 'CCTV Channel 4 Main Gate Offline', description: 'Tampilan kamera monitor blank hitam sejak hujan sore kemarin.', job_category: 'IT', priority: 'High', pic_technician: 'Ketut A.', status: 'Completed', notes: 'Konektor RJ45 diganti & switch direboot' },
+        { wo_id: 'WO-202605-005', order_date: '2026-05-17', department: 'F&B / Kitchen', location_id: 'Main Kitchen', title: 'Keramik Lantai Retak Dekat Dishwasher', description: 'Beberapa ubin terangkat dan berpotensi membahayakan staf.', job_category: 'Civil', priority: 'Normal', pic_technician: 'Komang D.', status: 'Open', notes: 'Dijadwalkan perbaikan saat break afternoon' }
       ]
     };
 
@@ -1721,6 +2011,40 @@
           return { success: true, message: `Proyek ${payload.project_id} berhasil diperbarui!` };
         }
 
+        if (action === 'workorder.list') {
+          const total = mockStore.workOrders.length;
+          const open = mockStore.workOrders.filter(w => w.status === 'Open').length;
+          const inProgress = mockStore.workOrders.filter(w => w.status === 'In Progress').length;
+          const completed = mockStore.workOrders.filter(w => w.status === 'Completed').length;
+          const pending = mockStore.workOrders.filter(w => w.status === 'Pending').length;
+          const byDept = {
+            hk: mockStore.workOrders.filter(w => w.department === 'Housekeeping').length,
+            fo: mockStore.workOrders.filter(w => w.department === 'Front Office').length,
+            sec: mockStore.workOrders.filter(w => w.department === 'Security').length,
+            vm: mockStore.workOrders.filter(w => w.department === 'Villa Manager').length,
+            fb: mockStore.workOrders.filter(w => w.department === 'F&B / Kitchen').length,
+            eng: mockStore.workOrders.filter(w => w.department === 'Engineering Internal').length
+          };
+          return {
+            success: true,
+            kpis: { total, open, inProgress, completed, pending, byDept },
+            data: [...mockStore.workOrders]
+          };
+        }
+
+        if (action === 'workorder.create') {
+          const nextId = 'WO-202605-' + String(mockStore.workOrders.length + 1).padStart(3, '0');
+          const newWo = Object.assign({ wo_id: nextId, status: payload.status || 'Open' }, payload);
+          mockStore.workOrders.unshift(newWo);
+          return { success: true, message: `Work Order ${nextId} berhasil dibuat!`, data: newWo };
+        }
+
+        if (action === 'workorder.update') {
+          const item = mockStore.workOrders.find(w => w.wo_id === payload.wo_id);
+          if (item) Object.assign(item, payload);
+          return { success: true, message: `Work Order ${payload.wo_id} berhasil diperbarui!` };
+        }
+
         if (action === 'energy.list') {
           return { success: true, data: [...mockStore.energy] };
         }
@@ -1740,9 +2064,16 @@
             }
           }
 
-          const tariffs = { 'Listrik PLN': 1450, 'Air PDAM': 9000, 'Gas LPG': 9000, 'Fuel Genset': 15000 };
-          const rate = tariffs[payload.category] || 1000;
-          const cost = Math.round(usage * rate);
+          let cost = 0;
+          if (payload.category === 'Listrik PLN') {
+            cost = Math.round(usage * 2005 * 1.07); // Rp 2.005/kWh + 7% Pajak PPJU
+          } else if (payload.category === 'Air PDAM') {
+            cost = Math.round(usage * 18862); // Rp 18.862/m3
+          } else if (payload.category === 'Fuel Genset') {
+            cost = Math.round(usage * 22000); // Rp 22.000/Liter
+          } else if (payload.category === 'Gas LPG') {
+            cost = parseFloat(payload.cost || 0) || 0; // TBD
+          }
 
           const newRecord = Object.assign({
             energy_record_id: nextId,
@@ -1822,6 +2153,8 @@
       energy: [],
       filteredEnergy: [],
       energyCategory: 'Semua Utilitas',
+      workOrders: [],
+      filteredWorkOrders: [],
       purchases: [],
       evaluations: []
     };
@@ -1997,6 +2330,15 @@
         filterEnergy();
       }
 
+      // 4.5. Work Orders
+      const woRes = await ApiClient.call('workorder.list', { period: state.currentPeriod });
+      if (woRes && woRes.success && woRes.data) {
+        state.workOrders = woRes.data;
+        state.filteredWorkOrders = [...woRes.data];
+        filterWorkOrders();
+        updateWorkOrderKPIs(woRes.kpis);
+      }
+
       // 5. Purchase
       const purRes = await ApiClient.call('purchase.get', { period: state.currentPeriod });
       if (purRes && purRes.success) {
@@ -2091,16 +2433,20 @@
       const loc = locSelect ? locSelect.value : 'Semua Lokasi';
       const statusSelect = document.getElementById('act-filter-status');
       const status = statusSelect ? statusSelect.value : 'Semua Status';
+      const catSelect = document.getElementById('act-filter-category');
+      const cat = catSelect ? catSelect.value : 'Semua Tipikal';
       const workerSelect = document.getElementById('act-filter-worker');
       const worker = workerSelect ? workerSelect.value : 'Semua Teknisi';
 
       state.filteredActivities = state.activities.filter(a => {
         if (loc !== 'Semua Lokasi' && a.location_id !== loc) return false;
         if (status !== 'Semua Status' && !a.status.includes(status)) return false;
+        if (cat !== 'Semua Tipikal' && (a.job_category || '') !== cat) return false;
         if (worker !== 'Semua Teknisi' && (!a.workers || !a.workers.includes(worker))) return false;
         if (q) {
           const m = String(a.activity_id).toLowerCase().includes(q) ||
                     String(a.job_name).toLowerCase().includes(q) ||
+                    String(a.job_category || '').toLowerCase().includes(q) ||
                     String(a.description || '').toLowerCase().includes(q) ||
                     String(a.location_id).toLowerCase().includes(q);
           if (!m) return false;
@@ -2116,6 +2462,7 @@
       const q = document.getElementById('act-search'); if (q) q.value = '';
       const loc = document.getElementById('act-filter-location'); if (loc) loc.value = 'Semua Lokasi';
       const st = document.getElementById('act-filter-status'); if (st) st.value = 'Semua Status';
+      const cat = document.getElementById('act-filter-category'); if (cat) cat.value = 'Semua Tipikal';
       const w = document.getElementById('act-filter-worker'); if (w) w.value = 'Semua Teknisi';
       filterActivities();
       showToast('Filter aktivitas di-reset.');
@@ -2148,6 +2495,8 @@
         else if (a.status === 'In Progress') badge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container-high text-primary"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> In Progress</span>`;
         else badge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-tertiary-fixed text-on-tertiary-container"><span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span> Pending</span>`;
 
+        const catBadge = a.job_category ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary uppercase mr-1">${a.job_category}</span>` : '';
+
         tr.innerHTML = `
           <td class="py-3 px-4 font-mono font-bold text-primary">${a.activity_id}</td>
           <td class="py-3 px-4">
@@ -2155,7 +2504,7 @@
             <span class="px-1.5 py-0.5 rounded ${a.input_mode === 'Weekly' ? 'bg-secondary-container/50 text-secondary' : 'bg-surface-container text-outline'} text-[10px] font-bold">${a.input_mode || 'Daily'}</span>
           </td>
           <td class="py-3 px-4 max-w-xs">
-            <div class="font-bold text-on-surface">${a.job_name}</div>
+            <div class="font-bold text-on-surface flex items-center flex-wrap gap-1">${catBadge} <span>${a.job_name}</span></div>
             <div class="text-[11px] text-outline truncate">${a.description || '-'}</div>
           </td>
           <td class="py-3 px-4 text-on-surface font-medium">${a.location_id}</td>
@@ -2389,6 +2738,12 @@
           ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-error-container text-error">● Anomali</span>`
           : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-secondary-container text-on-secondary-container">● Valid</span>`;
 
+        let tariffLabel = '—';
+        if (e.category === 'Listrik PLN') tariffLabel = 'Rp 2.005/kWh (+7%)';
+        else if (e.category === 'Air PDAM') tariffLabel = 'Rp 18.862/m³';
+        else if (e.category === 'Fuel Genset') tariffLabel = 'Rp 22.000/L';
+        else if (e.category === 'Gas LPG') tariffLabel = 'TBD (Manual)';
+
         tr.innerHTML = `
           <td class="py-3 px-4 font-mono font-bold text-primary">${e.energy_record_id}</td>
           <td class="py-3 px-4 font-medium">${e.record_date}</td>
@@ -2396,7 +2751,7 @@
           <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-surface-container text-outline text-[11px]">${e.input_method}</span></td>
           <td class="py-3 px-4 font-mono">${e.meter_reading ? Number(e.meter_reading).toLocaleString('id-ID') : '—'}</td>
           <td class="py-3 px-4 font-bold ${isAnomali ? 'text-error' : 'text-primary'}">${Number(e.usage_value).toLocaleString('id-ID')} ${e.unit || ''}</td>
-          <td class="py-3 px-4 text-outline font-medium">Rp ${Number(e.tariff_id ? 1450 : 9000).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4 text-outline font-medium text-[11.5px]">${tariffLabel}</td>
           <td class="py-3 px-4 font-bold text-on-surface">Rp ${Number(e.calculated_cost || 0).toLocaleString('id-ID')}</td>
           <td class="py-3 px-4">${statusBadge}</td>
           <td class="py-3 px-4 text-[11.5px] max-w-xs ${isAnomali ? 'text-error font-medium' : 'text-outline'}">${e.notes || '-'}</td>
@@ -2541,11 +2896,179 @@
     };
 
     // FORM SUBMISSIONS
+    // WORK ORDER MODULE LOGIC
+    function updateWorkOrderKPIs(kpis) {
+      if (!kpis) return;
+      const elTotal = document.getElementById('wo-kpi-total'); if (elTotal) elTotal.innerText = kpis.total || 0;
+      const elOpen = document.getElementById('wo-kpi-open'); if (elOpen) elOpen.innerText = kpis.open || 0;
+      const elProg = document.getElementById('wo-kpi-progress'); if (elProg) elProg.innerText = kpis.inProgress || 0;
+      const elComp = document.getElementById('wo-kpi-completed'); if (elComp) elComp.innerText = kpis.completed || 0;
+
+      const total = kpis.total || 1;
+      const elOpenPct = document.getElementById('wo-kpi-open-pct'); if (elOpenPct) elOpenPct.innerText = `${Math.round(((kpis.open || 0) / total) * 100)}%`;
+      const elProgPct = document.getElementById('wo-kpi-progress-pct'); if (elProgPct) elProgPct.innerText = `${Math.round(((kpis.inProgress || 0) / total) * 100)}%`;
+      const elCompPct = document.getElementById('wo-kpi-completed-pct'); if (elCompPct) elCompPct.innerText = `${Math.round(((kpis.completed || 0) / total) * 100)}%`;
+
+      if (kpis.byDept) {
+        const dHk = document.getElementById('wo-dept-hk'); if (dHk) dHk.innerText = kpis.byDept.hk || 0;
+        const dFo = document.getElementById('wo-dept-fo'); if (dFo) dFo.innerText = kpis.byDept.fo || 0;
+        const dSec = document.getElementById('wo-dept-sec'); if (dSec) dSec.innerText = kpis.byDept.sec || 0;
+        const dVm = document.getElementById('wo-dept-vm'); if (dVm) dVm.innerText = kpis.byDept.vm || 0;
+        const dFb = document.getElementById('wo-dept-fb'); if (dFb) dFb.innerText = kpis.byDept.fb || 0;
+        const dEng = document.getElementById('wo-dept-eng'); if (dEng) dEng.innerText = kpis.byDept.eng || 0;
+      }
+    }
+
+    window.filterWorkOrders = function() {
+      const qInput = document.getElementById('wo-search');
+      const q = (qInput ? qInput.value : '').toLowerCase();
+      const deptSelect = document.getElementById('wo-filter-dept');
+      const dept = deptSelect ? deptSelect.value : 'Semua Departemen';
+      const catSelect = document.getElementById('wo-filter-cat');
+      const cat = catSelect ? catSelect.value : 'Semua Tipikal';
+      const statusSelect = document.getElementById('wo-filter-status');
+      const status = statusSelect ? statusSelect.value : 'Semua Status';
+
+      state.filteredWorkOrders = state.workOrders.filter(w => {
+        if (dept !== 'Semua Departemen' && w.department !== dept) return false;
+        if (cat !== 'Semua Tipikal' && (w.job_category || '') !== cat) return false;
+        if (status !== 'Semua Status' && !w.status.includes(status)) return false;
+        if (q) {
+          const m = String(w.wo_id || '').toLowerCase().includes(q) ||
+                    String(w.title || '').toLowerCase().includes(q) ||
+                    String(w.description || '').toLowerCase().includes(q) ||
+                    String(w.location_id || '').toLowerCase().includes(q) ||
+                    String(w.pic_technician || '').toLowerCase().includes(q);
+          if (!m) return false;
+        }
+        return true;
+      });
+
+      renderWorkOrders();
+    };
+
+    window.resetWorkOrderFilters = function() {
+      const q = document.getElementById('wo-search'); if (q) q.value = '';
+      const dept = document.getElementById('wo-filter-dept'); if (dept) dept.value = 'Semua Departemen';
+      const cat = document.getElementById('wo-filter-cat'); if (cat) cat.value = 'Semua Tipikal';
+      const st = document.getElementById('wo-filter-status'); if (st) st.value = 'Semua Status';
+      filterWorkOrders();
+      showToast('Filter Work Order di-reset.');
+    };
+
+    function renderWorkOrders() {
+      const tbody = document.getElementById('workorder-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const list = state.filteredWorkOrders || [];
+      const countEl = document.getElementById('wo-table-count');
+      if (countEl) countEl.innerText = `Menampilkan ${list.length} dari ${state.workOrders.length} Work Orders tercatat`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-outline">Tidak ada Work Order pada kriteria ini.</td></tr>`;
+        return;
+      }
+
+      list.forEach(w => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-surface-container-low/40 transition-colors';
+
+        let statusBadge = '';
+        if (w.status === 'Completed') {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-secondary-container text-on-secondary-container"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Completed</span>`;
+        } else if (w.status === 'In Progress') {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container-high text-primary"><span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span> In Progress</span>`;
+        } else if (w.status === 'Pending') {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-tertiary-fixed text-on-tertiary-container"><span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container"></span> Pending</span>`;
+        } else {
+          statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-error-container text-error"><span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span> Open</span>`;
+        }
+
+        let prioBadge = '';
+        if (w.priority === 'Urgent') prioBadge = `<span class="px-2 py-0.5 rounded text-[10.5px] font-bold bg-error text-white uppercase">Urgent</span>`;
+        else if (w.priority === 'High') prioBadge = `<span class="px-2 py-0.5 rounded text-[10.5px] font-bold bg-tertiary-fixed text-on-tertiary-container uppercase">High</span>`;
+        else prioBadge = `<span class="px-2 py-0.5 rounded text-[10.5px] font-medium bg-surface-container text-outline">Normal</span>`;
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono font-bold text-primary">${w.wo_id}</td>
+          <td class="py-3 px-4 font-medium">${w.order_date || '—'}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded-lg bg-surface-container-high text-primary font-semibold text-[11.5px]">${w.department}</span>
+          </td>
+          <td class="py-3 px-4 text-on-surface font-medium">${w.location_id}</td>
+          <td class="py-3 px-4 max-w-xs">
+            <div class="font-bold text-on-surface">${w.title}</div>
+            <div class="text-[11px] text-outline truncate">${w.description || '-'}</div>
+          </td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-secondary-container/40 text-on-secondary-container uppercase">${w.job_category || 'General'}</span>
+          </td>
+          <td class="py-3 px-4">${prioBadge}</td>
+          <td class="py-3 px-4 font-medium text-on-surface">● ${w.pic_technician || 'Belum Ditugaskan'}</td>
+          <td class="py-3 px-4">${statusBadge}</td>
+          <td class="py-3 px-4 text-center">
+            <button onclick="updateWorkOrderStatusPrompt('${w.wo_id}', '${w.status}')" title="Ubah Status Work Order" class="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-[11px] font-semibold text-primary">
+              Ubah Status
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.updateWorkOrderStatusPrompt = async function(woId, currentStatus) {
+      const next = prompt(`Ubah status Work Order ${woId}:\nKetik: Open / In Progress / Completed / Pending`, currentStatus);
+      if (next && ['Open', 'In Progress', 'Completed', 'Pending'].includes(next.trim())) {
+        showToast(`Memperbarui status ${woId} ke ${next.trim()}...`);
+        const res = await ApiClient.call('workorder.update', {
+          wo_id: woId,
+          status: next.trim()
+        });
+        if (res && res.success) {
+          showToast(`Status ${woId} berhasil diubah ke ${next.trim()}!`);
+          loadAllData();
+        }
+      }
+    };
+
+    window.submitWorkOrder = async function(e) {
+      e.preventDefault();
+      showToast('Menyimpan Work Order baru...');
+      const res = await ApiClient.call('workorder.create', {
+        order_date: document.getElementById('form-wo-date').value,
+        department: document.getElementById('form-wo-dept').value,
+        location_id: document.getElementById('form-wo-location').value,
+        job_category: document.getElementById('form-wo-category').value,
+        title: document.getElementById('form-wo-title').value,
+        description: document.getElementById('form-wo-desc').value,
+        priority: document.getElementById('form-wo-priority').value,
+        pic_technician: document.getElementById('form-wo-pic').value,
+        status: document.getElementById('form-wo-status').value,
+        notes: document.getElementById('form-wo-notes').value
+      });
+
+      if (res && res.success) {
+        closeModal('modal-work-order');
+        showToast(res.message);
+        loadAllData();
+      }
+    };
+
+    window.exportWorkOrdersCsv = function() {
+      let csv = 'WO ID,Tanggal,Departemen,Lokasi,Judul Pekerjaan,Tipikal,Prioritas,PIC Teknisi,Status,Catatan\n';
+      (state.filteredWorkOrders || state.workOrders).forEach(w => {
+        csv += `"${w.wo_id}","${w.order_date}","${w.department}","${w.location_id}","${w.title}","${w.job_category}","${w.priority}","${w.pic_technician}","${w.status}","${w.notes || ''}"\n`;
+      });
+      downloadCsv(csv, `Work_Orders_Agranusa_${state.currentPeriod}.csv`);
+    };
+
     window.submitDailyActivity = async function(e) {
       e.preventDefault();
       const date = document.getElementById('form-act-date').value;
       const name = document.getElementById('form-act-name').value;
       const location = document.getElementById('form-act-location').value;
+      const category = document.getElementById('form-act-category') ? document.getElementById('form-act-category').value : 'Electrical';
       const status = document.getElementById('form-act-status').value;
       const desc = document.getElementById('form-act-desc').value;
       const notes = document.getElementById('form-act-notes').value;
@@ -2567,6 +3090,7 @@
         activity_date: date,
         job_name: name,
         location_id: location,
+        job_category: category,
         status: status,
         description: desc,
         notes: notes,
@@ -2709,6 +3233,10 @@
         const inp = document.getElementById('act-search');
         if (inp) inp.value = q;
         filterActivities();
+      } else if (state.activeView === 'work-orders') {
+        const inp = document.getElementById('wo-search');
+        if (inp) inp.value = q;
+        filterWorkOrders();
       } else if (state.activeView === 'project-monitoring') {
         const inp = document.getElementById('prj-search');
         if (inp) inp.value = q;
