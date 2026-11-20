@@ -17,6 +17,7 @@ const ALL_SCHEMAS = {
   ENERGY_FUEL: ['record_id', 'record_date', 'input_method', 'meter_genset', 'usage_liter', 'tarif_per_liter', 'total_biaya', 'validation_status', 'notes', 'created_at'],
   ENERGY_GAS: ['record_id', 'record_date', 'input_method', 'usage_kg', 'tarif_per_kg', 'total_biaya', 'validation_status', 'notes', 'created_at'],
   ENERGY_DAILY: ['energy_record_id', 'category', 'record_date', 'input_method', 'usage_value', 'meter_reading', 'unit', 'tariff_id', 'calculated_cost', 'validation_status', 'notes', 'created_at', 'updated_at'],
+  OPEX_DAILY: ['opex_id', 'record_date', 'reporting_period', 'category', 'item_name', 'qty', 'unit', 'unit_price', 'total_amount', 'vendor', 'receipt_no', 'notes', 'created_at', 'updated_at'],
   PURCHASE_SUMMARY: ['purchase_summary_id', 'reporting_period', 'total_amount', 'description', 'notes', 'created_at', 'updated_at'],
   MONTHLY_REPORTS: ['report_id', 'reporting_period', 'report_status', 'generated_at', 'generated_by', 'pdf_file_reference', 'data_version'],
   EVALUATION_RESULTS: ['evaluation_id', 'reporting_period', 'evaluation_category', 'title', 'finding', 'actual_value', 'comparison_value', 'severity', 'recommendation', 'generated_at'],
@@ -33,7 +34,7 @@ function doGet(e) {
     payload = e.parameter;
   }
   const result = (action === 'ping')
-    ? { success: true, message: 'Agranusa Engineering GAS API is active', version: 'v2.5.0' }
+    ? { success: true, message: 'Agranusa Engineering GAS API is active', version: 'v2.6.0' }
     : dispatchAction(action, payload);
 
   return ContentService.createTextOutput(JSON.stringify(result))
@@ -78,7 +79,7 @@ function ensureTab(tabName) {
 }
 
 function ensureAllNewTabs() {
-  ['ENERGY_LISTRIK', 'ENERGY_AIR', 'ENERGY_FUEL', 'ENERGY_GAS', 'WORK_ORDERS'].forEach(t => ensureTab(t));
+  ['ENERGY_LISTRIK', 'ENERGY_AIR', 'ENERGY_FUEL', 'ENERGY_GAS', 'WORK_ORDERS', 'OPEX_DAILY'].forEach(t => ensureTab(t));
 }
 
 function getTableData(tabName) {
@@ -135,6 +136,197 @@ function dispatchAction(action, payload) {
   ensureAllNewTabs();
 
   switch (action) {
+    // ==========================================
+    // 0. CONSOLIDATED HIGH-SPEED BATCH SYNC
+    // ==========================================
+    case 'sync.all': {
+      const users = getTableData('USERS');
+      const activeUser = users.find(u => String(u.is_active).toUpperCase() === 'TRUE' || u.user_id === 'USR-001') || (users.length > 0 ? users[0] : null);
+      const employees = getTableData('EMPLOYEES');
+      const locations = getTableData('LOCATIONS');
+
+      const activities = getTableData('ACTIVITIES');
+      const actTotal = activities.length;
+      const actDone = activities.filter(a => a.status === 'Done').length;
+      const actProg = activities.filter(a => a.status === 'In Progress').length;
+      const actPend = activities.filter(a => a.status === 'Pending').length;
+      const actCompRate = actTotal > 0 ? ((actDone / actTotal) * 100).toFixed(1) : 0;
+
+      const projects = getTableData('PROJECTS');
+      const prjBudget = projects.reduce((acc, p) => acc + (parseFloat(p.budget) || 0), 0);
+      const prjCost = projects.reduce((acc, p) => acc + (parseFloat(p.project_cost) || 0), 0);
+      const prjOver = projects.filter(p => (parseFloat(p.project_cost) || 0) > (parseFloat(p.budget) || 0)).length;
+
+      const workOrders = getTableData('WORK_ORDERS');
+      const woTotal = workOrders.length;
+      const woOpen = workOrders.filter(w => w.status === 'Open').length;
+      const woProg = workOrders.filter(w => w.status === 'In Progress').length;
+      const woComp = workOrders.filter(w => w.status === 'Completed').length;
+      const woPend = workOrders.filter(w => w.status === 'Pending').length;
+      const woByDept = {
+        hk: workOrders.filter(w => w.department === 'Housekeeping').length,
+        fo: workOrders.filter(w => w.department === 'Front Office').length,
+        sec: workOrders.filter(w => w.department === 'Security').length,
+        vm: workOrders.filter(w => w.department === 'Villa Manager').length,
+        fb: workOrders.filter(w => w.department === 'F&B / Kitchen').length,
+        eng: workOrders.filter(w => w.department === 'Engineering Internal').length
+      };
+
+      const listrikData = getTableData('ENERGY_LISTRIK');
+      const airData = getTableData('ENERGY_AIR');
+      const fuelData = getTableData('ENERGY_FUEL');
+      const gasData = getTableData('ENERGY_GAS');
+      const legacyEnergy = getTableData('ENERGY_DAILY');
+
+      const energyRecords = [];
+      listrikData.forEach(r => {
+        energyRecords.push({
+          energy_record_id: r.record_id,
+          category: 'Listrik PLN',
+          record_date: r.record_date,
+          input_method: r.input_method || 'Meter Reading',
+          meter_reading: r.meter_reading,
+          usage_value: parseFloat(r.usage_kwh) || 0,
+          unit: 'kWh',
+          calculated_cost: parseFloat(r.total_biaya) || 0,
+          validation_status: r.validation_status || 'Valid',
+          notes: r.notes || ''
+        });
+      });
+      airData.forEach(r => {
+        energyRecords.push({
+          energy_record_id: r.record_id,
+          category: 'Air PDAM',
+          record_date: r.record_date,
+          input_method: r.input_method || 'Meter Reading',
+          meter_reading: r.meter_reading,
+          usage_value: parseFloat(r.usage_m3) || 0,
+          unit: 'm³',
+          calculated_cost: parseFloat(r.total_biaya) || 0,
+          validation_status: r.validation_status || 'Valid',
+          notes: r.notes || ''
+        });
+      });
+      fuelData.forEach(r => {
+        energyRecords.push({
+          energy_record_id: r.record_id,
+          category: 'Fuel Genset',
+          record_date: r.record_date,
+          input_method: r.input_method || 'Daily Usage',
+          meter_reading: r.meter_genset || '',
+          usage_value: parseFloat(r.usage_liter) || 0,
+          unit: 'Liter',
+          calculated_cost: parseFloat(r.total_biaya) || 0,
+          validation_status: r.validation_status || 'Valid',
+          notes: r.notes || ''
+        });
+      });
+      gasData.forEach(r => {
+        energyRecords.push({
+          energy_record_id: r.record_id,
+          category: 'Gas LPG',
+          record_date: r.record_date,
+          input_method: r.input_method || 'Daily Usage',
+          meter_reading: '',
+          usage_value: parseFloat(r.usage_kg) || 0,
+          unit: 'kg',
+          calculated_cost: parseFloat(r.total_biaya) || 0,
+          validation_status: r.validation_status || 'Valid',
+          notes: r.notes || ''
+        });
+      });
+      legacyEnergy.forEach(r => {
+        energyRecords.push({
+          energy_record_id: r.energy_record_id,
+          category: r.category,
+          record_date: r.record_date,
+          input_method: r.input_method,
+          meter_reading: r.meter_reading,
+          usage_value: parseFloat(r.usage_value) || 0,
+          unit: r.unit,
+          calculated_cost: parseFloat(r.calculated_cost) || 0,
+          validation_status: r.validation_status,
+          notes: r.notes
+        });
+      });
+
+      const opexData = getTableData('OPEX_DAILY');
+      const opexTotal = opexData.reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
+      const todayStr = Utilities.formatDate(new Date(), 'Asia/Makassar', 'yyyy-MM-dd');
+      const opexToday = opexData.filter(o => String(o.record_date).startsWith(todayStr)).reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
+      const distinctDays = [...new Set(opexData.map(o => String(o.record_date).substring(0, 10)))].filter(Boolean);
+      const opexAvg = distinctDays.length > 0 ? Math.round(opexTotal / distinctDays.length) : 0;
+      const opexCategories = {};
+      opexData.forEach(o => {
+        const cat = o.category || 'Lain-lain';
+        opexCategories[cat] = (opexCategories[cat] || 0) + (parseFloat(o.total_amount) || 0);
+      });
+
+      const purchases = getTableData('PURCHASE_SUMMARY');
+      const curPur = purchases.find(p => p.reporting_period === period) || { total_amount: opexTotal, description: 'Total akumulasi pengeluaran operasional.' };
+      const evaluations = getTableData('EVALUATION_RESULTS');
+      const totalEnergyCost = energyRecords.reduce((acc, e) => acc + (parseFloat(e.calculated_cost) || 0), 0);
+
+      return {
+        success: true,
+        version: 'v2.6.0',
+        user: {
+          userId: activeUser ? activeUser.user_id : 'USR-001',
+          email: activeUser ? activeUser.email : 'rizqi.mashuda@agranusa.com',
+          displayName: activeUser ? (activeUser.display_name || activeUser.displayName) : 'Rizqi Mashuda',
+          role: activeUser ? activeUser.role : 'Head of Engineering'
+        },
+        master: {
+          employees: employees,
+          locations: locations,
+          users: users,
+          jobCategories: ['IT', 'Electrical', 'Plumbing', 'Civil', 'Mechanical'],
+          departments: ['Housekeeping', 'Front Office', 'Security', 'Villa Manager', 'F&B / Kitchen', 'Engineering Internal'],
+          tariffs: { listrik: { perKwh: 2005, ppjuPercent: 7 }, air: { perM3: 18862 }, solar: { perLiter: 22000 }, gas: { perKg: 0 } }
+        },
+        dashboard: {
+          kpiCards: {
+            activities: { total: actTotal, done: actDone, inProgress: actProg, pending: actPend, completionRate: actCompRate },
+            projects: { total: projects.length, totalBudget: prjBudget, totalCost: prjCost, overBudgetCount: prjOver },
+            energy: { totalCost: totalEnergyCost || 71762500, budgetPlafon: 78000000 },
+            purchase: { totalAmount: curPur.total_amount || opexTotal }
+          },
+          topEvaluations: evaluations
+        },
+        activities: { kpis: { total: actTotal, done: actDone, inProgress: actProg, pending: actPend, completionRate: actCompRate }, data: activities },
+        projects: {
+          kpis: {
+            totalProjects: projects.length,
+            totalBudget: prjBudget,
+            totalCost: prjCost,
+            remainingBudget: Math.max(0, prjBudget - prjCost),
+            overBudgetCount: prjOver,
+            statusCounts: {
+              Completed: projects.filter(p => p.status === 'Completed').length,
+              InProgress: projects.filter(p => p.status === 'In Progress').length,
+              Planning: projects.filter(p => p.status === 'Planning').length,
+              OnHold: projects.filter(p => p.status === 'On Hold').length
+            }
+          },
+          data: projects
+        },
+        energy: { data: energyRecords },
+        workOrders: { kpis: { total: woTotal, open: woOpen, inProgress: woProg, completed: woComp, pending: woPend, byDept: woByDept }, data: workOrders },
+        opexDaily: {
+          kpis: {
+            totalAmount: opexTotal,
+            todayAmount: opexToday,
+            avgDaily: opexAvg,
+            totalTransactions: opexData.length,
+            byCategory: opexCategories
+          },
+          data: opexData
+        },
+        purchase: { period: period, current: curPur, comparison: { difference: 2900000, percentChange: 8.9, hasComparison: true } },
+        evaluations: evaluations
+      };
+    }
+
     case 'auth.login':
     case 'auth.me': {
       const users = getTableData('USERS');
@@ -719,6 +911,65 @@ function dispatchAction(action, payload) {
       return { success: true, message: `Ringkasan belanja ${period} berhasil disimpan ke Google Sheet!` };
     }
 
+    case 'opex.list': {
+      const opexData = getTableData('OPEX_DAILY');
+      const opexTotal = opexData.reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
+      const todayStr = Utilities.formatDate(new Date(), 'Asia/Makassar', 'yyyy-MM-dd');
+      const opexToday = opexData.filter(o => String(o.record_date).startsWith(todayStr)).reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
+      const distinctDays = [...new Set(opexData.map(o => String(o.record_date).substring(0, 10)))].filter(Boolean);
+      const opexAvg = distinctDays.length > 0 ? Math.round(opexTotal / distinctDays.length) : 0;
+      const opexCategories = {};
+      opexData.forEach(o => {
+        const cat = o.category || 'Lain-lain';
+        opexCategories[cat] = (opexCategories[cat] || 0) + (parseFloat(o.total_amount) || 0);
+      });
+
+      return {
+        success: true,
+        kpis: {
+          totalAmount: opexTotal,
+          todayAmount: opexToday,
+          avgDaily: opexAvg,
+          totalTransactions: opexData.length,
+          byCategory: opexCategories
+        },
+        data: opexData
+      };
+    }
+
+    case 'opex.create': {
+      const existing = getTableData('OPEX_DAILY');
+      const nextId = 'OPX-' + period.replace('-', '') + '-' + String(existing.length + 1).padStart(3, '0');
+      const qty = parseFloat(payload.qty) || 1;
+      const price = parseFloat(payload.unit_price) || parseFloat(payload.total_amount) || 0;
+      const total = parseFloat(payload.total_amount) || (qty * price);
+
+      const newRow = {
+        opex_id: nextId,
+        record_date: payload.record_date || Utilities.formatDate(new Date(), 'Asia/Makassar', 'yyyy-MM-dd'),
+        reporting_period: payload.reporting_period || period,
+        category: payload.category || 'Material / Sparepart',
+        item_name: payload.item_name || payload.notes || 'Pengeluaran Opex',
+        qty: qty,
+        unit: payload.unit || 'Pcs',
+        unit_price: price,
+        total_amount: total,
+        vendor: payload.vendor || 'Toko / Supplier',
+        receipt_no: payload.receipt_no || '-',
+        notes: payload.notes || '',
+        created_at: now,
+        updated_at: now
+      };
+
+      appendTableRow('OPEX_DAILY', newRow);
+      return { success: true, message: `Transaksi Opex ${nextId} (Rp ${total.toLocaleString('id-ID')}) berhasil dicatat ke Google Sheet!`, data: newRow };
+    }
+
+    case 'opex.update': {
+      updateTableRow('OPEX_DAILY', 'opex_id', payload.opex_id, payload);
+      return { success: true, message: `Data Opex ${payload.opex_id} berhasil diperbarui!` };
+    }
+
     case 'evaluation.get':
     case 'evaluation.generate': {
       const data = getTableData('EVALUATION_RESULTS');
@@ -727,7 +978,7 @@ function dispatchAction(action, payload) {
 
     case 'database.init': {
       ensureAllNewTabs();
-      return { success: true, message: 'Database 17 tab berhasil diverifikasi & siap terhubung!' };
+      return { success: true, message: 'Database 18 tab berhasil diverifikasi & siap terhubung!' };
     }
 
     default:
@@ -736,7 +987,7 @@ function dispatchAction(action, payload) {
 }
 
 /**
- * FUNGSI SETUP UPDATE: Membuat sheet ENERGY_LISTRIK, ENERGY_AIR, ENERGY_FUEL, ENERGY_GAS, dan WORK_ORDERS
+ * FUNGSI SETUP UPDATE: Membuat sheet ENERGY_LISTRIK, ENERGY_AIR, ENERGY_FUEL, ENERGY_GAS, WORK_ORDERS, dan OPEX_DAILY
  * Bisa dijalankan langsung dari editor Apps Script (pilih fungsi 'updateStrukturTabBaru' lalu klik Run/Jalankan),
  * atau lewat menu khusus di Google Sheets: "⚡ Agranusa Engineering" -> "🚀 Buat Tab Baru".
  */
@@ -744,7 +995,7 @@ function onOpen() {
   try {
     const ui = SpreadsheetApp.getUi();
     ui.createMenu('⚡ Agranusa Engineering')
-      .addItem('🚀 Buat Tab Baru (Energy & Work Orders)', 'updateStrukturTabBaru')
+      .addItem('🚀 Buat Tab Baru (Energy, WO & Opex Harian)', 'updateStrukturTabBaru')
       .addToUi();
   } catch (e) {
     Logger.log('onOpen skipped in headless mode: ' + e.message);
@@ -753,9 +1004,9 @@ function onOpen() {
 
 function updateStrukturTabBaru() {
   ensureAllNewTabs();
-  Logger.log("SUKSES: Tab ENERGY_LISTRIK, ENERGY_AIR, ENERGY_FUEL, ENERGY_GAS, dan WORK_ORDERS telah siap!");
+  Logger.log("SUKSES: Tab ENERGY_LISTRIK, ENERGY_AIR, ENERGY_FUEL, ENERGY_GAS, WORK_ORDERS, dan OPEX_DAILY telah siap!");
   try {
-    SpreadsheetApp.getUi().alert('Sukses!\n\n5 Tab baru berhasil dibuat di spreadsheet ini:\n1. ENERGY_LISTRIK\n2. ENERGY_AIR\n3. ENERGY_FUEL\n4. ENERGY_GAS\n5. WORK_ORDERS\n\nAnda sekarang dapat menyalin data lama ke sheet masing-masing!');
+    SpreadsheetApp.getUi().alert('Sukses!\n\n6 Tab baru berhasil dibuat di spreadsheet ini:\n1. ENERGY_LISTRIK\n2. ENERGY_AIR\n3. ENERGY_FUEL\n4. ENERGY_GAS\n5. WORK_ORDERS\n6. OPEX_DAILY\n\nSemua sheet siap digunakan!');
   } catch (e) {
     Logger.log('Alert skipped: ' + e.message);
   }

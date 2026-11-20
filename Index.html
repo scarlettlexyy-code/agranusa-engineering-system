@@ -110,6 +110,10 @@
           <span class="material-symbols-outlined text-[20px]">bolt</span>
           <span>Energy Consumption</span>
         </button>
+        <button onclick="navigateTo('daily-opex')" data-path="daily-opex" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
+          <span class="material-symbols-outlined text-[20px]">payments</span>
+          <span>Opex Harian</span>
+        </button>
         <button onclick="navigateTo('monthly-purchase')" data-path="monthly-purchase" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
           <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
           <span>Monthly Purchase</span>
@@ -1200,6 +1204,168 @@
       </section>
 
       <!-- ========================================== -->
+      <!-- VIEW: DAILY OPEX DASHBOARD (MODUL E.1) -->
+      <!-- ========================================== -->
+      <section id="view-daily-opex" class="view-panel hidden flex flex-col gap-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h1 class="text-[26px] font-bold text-primary tracking-tight">Dashboard Opex Harian</h1>
+              <span class="px-2.5 py-0.5 rounded-full bg-secondary-container/50 text-on-secondary-container text-[11px] font-semibold">
+                Daily Operating Expenses
+              </span>
+            </div>
+            <p class="text-[13px] text-outline mt-0.5">Pencatatan rincian biaya pemakaian & belanja operasional harian teknisi Agranusa Signature Villa.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <button onclick="navigateTo('monthly-purchase')" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-on-surface text-[13px] font-semibold shadow-sm transition-all">
+              <span class="material-symbols-outlined text-[18px] text-primary">calendar_month</span>
+              <span>Rekap Belanja Bulanan</span>
+            </button>
+            <button onclick="exportDailyOpexCsv()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-on-surface text-[13px] font-semibold shadow-sm transition-all">
+              <span class="material-symbols-outlined text-[18px] text-primary">download</span>
+              <span>Export CSV</span>
+            </button>
+            <button onclick="openModal('modal-daily-opex')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
+              <span class="material-symbols-outlined text-[18px] text-secondary-fixed">add_circle</span>
+              <span>+ Input Opex Harian</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 KPI Cards (Opex Harian) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Opex Bulan Ini</span>
+              <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[20px]">payments</span>
+              </div>
+            </div>
+            <div class="my-3 text-[26px] font-bold text-primary" id="opex-kpi-total">Rp 0</div>
+            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
+              <span>Akumulasi berjalan</span>
+              <span class="font-semibold text-secondary">Periode Mei 2026</span>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Pengeluaran Hari Ini</span>
+              <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-on-secondary-container">
+                <span class="material-symbols-outlined text-[20px]">today</span>
+              </div>
+            </div>
+            <div class="my-3 text-[26px] font-bold text-on-surface" id="opex-kpi-today">Rp 0</div>
+            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
+              <span id="opex-today-badge">19 Mei 2026</span>
+              <span class="text-secondary font-semibold">Realtime</span>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Rata-Rata per Hari</span>
+              <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[20px]">show_chart</span>
+              </div>
+            </div>
+            <div class="my-3 text-[26px] font-bold text-on-surface" id="opex-kpi-avg">Rp 0</div>
+            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
+              <span>Rerata hari aktif</span>
+              <span class="text-outline">AC-05</span>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Jumlah Transaksi</span>
+              <div class="w-9 h-9 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-container">
+                <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+              </div>
+            </div>
+            <div class="my-3 text-[26px] font-bold text-on-surface" id="opex-kpi-count">0</div>
+            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
+              <span>Struk & nota tercatat</span>
+              <span class="text-on-tertiary-container font-semibold">Valid</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Breakdown Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm">
+            <div class="text-[11px] text-outline font-semibold uppercase">Material / Sparepart</div>
+            <div class="text-[16px] font-bold text-primary mt-1" id="opex-cat-sparepart">Rp 0</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm">
+            <div class="text-[11px] text-outline font-semibold uppercase">Chemical & Pool</div>
+            <div class="text-[16px] font-bold text-secondary mt-1" id="opex-cat-chemical">Rp 0</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm">
+            <div class="text-[11px] text-outline font-semibold uppercase">Perbaikan / Repair</div>
+            <div class="text-[16px] font-bold text-error mt-1" id="opex-cat-repair">Rp 0</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm">
+            <div class="text-[11px] text-outline font-semibold uppercase">Perlengkapan / Tools</div>
+            <div class="text-[16px] font-bold text-on-surface mt-1" id="opex-cat-tools">Rp 0</div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm">
+            <div class="text-[11px] text-outline font-semibold uppercase">Operasional Umum</div>
+            <div class="text-[16px] font-bold text-on-surface-variant mt-1" id="opex-cat-general">Rp 0</div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white rounded-2xl p-4 border border-surface-container shadow-sm flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-3 flex-1">
+            <div class="relative min-w-[220px]">
+              <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[18px]">search</span>
+              <input id="opex-search" oninput="filterDailyOpex()" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] focus:outline-none focus:bg-white border border-transparent focus:border-secondary/40" placeholder="Cari nama barang, vendor, no nota..." type="text"/>
+            </div>
+            <select id="opex-filter-cat" onchange="filterDailyOpex()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+              <option value="Semua Kategori">Semua Kategori</option>
+              <option value="Material / Sparepart">Material / Sparepart</option>
+              <option value="Chemical & Pool">Chemical & Pool</option>
+              <option value="Perbaikan / Repair">Perbaikan / Repair</option>
+              <option value="Perlengkapan / Tools">Perlengkapan / Tools</option>
+              <option value="Operasional Umum">Operasional Umum</option>
+            </select>
+            <input id="opex-filter-date" type="date" onchange="filterDailyOpex()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent" title="Filter Tanggal Tertentu"/>
+          </div>
+          <button onclick="resetDailyOpexFilters()" class="text-[12px] text-outline hover:text-primary underline">Reset Filter</button>
+        </div>
+
+        <!-- Daily Opex Table -->
+        <div class="bg-white rounded-2xl border border-surface-container shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-[12.5px] border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
+                  <th class="py-3 px-4">Opex ID</th>
+                  <th class="py-3 px-4">Tanggal</th>
+                  <th class="py-3 px-4">Kategori</th>
+                  <th class="py-3 px-4">Nama Barang / Uraian</th>
+                  <th class="py-3 px-4">Qty</th>
+                  <th class="py-3 px-4">Harga Satuan</th>
+                  <th class="py-3 px-4">Total Biaya</th>
+                  <th class="py-3 px-4">Vendor / Toko</th>
+                  <th class="py-3 px-4">No. Nota</th>
+                  <th class="py-3 px-4">Catatan</th>
+                </tr>
+              </thead>
+              <tbody id="daily-opex-table-body" class="divide-y divide-surface-container">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+          <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline bg-surface-container-low/30">
+            <span id="daily-opex-table-count">Menampilkan 0 Transaksi Opex</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
       <!-- VIEW 5: MONTHLY PURCHASE SUMMARY (MODUL E) -->
       <!-- ========================================== -->
       <section id="view-monthly-purchase" class="view-panel hidden flex flex-col gap-6">
@@ -1667,42 +1833,131 @@
     </div>
   </div>
 
-  <!-- Modal: Input Daily Usage (Energi) -->
+  <!-- Modal: Input Daily Usage (Energi & Opex Harian) -->
   <div id="modal-daily-usage" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-surface-container overflow-hidden">
       <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
         <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
-          <span class="material-symbols-outlined text-secondary">bolt</span> + Input Daily Usage (Langsung)
+          <span class="material-symbols-outlined text-secondary">bolt</span> + Input Daily Usage (5 Kategori)
         </h3>
         <button onclick="closeModal('modal-daily-usage')" class="text-outline hover:text-on-surface">
           <span class="material-symbols-outlined text-[20px]">close</span>
         </button>
       </div>
-      <form onsubmit="submitEnergyUsage(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+      <form id="form-daily-usage" onsubmit="submitEnergyUsage(event)" class="p-5 flex flex-col gap-4 text-[13px]">
         <div>
-          <label class="block text-outline font-semibold mb-1">Kategori Utilitas *</label>
-          <select id="usage-category" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
-            <option value="Listrik PLN">Listrik PLN (kWh)</option>
-            <option value="Air PDAM">Air PDAM (m³)</option>
-            <option value="Gas LPG">Gas LPG (kg)</option>
-            <option value="Fuel Genset">Fuel Genset (Liter)</option>
+          <label class="block text-outline font-semibold mb-1">Kategori Input *</label>
+          <select id="usage-category" onchange="handleUsageCategoryChange(this.value)" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+            <option value="Listrik PLN">1. Listrik PLN (kWh)</option>
+            <option value="Air PDAM">2. Air PDAM (m³)</option>
+            <option value="Fuel Genset">3. Fuel Genset (Liter)</option>
+            <option value="Gas LPG">4. Gas LPG (kg)</option>
+            <option value="Opex Daily">5. Opex Daily (Belanja Harian - Rp)</option>
           </select>
         </div>
         <div>
           <label class="block text-outline font-semibold mb-1">Tanggal *</label>
-          <input id="usage-date" type="date" value="2026-05-18" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          <input id="usage-date" type="date" value="2026-05-19" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div id="usage-item-container" class="hidden">
+          <label class="block text-outline font-semibold mb-1">Nama Barang / Uraian Belanja *</label>
+          <input id="usage-item-name" type="text" placeholder="Contoh: Beli sparepart kran, cat, chemical pool..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
         </div>
         <div>
-          <label class="block text-outline font-semibold mb-1">Jumlah Pemakaian Bersih *</label>
+          <label class="block text-outline font-semibold mb-1" id="usage-val-label">Jumlah Pemakaian Bersih *</label>
           <input id="usage-val" type="number" step="0.01" required placeholder="Contoh: 30" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
         </div>
         <div>
           <label class="block text-outline font-semibold mb-1">Catatan Operasional</label>
-          <input id="usage-notes" type="text" placeholder="Restoran normal / Uji beban..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          <input id="usage-notes" type="text" placeholder="Restoran normal / Uji beban / Toko pembelian..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
         </div>
         <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
           <button type="button" onclick="closeModal('modal-daily-usage')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan Pemakaian</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan Data</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Input Opex Harian Terperinci -->
+  <div id="modal-daily-opex" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-surface-container overflow-hidden">
+      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
+        <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">payments</span> + Input Pengeluaran Opex Harian
+        </h3>
+        <button onclick="closeModal('modal-daily-opex')" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form id="form-daily-opex" onsubmit="submitDailyOpex(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Tanggal Transaksi *</label>
+            <input id="form-opex-date" type="date" value="2026-05-19" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Kategori Opex *</label>
+            <select id="form-opex-cat" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Material / Sparepart">Material / Sparepart</option>
+              <option value="Chemical & Pool">Chemical & Pool</option>
+              <option value="Perbaikan / Repair">Perbaikan / Repair</option>
+              <option value="Perlengkapan / Tools">Perlengkapan / Tools</option>
+              <option value="Operasional Umum">Operasional Umum</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Nama Barang / Uraian Pengeluaran *</label>
+          <input id="form-opex-item" type="text" required placeholder="Contoh: Mechanical Seal Pompa Kolam 2 Inch" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Kuantitas (Qty) *</label>
+            <input id="form-opex-qty" type="number" step="0.1" value="1" required oninput="calcOpexTotal()" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Satuan *</label>
+            <select id="form-opex-unit" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Pcs">Pcs</option>
+              <option value="Unit">Unit</option>
+              <option value="Liter">Liter</option>
+              <option value="Kg">Kg</option>
+              <option value="Box">Box</option>
+              <option value="Set">Set</option>
+              <option value="Roll">Roll</option>
+              <option value="Meter">Meter</option>
+              <option value="Pail">Pail / Galon</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Harga Satuan (Rp) *</label>
+            <input id="form-opex-price" type="number" step="100" required placeholder="0" oninput="calcOpexTotal()" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Total Biaya (Rp) *</label>
+            <input id="form-opex-total" type="number" step="100" required readonly class="w-full p-2.5 rounded-xl bg-surface-container font-bold text-primary focus:outline-none cursor-not-allowed"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Vendor / Toko Pembelian</label>
+            <input id="form-opex-vendor" type="text" placeholder="Contoh: Mitra10, UD Bangun Jaya..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">No. Nota / Faktur</label>
+            <input id="form-opex-receipt" type="text" placeholder="No. Struk kasir" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Catatan Tambahan</label>
+            <input id="form-opex-notes" type="text" placeholder="Keterangan alokasi/villa..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+        </div>
+        <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-daily-opex')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan ke Google Sheets</button>
         </div>
       </form>
     </div>
@@ -1879,6 +2134,12 @@
         { wo_id: 'WO-202605-003', order_date: '2026-05-18', department: 'Villa Manager', location_id: 'Villa 12', title: 'Kran Sink Kitchenette Macet', description: 'Handle kran air panas tidak bisa diputar ke kanan.', job_category: 'Plumbing', priority: 'Normal', pic_technician: 'Made S.', status: 'Open', notes: 'Menunggu tamu checkout jam 12:00' },
         { wo_id: 'WO-202605-004', order_date: '2026-05-17', department: 'Security', location_id: 'Pos Jaga Timur', title: 'CCTV Channel 4 Main Gate Offline', description: 'Tampilan kamera monitor blank hitam sejak hujan sore kemarin.', job_category: 'IT', priority: 'High', pic_technician: 'Ketut A.', status: 'Completed', notes: 'Konektor RJ45 diganti & switch direboot' },
         { wo_id: 'WO-202605-005', order_date: '2026-05-17', department: 'F&B / Kitchen', location_id: 'Main Kitchen', title: 'Keramik Lantai Retak Dekat Dishwasher', description: 'Beberapa ubin terangkat dan berpotensi membahayakan staf.', job_category: 'Civil', priority: 'Normal', pic_technician: 'Komang D.', status: 'Open', notes: 'Dijadwalkan perbaikan saat break afternoon' }
+      ],
+      opexDaily: [
+        { opex_id: 'OPX-202605-001', record_date: '2026-05-19', reporting_period: '2026-05', category: 'Material / Sparepart', item_name: 'Mechanical Seal Pompa Kolam 2 Inch', qty: 2, unit: 'Pcs', unit_price: 350000, total_amount: 700000, vendor: 'Mitra10 Bali', receipt_no: 'INV-88910', notes: 'Untuk maintenance pompa sirkulasi Villa 12' },
+        { opex_id: 'OPX-202605-002', record_date: '2026-05-18', reporting_period: '2026-05', category: 'Chemical & Pool', item_name: 'Kaporit Granular 70% & PAC Tawas', qty: 3, unit: 'Pail', unit_price: 450000, total_amount: 1350000, vendor: 'UD Tirta Abadi', receipt_no: 'TR-4421', notes: 'Treatment air kolam cluster B' },
+        { opex_id: 'OPX-202605-003', record_date: '2026-05-18', reporting_period: '2026-05', category: 'Perbaikan / Repair', item_name: 'Jasa Las & Fitting Pipa Stainless Chiller', qty: 1, unit: 'Set', unit_price: 850000, total_amount: 850000, vendor: 'Bengkel Teknik Presisi', receipt_no: 'KW-091', notes: 'Perbaikan darurat kebocoran bypass valve' },
+        { opex_id: 'OPX-202605-004', record_date: '2026-05-17', reporting_period: '2026-05', category: 'Perlengkapan / Tools', item_name: 'Bohlam LED Warm White 12W & Fitting E27', qty: 10, unit: 'Pcs', unit_price: 65000, total_amount: 650000, vendor: 'Toko Surya Elektrik', receipt_no: 'FKT-3129', notes: 'Penggantian lampu penerangan walkway' }
       ]
     };
 
@@ -2045,6 +2306,66 @@
           return { success: true, message: `Work Order ${payload.wo_id} berhasil diperbarui!` };
         }
 
+        if (action === 'opex.list') {
+          const list = mockStore.opexDaily || [];
+          const total = list.reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
+          const todayStr = '2026-05-19';
+          const todayAmt = list.filter(o => o.record_date === todayStr).reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
+          const distinctDays = [...new Set(list.map(o => o.record_date))].filter(Boolean);
+          const avg = distinctDays.length > 0 ? Math.round(total / distinctDays.length) : 0;
+          const byCat = {};
+          list.forEach(o => {
+            byCat[o.category] = (byCat[o.category] || 0) + (parseFloat(o.total_amount) || 0);
+          });
+          return {
+            success: true,
+            kpis: {
+              totalAmount: total,
+              todayAmount: todayAmt,
+              avgDaily: avg,
+              totalTransactions: list.length,
+              byCategory: byCat
+            },
+            data: [...list]
+          };
+        }
+
+        if (action === 'opex.create') {
+          const nextId = 'OPX-202605-' + String((mockStore.opexDaily || []).length + 1).padStart(3, '0');
+          const qty = parseFloat(payload.qty) || 1;
+          const price = parseFloat(payload.unit_price) || parseFloat(payload.total_amount) || 0;
+          const total = parseFloat(payload.total_amount) || (qty * price);
+          const newRow = Object.assign({
+            opex_id: nextId,
+            qty: qty,
+            unit_price: price,
+            total_amount: total
+          }, payload);
+          mockStore.opexDaily.unshift(newRow);
+          return { success: true, message: `Transaksi Opex ${nextId} (Rp ${total.toLocaleString('id-ID')}) berhasil dicatat!`, data: newRow };
+        }
+
+        if (action === 'opex.update') {
+          const item = (mockStore.opexDaily || []).find(o => o.opex_id === payload.opex_id);
+          if (item) Object.assign(item, payload);
+          return { success: true, message: `Data Opex ${payload.opex_id} berhasil diperbarui!` };
+        }
+
+        if (action === 'sync.all') {
+          return {
+            success: true,
+            user: { userId: 'USR-001', displayName: 'Rizqi Mashuda', role: 'Head of Engineering' },
+            dashboard: this.mockFallback('dashboard.get', payload),
+            activities: this.mockFallback('activity.list', payload),
+            projects: this.mockFallback('project.list', payload),
+            energy: this.mockFallback('energy.list', payload),
+            workOrders: this.mockFallback('workorder.list', payload),
+            opexDaily: this.mockFallback('opex.list', payload),
+            purchase: this.mockFallback('purchase.get', payload),
+            evaluations: mockStore.evaluations
+          };
+        }
+
         if (action === 'energy.list') {
           return { success: true, data: [...mockStore.energy] };
         }
@@ -2155,6 +2476,8 @@
       energyCategory: 'Semua Utilitas',
       workOrders: [],
       filteredWorkOrders: [],
+      opexDaily: [],
+      filteredOpexDaily: [],
       purchases: [],
       evaluations: []
     };
@@ -2280,76 +2603,131 @@
       }
     }
 
-    // Main Data Loader
+    // Main Data Loader (High-Speed Batch Sync with Cache Fallback)
     async function loadAllData() {
-      // 0. User Profile & Master Data (Realtime from Google Sheets)
-      const meRes = await ApiClient.call('auth.me', {});
+      // 0. Instant Cache Restore for 0ms First Render
+      try {
+        const cached = localStorage.getItem('agranusa_bundle_' + state.currentPeriod);
+        if (cached) {
+          const bundle = JSON.parse(cached);
+          applySyncedBundle(bundle, false);
+        }
+      } catch (e) {
+        console.warn('Cache restore skipped:', e);
+      }
+
+      // 1. Try Consolidated High-Speed Batch Sync (1 single network roundtrip)
+      const bundle = await ApiClient.call('sync.all', { period: state.currentPeriod });
+      if (bundle && bundle.success && bundle.user) {
+        applySyncedBundle(bundle, true);
+        return;
+      }
+
+      // 2. Parallel Fallback (Promise.all) if backend still running previous version
+      const [meRes, masterRes, dashRes, actRes, prjRes, engRes, woRes, opexRes, purRes, evalRes] = await Promise.all([
+        ApiClient.call('auth.me', {}),
+        ApiClient.call('master.get', {}),
+        ApiClient.call('dashboard.get', { period: state.currentPeriod }),
+        ApiClient.call('activity.list', { period: state.currentPeriod }),
+        ApiClient.call('project.list', {}),
+        ApiClient.call('energy.list', { period: state.currentPeriod }),
+        ApiClient.call('workorder.list', { period: state.currentPeriod }),
+        ApiClient.call('opex.list', { period: state.currentPeriod }),
+        ApiClient.call('purchase.get', { period: state.currentPeriod }),
+        ApiClient.call('evaluation.get', { period: state.currentPeriod })
+      ]);
+
       if (meRes && meRes.success && meRes.user) {
         const elName = document.getElementById('header-user-name');
         const elRole = document.getElementById('header-user-role');
         if (elName && meRes.user.displayName) elName.innerText = meRes.user.displayName;
         if (elRole && meRes.user.role) elRole.innerText = meRes.user.role;
       }
-
-      const masterRes = await ApiClient.call('master.get', {});
-      if (masterRes && masterRes.success) {
-        if (masterRes.employees && masterRes.employees.length > 0) {
-          updateEmployeeList(masterRes.employees);
-        }
-      }
-
-      // 1. Dashboard
-      const dashRes = await ApiClient.call('dashboard.get', { period: state.currentPeriod });
-      if (dashRes && dashRes.success && dashRes.kpiCards) {
-        renderDashboard(dashRes);
-      }
-
-      // 2. Activities
-      const actRes = await ApiClient.call('activity.list', { period: state.currentPeriod });
+      if (masterRes && masterRes.success && masterRes.employees) updateEmployeeList(masterRes.employees);
+      if (dashRes && dashRes.success) renderDashboard(dashRes);
       if (actRes && actRes.success && actRes.data) {
         state.activities = actRes.data;
         state.filteredActivities = [...actRes.data];
         filterActivities();
         updateActivityKPIs(actRes.kpis);
       }
-
-      // 3. Projects
-      const prjRes = await ApiClient.call('project.list', {});
       if (prjRes && prjRes.success && prjRes.data) {
         state.projects = prjRes.data;
         state.filteredProjects = [...prjRes.data];
         filterProjects();
         updateProjectKPIs(prjRes.kpis);
       }
-
-      // 4. Energy
-      const engRes = await ApiClient.call('energy.list', { period: state.currentPeriod });
       if (engRes && engRes.success && engRes.data) {
         state.energy = engRes.data;
         state.filteredEnergy = [...engRes.data];
         filterEnergy();
       }
-
-      // 4.5. Work Orders
-      const woRes = await ApiClient.call('workorder.list', { period: state.currentPeriod });
       if (woRes && woRes.success && woRes.data) {
         state.workOrders = woRes.data;
         state.filteredWorkOrders = [...woRes.data];
         filterWorkOrders();
         updateWorkOrderKPIs(woRes.kpis);
       }
-
-      // 5. Purchase
-      const purRes = await ApiClient.call('purchase.get', { period: state.currentPeriod });
-      if (purRes && purRes.success) {
-        renderPurchase(purRes);
+      if (opexRes && opexRes.success && opexRes.data) {
+        state.opexDaily = opexRes.data;
+        state.filteredOpexDaily = [...opexRes.data];
+        filterDailyOpex();
+        updateDailyOpexKPIs(opexRes.kpis);
       }
-
-      // 6. Evaluations
-      const evalRes = await ApiClient.call('evaluation.get', { period: state.currentPeriod });
+      if (purRes && purRes.success) renderPurchase(purRes);
       if (evalRes && evalRes.success && evalRes.findings) {
         state.evaluations = evalRes.findings;
         renderEvaluations(evalRes.findings);
+      }
+    }
+
+    function applySyncedBundle(bundle, saveToCache = true) {
+      if (bundle.user) {
+        const elName = document.getElementById('header-user-name');
+        const elRole = document.getElementById('header-user-role');
+        if (elName && bundle.user.displayName) elName.innerText = bundle.user.displayName;
+        if (elRole && bundle.user.role) elRole.innerText = bundle.user.role;
+      }
+      if (bundle.master && bundle.master.employees) updateEmployeeList(bundle.master.employees);
+      if (bundle.dashboard) renderDashboard(bundle.dashboard);
+      if (bundle.activities && bundle.activities.data) {
+        state.activities = bundle.activities.data;
+        state.filteredActivities = [...bundle.activities.data];
+        filterActivities();
+        updateActivityKPIs(bundle.activities.kpis);
+      }
+      if (bundle.projects && bundle.projects.data) {
+        state.projects = bundle.projects.data;
+        state.filteredProjects = [...bundle.projects.data];
+        filterProjects();
+        updateProjectKPIs(bundle.projects.kpis);
+      }
+      if (bundle.energy && bundle.energy.data) {
+        state.energy = bundle.energy.data;
+        state.filteredEnergy = [...bundle.energy.data];
+        filterEnergy();
+      }
+      if (bundle.workOrders && bundle.workOrders.data) {
+        state.workOrders = bundle.workOrders.data;
+        state.filteredWorkOrders = [...bundle.workOrders.data];
+        filterWorkOrders();
+        updateWorkOrderKPIs(bundle.workOrders.kpis);
+      }
+      if (bundle.opexDaily && bundle.opexDaily.data) {
+        state.opexDaily = bundle.opexDaily.data;
+        state.filteredOpexDaily = [...bundle.opexDaily.data];
+        filterDailyOpex();
+        updateDailyOpexKPIs(bundle.opexDaily.kpis);
+      }
+      if (bundle.purchase) renderPurchase(bundle.purchase);
+      if (bundle.evaluations) {
+        state.evaluations = bundle.evaluations;
+        renderEvaluations(bundle.evaluations);
+      }
+      if (saveToCache) {
+        try {
+          localStorage.setItem('agranusa_bundle_' + state.currentPeriod, JSON.stringify(bundle));
+        } catch (e) {}
       }
     }
 
@@ -3150,22 +3528,283 @@
       }
     };
 
+    window.handleUsageCategoryChange = function(val) {
+      const lbl = document.getElementById('usage-val-label');
+      const inp = document.getElementById('usage-val');
+      const itemContainer = document.getElementById('usage-item-container');
+      if (!lbl || !inp) return;
+
+      if (val === 'Opex Daily') {
+        lbl.innerText = 'Nominal Pengeluaran Harian (Rp) *';
+        inp.placeholder = 'Contoh: 150000';
+        inp.step = '100';
+        if (itemContainer) itemContainer.classList.remove('hidden');
+      } else {
+        lbl.innerText = 'Jumlah Pemakaian Bersih *';
+        inp.step = '0.01';
+        if (itemContainer) itemContainer.classList.add('hidden');
+        if (val === 'Listrik PLN') inp.placeholder = 'Contoh: 45 (kWh)';
+        else if (val === 'Air PDAM') inp.placeholder = 'Contoh: 30 (m³)';
+        else if (val === 'Fuel Genset') inp.placeholder = 'Contoh: 25 (Liter)';
+        else if (val === 'Gas LPG') inp.placeholder = 'Contoh: 15 (kg)';
+      }
+    };
+
     window.submitEnergyUsage = async function(e) {
       e.preventDefault();
-      showToast('Menyimpan konsumsi energi...');
-      const res = await ApiClient.call('energy.create', {
-        category: document.getElementById('usage-category').value,
-        record_date: document.getElementById('usage-date').value,
-        input_method: 'Daily Usage',
-        usage_value: document.getElementById('usage-val').value,
-        notes: document.getElementById('usage-notes').value
+      const cat = document.getElementById('usage-category').value;
+      const date = document.getElementById('usage-date').value;
+      const val = parseFloat(document.getElementById('usage-val').value) || 0;
+      const itemName = document.getElementById('usage-item-name') ? document.getElementById('usage-item-name').value : '';
+      const notes = document.getElementById('usage-notes').value;
+
+      showToast('Menyimpan ' + cat + '...');
+
+      if (cat === 'Opex Daily') {
+        const nextId = 'OPX-' + state.currentPeriod.replace('-', '') + '-' + String((state.opexDaily || []).length + 1).padStart(3, '0');
+        const newOpex = {
+          opex_id: nextId,
+          record_date: date,
+          reporting_period: state.currentPeriod,
+          category: 'Operasional Umum',
+          item_name: itemName || notes || 'Belanja Harian Opex',
+          qty: 1,
+          unit: 'Transaksi',
+          unit_price: val,
+          total_amount: val,
+          vendor: '-',
+          receipt_no: '-',
+          notes: notes
+        };
+        // Optimistic UI update
+        state.opexDaily.unshift(newOpex);
+        filterDailyOpex();
+        recalcOpexKPIs();
+
+        closeModal('modal-daily-usage');
+        // KOSONGKAN FORM KEMBALI
+        e.target.reset();
+        document.getElementById('usage-date').value = '2026-05-19';
+        handleUsageCategoryChange('Listrik PLN');
+        showToast('Pengeluaran Opex harian Rp ' + val.toLocaleString('id-ID') + ' berhasil dicatat!');
+
+        // Background sync to GAS
+        ApiClient.call('opex.create', newOpex);
+      } else {
+        let unit = 'kWh';
+        let cost = 0;
+        if (cat === 'Listrik PLN') { unit = 'kWh'; cost = Math.round(val * 2005 * 1.07); }
+        else if (cat === 'Air PDAM') { unit = 'm³'; cost = Math.round(val * 18862); }
+        else if (cat === 'Fuel Genset') { unit = 'Liter'; cost = Math.round(val * 22000); }
+        else if (cat === 'Gas LPG') { unit = 'kg'; cost = 0; }
+
+        const nextId = 'ENG-' + date.replace(/-/g, '') + '-' + String((state.energy || []).length + 1).padStart(2, '0');
+        const newRecord = {
+          energy_record_id: nextId,
+          record_date: date,
+          category: cat,
+          input_method: 'Daily Usage',
+          meter_reading: '',
+          usage_value: val,
+          unit: unit,
+          calculated_cost: cost,
+          validation_status: 'Valid',
+          notes: notes
+        };
+        // Optimistic UI update
+        state.energy.unshift(newRecord);
+        filterEnergy();
+
+        closeModal('modal-daily-usage');
+        // KOSONGKAN FORM KEMBALI
+        e.target.reset();
+        document.getElementById('usage-date').value = '2026-05-19';
+        handleUsageCategoryChange('Listrik PLN');
+        showToast('Pemakaian ' + cat + ' berhasil disimpan!');
+
+        // Background sync to GAS
+        ApiClient.call('energy.create', {
+          category: cat,
+          record_date: date,
+          input_method: 'Daily Usage',
+          usage_value: val,
+          notes: notes
+        });
+      }
+    };
+
+    // DAILY OPEX MODULE LOGIC
+    window.calcOpexTotal = function() {
+      const q = parseFloat(document.getElementById('form-opex-qty').value) || 0;
+      const p = parseFloat(document.getElementById('form-opex-price').value) || 0;
+      const tot = Math.round(q * p);
+      const el = document.getElementById('form-opex-total');
+      if (el) el.value = tot;
+    };
+
+    window.submitDailyOpex = async function(e) {
+      e.preventDefault();
+      const date = document.getElementById('form-opex-date').value;
+      const cat = document.getElementById('form-opex-cat').value;
+      const item = document.getElementById('form-opex-item').value;
+      const qty = parseFloat(document.getElementById('form-opex-qty').value) || 1;
+      const unit = document.getElementById('form-opex-unit').value;
+      const price = parseFloat(document.getElementById('form-opex-price').value) || 0;
+      const total = parseFloat(document.getElementById('form-opex-total').value) || (qty * price);
+      const vendor = document.getElementById('form-opex-vendor').value;
+      const receipt = document.getElementById('form-opex-receipt').value;
+      const notes = document.getElementById('form-opex-notes').value;
+
+      showToast('Menyimpan Opex harian...');
+
+      const nextId = 'OPX-' + state.currentPeriod.replace('-', '') + '-' + String((state.opexDaily || []).length + 1).padStart(3, '0');
+      const newRow = {
+        opex_id: nextId,
+        record_date: date,
+        reporting_period: state.currentPeriod,
+        category: cat,
+        item_name: item,
+        qty: qty,
+        unit: unit,
+        unit_price: price,
+        total_amount: total,
+        vendor: vendor || '-',
+        receipt_no: receipt || '-',
+        notes: notes
+      };
+
+      // Optimistic update
+      state.opexDaily.unshift(newRow);
+      filterDailyOpex();
+      recalcOpexKPIs();
+
+      closeModal('modal-daily-opex');
+      e.target.reset();
+      document.getElementById('form-opex-date').value = '2026-05-19';
+      document.getElementById('form-opex-qty').value = '1';
+      showToast('Opex ' + nextId + ' (Rp ' + total.toLocaleString('id-ID') + ') berhasil disimpan!');
+
+      // Sync to backend
+      const res = await ApiClient.call('opex.create', newRow);
+      if (res && res.data && res.data.opex_id) {
+        newRow.opex_id = res.data.opex_id;
+        renderDailyOpex();
+      }
+    };
+
+    function recalcOpexKPIs() {
+      const list = state.opexDaily || [];
+      const total = list.reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
+      const todayStr = '2026-05-19';
+      const todayAmt = list.filter(o => String(o.record_date).startsWith(todayStr)).reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
+      const distinctDays = [...new Set(list.map(o => String(o.record_date).substring(0, 10)))].filter(Boolean);
+      const avg = distinctDays.length > 0 ? Math.round(total / distinctDays.length) : 0;
+      const byCat = {};
+      list.forEach(o => {
+        byCat[o.category] = (byCat[o.category] || 0) + (parseFloat(o.total_amount) || 0);
       });
 
-      if (res && res.success) {
-        closeModal('modal-daily-usage');
-        showToast(res.message);
-        loadAllData();
+      updateDailyOpexKPIs({
+        totalAmount: total,
+        todayAmount: todayAmt,
+        avgDaily: avg,
+        totalTransactions: list.length,
+        byCategory: byCat
+      });
+    }
+
+    function updateDailyOpexKPIs(kpis) {
+      if (!kpis) return;
+      const elTot = document.getElementById('opex-kpi-total'); if (elTot) elTot.innerText = `Rp ${Number(kpis.totalAmount || 0).toLocaleString('id-ID')}`;
+      const elToday = document.getElementById('opex-kpi-today'); if (elToday) elToday.innerText = `Rp ${Number(kpis.todayAmount || 0).toLocaleString('id-ID')}`;
+      const elAvg = document.getElementById('opex-kpi-avg'); if (elAvg) elAvg.innerText = `Rp ${Number(kpis.avgDaily || 0).toLocaleString('id-ID')}`;
+      const elCount = document.getElementById('opex-kpi-count'); if (elCount) elCount.innerText = kpis.totalTransactions || 0;
+
+      if (kpis.byCategory) {
+        const cSpare = document.getElementById('opex-cat-sparepart'); if (cSpare) cSpare.innerText = `Rp ${Number(kpis.byCategory['Material / Sparepart'] || 0).toLocaleString('id-ID')}`;
+        const cChem = document.getElementById('opex-cat-chemical'); if (cChem) cChem.innerText = `Rp ${Number(kpis.byCategory['Chemical & Pool'] || 0).toLocaleString('id-ID')}`;
+        const cRep = document.getElementById('opex-cat-repair'); if (cRep) cRep.innerText = `Rp ${Number(kpis.byCategory['Perbaikan / Repair'] || 0).toLocaleString('id-ID')}`;
+        const cTool = document.getElementById('opex-cat-tools'); if (cTool) cTool.innerText = `Rp ${Number(kpis.byCategory['Perlengkapan / Tools'] || 0).toLocaleString('id-ID')}`;
+        const cGen = document.getElementById('opex-cat-general'); if (cGen) cGen.innerText = `Rp ${Number(kpis.byCategory['Operasional Umum'] || 0).toLocaleString('id-ID')}`;
       }
+    }
+
+    window.filterDailyOpex = function() {
+      const qInput = document.getElementById('opex-search');
+      const q = (qInput ? qInput.value : '').toLowerCase();
+      const catSelect = document.getElementById('opex-filter-cat');
+      const cat = catSelect ? catSelect.value : 'Semua Kategori';
+      const dateSelect = document.getElementById('opex-filter-date');
+      const dt = dateSelect ? dateSelect.value : '';
+
+      state.filteredOpexDaily = (state.opexDaily || []).filter(o => {
+        if (cat !== 'Semua Kategori' && o.category !== cat) return false;
+        if (dt && !String(o.record_date).startsWith(dt)) return false;
+        if (q) {
+          const m = String(o.opex_id || '').toLowerCase().includes(q) ||
+                    String(o.item_name || '').toLowerCase().includes(q) ||
+                    String(o.category || '').toLowerCase().includes(q) ||
+                    String(o.vendor || '').toLowerCase().includes(q) ||
+                    String(o.receipt_no || '').toLowerCase().includes(q) ||
+                    String(o.notes || '').toLowerCase().includes(q);
+          if (!m) return false;
+        }
+        return true;
+      });
+
+      renderDailyOpex();
+    };
+
+    window.resetDailyOpexFilters = function() {
+      const q = document.getElementById('opex-search'); if (q) q.value = '';
+      const c = document.getElementById('opex-filter-cat'); if (c) c.value = 'Semua Kategori';
+      const d = document.getElementById('opex-filter-date'); if (d) d.value = '';
+      filterDailyOpex();
+      showToast('Filter Opex harian di-reset.');
+    };
+
+    function renderDailyOpex() {
+      const tbody = document.getElementById('daily-opex-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const list = state.filteredOpexDaily || [];
+      const countEl = document.getElementById('daily-opex-table-count');
+      if (countEl) countEl.innerText = `Menampilkan ${list.length} dari ${(state.opexDaily || []).length} Transaksi Opex tercatat`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-outline">Tidak ada data Opex harian pada kriteria ini.</td></tr>`;
+        return;
+      }
+
+      list.forEach(o => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-surface-container-low/40 transition-colors';
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono font-bold text-primary">${o.opex_id}</td>
+          <td class="py-3 px-4 font-medium">${o.record_date || '—'}</td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded-lg bg-surface-container-high text-primary font-semibold text-[11px]">${o.category}</span>
+          </td>
+          <td class="py-3 px-4 font-bold text-on-surface">${o.item_name}</td>
+          <td class="py-3 px-4 font-medium">${o.qty || 1} ${o.unit || 'Pcs'}</td>
+          <td class="py-3 px-4 text-outline">Rp ${Number(o.unit_price || 0).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4 font-bold text-primary">Rp ${Number(o.total_amount || 0).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4 text-on-surface">${o.vendor || '-'}</td>
+          <td class="py-3 px-4 font-mono text-[11px] text-outline">${o.receipt_no || '-'}</td>
+          <td class="py-3 px-4 text-[11.5px] text-outline max-w-xs truncate">${o.notes || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.exportDailyOpexCsv = function() {
+      let csv = 'Opex ID,Tanggal,Kategori,Nama Barang,Qty,Satuan,Harga Satuan,Total Biaya,Vendor,No Nota,Catatan\n';
+      (state.filteredOpexDaily || state.opexDaily || []).forEach(o => {
+        csv += `"${o.opex_id}","${o.record_date}","${o.category}","${o.item_name}","${o.qty}","${o.unit}","${o.unit_price}","${o.total_amount}","${o.vendor}","${o.receipt_no}","${o.notes || ''}"\n`;
+      });
+      downloadCsv(csv, `Opex_Harian_Agranusa_${state.currentPeriod}.csv`);
     };
 
     window.submitMeterReading = async function(e) {
@@ -3245,6 +3884,10 @@
         const inp = document.getElementById('eng-search');
         if (inp) inp.value = q;
         filterEnergy();
+      } else if (state.activeView === 'daily-opex') {
+        const inp = document.getElementById('opex-search');
+        if (inp) inp.value = q;
+        filterDailyOpex();
       }
     };
 
