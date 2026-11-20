@@ -1870,17 +1870,16 @@
               <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-semibold border border-amber-200">Rp 2.005/kWh + 7%</span>
             </div>
             <div class="flex flex-col gap-2">
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Hari Ini (kWh) *</label>
-                  <input id="usage-val-listrik" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 920" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
-                </div>
-                <div>
-                  <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Kemarin (kWh)</label>
-                  <input id="usage-prev-listrik" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Kemarin..." class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none text-[12px]"/>
-                </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Hari Ini (kWh) *</label>
+                <input id="usage-val-listrik" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 920" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
               </div>
-              <div id="diff-listrik" class="hidden text-[11px] px-2 py-1 rounded-lg bg-surface-container-low font-semibold"></div>
+              <!-- Info otomatis kemarin -->
+              <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-100 text-[11px]">
+                <span class="text-amber-700 font-medium">📅 Kemarin (otomatis):</span>
+                <span id="prev-info-listrik" class="font-bold text-amber-900">— kWh</span>
+              </div>
+              <div id="diff-listrik" class="hidden text-[11px] px-2 py-1 rounded-lg font-semibold"></div>
               <div class="mt-1 pt-1.5 border-t border-surface-container flex items-center justify-between text-[11.5px]">
                 <span class="text-outline">Estimasi Biaya:</span>
                 <span id="subtotal-listrik" class="font-bold text-primary">Rp 0</span>
@@ -1898,17 +1897,16 @@
               <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 font-semibold border border-sky-200">Rp 18.862/m³</span>
             </div>
             <div class="flex flex-col gap-2">
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Hari Ini (m³) *</label>
-                  <input id="usage-val-air" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 65" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
-                </div>
-                <div>
-                  <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Kemarin (m³)</label>
-                  <input id="usage-prev-air" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Kemarin..." class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none text-[12px]"/>
-                </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Hari Ini (m³) *</label>
+                <input id="usage-val-air" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 65" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
               </div>
-              <div id="diff-air" class="hidden text-[11px] px-2 py-1 rounded-lg bg-surface-container-low font-semibold"></div>
+              <!-- Info otomatis kemarin -->
+              <div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-sky-50 border border-sky-100 text-[11px]">
+                <span class="text-sky-700 font-medium">📅 Kemarin (otomatis):</span>
+                <span id="prev-info-air" class="font-bold text-sky-900">— m³</span>
+              </div>
+              <div id="diff-air" class="hidden text-[11px] px-2 py-1 rounded-lg font-semibold"></div>
               <div class="mt-1 pt-1.5 border-t border-surface-container flex items-center justify-between text-[11.5px]">
                 <span class="text-outline">Estimasi Biaya:</span>
                 <span id="subtotal-air" class="font-bold text-primary">Rp 0</span>
@@ -2695,6 +2693,10 @@
       const modal = document.getElementById(id);
       if (!modal) return;
       modal.classList.remove('hidden');
+      // Saat buka form daily usage → tampilkan otomatis data kemarin
+      if (id === 'modal-daily-usage') {
+        calcDailyUsageTotals();
+      }
       // Load saved budget ketika modal-budget dibuka
       if (id === 'modal-budget') {
         const bp = document.getElementById('budget-period');
@@ -3775,14 +3777,45 @@
       }
     };
 
+    // Ambil pemakaian terakhir dari state.energy berdasarkan kategori
+    function getLastUsage(category) {
+      if (!state.energy || state.energy.length === 0) return null;
+      const records = state.energy
+        .filter(e => e.category === category && e.usage_value > 0)
+        .sort((a, b) => b.record_date.localeCompare(a.record_date));
+      return records.length > 0 ? records[0] : null;
+    }
+
     window.calcDailyUsageTotals = function() {
       const vListrik = parseFloat(document.getElementById('usage-val-listrik').value) || 0;
-      const pListrik = parseFloat(document.getElementById('usage-prev-listrik') ? document.getElementById('usage-prev-listrik').value : 0) || 0;
       const vAir = parseFloat(document.getElementById('usage-val-air').value) || 0;
-      const pAir = parseFloat(document.getElementById('usage-prev-air') ? document.getElementById('usage-prev-air').value : 0) || 0;
       const vFuel = parseFloat(document.getElementById('usage-val-fuel').value) || 0;
       const vGas = parseFloat(document.getElementById('usage-val-gas').value) || 0;
       const pGas = parseFloat(document.getElementById('usage-cost-gas').value) || 0;
+
+      // Ambil data kemarin otomatis dari state.energy
+      const prevListrikRec = getLastUsage('Listrik PLN');
+      const prevAirRec = getLastUsage('Air PDAM');
+      const pListrik = prevListrikRec ? (prevListrikRec.usage_value || 0) : 0;
+      const pAir = prevAirRec ? (prevAirRec.usage_value || 0) : 0;
+
+      // Update tampilan "kemarin otomatis" di kartu
+      const prevInfoL = document.getElementById('prev-info-listrik');
+      if (prevInfoL) {
+        if (prevListrikRec) {
+          prevInfoL.textContent = Number(pListrik).toLocaleString('id-ID') + ' kWh (' + prevListrikRec.record_date + ')';
+        } else {
+          prevInfoL.textContent = '— (belum ada data)';
+        }
+      }
+      const prevInfoA = document.getElementById('prev-info-air');
+      if (prevInfoA) {
+        if (prevAirRec) {
+          prevInfoA.textContent = Number(pAir).toLocaleString('id-ID') + ' m³ (' + prevAirRec.record_date + ')';
+        } else {
+          prevInfoA.textContent = '— (belum ada data)';
+        }
+      }
 
       // Formula resmi: Listrik PLN Rp 2.005/kWh + PPJU 7%
       const cListrik = Math.round(vListrik * 2005 * 1.07);
@@ -3805,7 +3838,7 @@
       const elSubG = document.getElementById('subtotal-gas');
       if (elSubG) elSubG.innerText = cGas > 0 ? ('Rp ' + cGas.toLocaleString('id-ID')) : (vGas > 0 ? (vGas + ' kg') : 'Rp 0');
 
-      // Selisih Listrik vs Kemarin
+      // Selisih Listrik vs Kemarin (otomatis)
       const diffEl = document.getElementById('diff-listrik');
       if (diffEl) {
         if (vListrik > 0 && pListrik > 0) {
@@ -3813,12 +3846,12 @@
           const pct = ((diff / pListrik) * 100).toFixed(1);
           const isUp = diff >= 0;
           diffEl.className = `text-[11px] px-2 py-1 rounded-lg font-semibold ${isUp ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`;
-          diffEl.innerHTML = `${isUp ? '▲' : '▼'} Selisih: ${isUp ? '+' : ''}${diff.toFixed(2)} kWh (${isUp ? '+' : ''}${pct}%) vs kemarin`;
+          diffEl.innerHTML = `${isUp ? '▲' : '▼'} vs Kemarin: ${isUp ? '+' : ''}${diff.toFixed(2)} kWh (${isUp ? '+' : ''}${pct}%)`;
           diffEl.classList.remove('hidden');
         } else { diffEl.classList.add('hidden'); }
       }
 
-      // Selisih Air vs Kemarin
+      // Selisih Air vs Kemarin (otomatis)
       const diffAir = document.getElementById('diff-air');
       if (diffAir) {
         if (vAir > 0 && pAir > 0) {
@@ -3826,7 +3859,7 @@
           const pct = ((diff / pAir) * 100).toFixed(1);
           const isUp = diff >= 0;
           diffAir.className = `text-[11px] px-2 py-1 rounded-lg font-semibold ${isUp ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`;
-          diffAir.innerHTML = `${isUp ? '▲' : '▼'} Selisih: ${isUp ? '+' : ''}${diff.toFixed(2)} m³ (${isUp ? '+' : ''}${pct}%) vs kemarin`;
+          diffAir.innerHTML = `${isUp ? '▲' : '▼'} vs Kemarin: ${isUp ? '+' : ''}${diff.toFixed(2)} m³ (${isUp ? '+' : ''}${pct}%)`;
           diffAir.classList.remove('hidden');
         } else { diffAir.classList.add('hidden'); }
       }
@@ -3893,10 +3926,13 @@
       const notes = document.getElementById('usage-notes').value;
 
       const vListrik = parseFloat(document.getElementById('usage-val-listrik').value) || 0;
-      const pListrik = parseFloat(document.getElementById('usage-prev-listrik') ? document.getElementById('usage-prev-listrik').value : 0) || 0;
+      // Ambil prev otomatis dari data tersimpan
+      const prevListrikRec = getLastUsage('Listrik PLN');
+      const pListrik = prevListrikRec ? (prevListrikRec.usage_value || 0) : 0;
 
       const vAir = parseFloat(document.getElementById('usage-val-air').value) || 0;
-      const pAir = parseFloat(document.getElementById('usage-prev-air') ? document.getElementById('usage-prev-air').value : 0) || 0;
+      const prevAirRec = getLastUsage('Air PDAM');
+      const pAir = prevAirRec ? (prevAirRec.usage_value || 0) : 0;
 
       const vFuel = parseFloat(document.getElementById('usage-val-fuel').value) || 0;
 
