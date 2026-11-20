@@ -740,6 +740,19 @@ function dispatchAction(action, payload) {
       };
     }
 
+    case 'energy.createBatch': {
+      const items = payload.items || [];
+      const results = [];
+      items.forEach(item => {
+        results.push(dispatchAction('energy.create', item));
+      });
+      return {
+        success: true,
+        message: `${items.length} data pemakaian energi berhasil disimpan!`,
+        results: results
+      };
+    }
+
     case 'energy.create': {
       const cat = payload.category || 'Listrik PLN';
       const dateStr = payload.record_date || Utilities.formatDate(new Date(), 'Asia/Makassar', 'yyyy-MM-dd');

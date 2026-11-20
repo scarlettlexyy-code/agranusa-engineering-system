@@ -1,1 +1,1 @@
-feat: daily opex dashboard, 5 category usage form with auto-reset, batch sync, and user profile update
+feat: all-in-one daily energy input form with 4 utilities, real-time formula calculator, and auto-reset

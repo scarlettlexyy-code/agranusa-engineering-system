@@ -1833,47 +1833,162 @@
     </div>
   </div>
 
-  <!-- Modal: Input Daily Usage (Energi & Opex Harian) -->
+  <!-- Modal: Input Daily Usage (All-in-One 4 Kategori Energi) -->
   <div id="modal-daily-usage" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-surface-container overflow-hidden">
-      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
-        <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
-          <span class="material-symbols-outlined text-secondary">bolt</span> + Input Daily Usage (5 Kategori)
-        </h3>
-        <button onclick="closeModal('modal-daily-usage')" class="text-outline hover:text-on-surface">
-          <span class="material-symbols-outlined text-[20px]">close</span>
+    <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl border border-surface-container overflow-hidden max-h-[92vh] flex flex-col">
+      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50 shrink-0">
+        <div>
+          <h3 class="text-[17px] font-bold text-primary flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary">bolt</span> Catat Pemakaian Energi Harian (All-in-One)
+          </h3>
+          <p class="text-[12px] text-outline mt-0.5">Isi pemakaian 4 utilitas (Listrik, Air, Fuel, Gas) sekaligus dalam 1 form tanpa perlu ganti kategori.</p>
+        </div>
+        <button onclick="closeModal('modal-daily-usage')" class="text-outline hover:text-on-surface p-1 rounded-lg">
+          <span class="material-symbols-outlined text-[22px]">close</span>
         </button>
       </div>
-      <form id="form-daily-usage" onsubmit="submitEnergyUsage(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+
+      <form id="form-daily-usage" onsubmit="submitEnergyUsage(event)" class="p-6 overflow-y-auto flex flex-col gap-4 text-[13px]">
+        <!-- Tanggal Pencatatan -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-surface-container-low border border-surface-container">
+          <div class="flex items-center gap-2 text-primary font-semibold">
+            <span class="material-symbols-outlined text-[20px] text-secondary">calendar_today</span>
+            <span>Tanggal Catat Pemakaian *</span>
+          </div>
+          <input id="usage-date" type="date" value="2026-05-19" required class="p-2 rounded-xl bg-white border border-surface-container font-semibold text-on-surface focus:outline-none focus:ring-1 focus:ring-secondary"/>
+        </div>
+
+        <!-- 4 Utility Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 1. Listrik PLN -->
+          <div class="p-4 rounded-2xl bg-surface border border-surface-container hover:border-secondary/50 transition-colors flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2 font-bold text-on-surface">
+                <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-[14px]">⚡</span>
+                <span>Listrik PLN</span>
+              </div>
+              <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-semibold border border-amber-200">Rp 2.005/kWh + 7%</span>
+            </div>
+            <div class="flex flex-col gap-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Bersih (kWh)</label>
+                <input id="usage-val-listrik" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 920" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-outline mb-1">Stand Meter Akhir (Opsional)</label>
+                <input id="usage-meter-listrik" type="number" step="1" placeholder="Stand meter PLN..." class="w-full p-2 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none text-[12px]"/>
+              </div>
+              <div class="mt-1 pt-1.5 border-t border-surface-container flex items-center justify-between text-[11.5px]">
+                <span class="text-outline">Estimasi Biaya:</span>
+                <span id="subtotal-listrik" class="font-bold text-primary">Rp 0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Air PDAM -->
+          <div class="p-4 rounded-2xl bg-surface border border-surface-container hover:border-secondary/50 transition-colors flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2 font-bold text-on-surface">
+                <span class="w-7 h-7 rounded-lg bg-sky-100 text-sky-800 flex items-center justify-center font-bold text-[14px]">💧</span>
+                <span>Air PDAM</span>
+              </div>
+              <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 font-semibold border border-sky-200">Rp 18.862/m³</span>
+            </div>
+            <div class="flex flex-col gap-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Bersih (m³)</label>
+                <input id="usage-val-air" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 65" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-outline mb-1">Stand Meter Akhir (Opsional)</label>
+                <input id="usage-meter-air" type="number" step="1" placeholder="Stand meter PDAM..." class="w-full p-2 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none text-[12px]"/>
+              </div>
+              <div class="mt-1 pt-1.5 border-t border-surface-container flex items-center justify-between text-[11.5px]">
+                <span class="text-outline">Estimasi Biaya:</span>
+                <span id="subtotal-air" class="font-bold text-primary">Rp 0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Fuel Genset -->
+          <div class="p-4 rounded-2xl bg-surface border border-surface-container hover:border-secondary/50 transition-colors flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2 font-bold text-on-surface">
+                <span class="w-7 h-7 rounded-lg bg-orange-100 text-orange-800 flex items-center justify-center font-bold text-[14px]">⛽</span>
+                <span>Fuel Genset</span>
+              </div>
+              <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-orange-50 text-orange-800 font-semibold border border-orange-200">Rp 22.000/Liter</span>
+            </div>
+            <div class="flex flex-col gap-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Solar (Liter)</label>
+                <input id="usage-val-fuel" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 35" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-outline mb-1">Running Hours / Jam Operasi (Opsional)</label>
+                <input id="usage-meter-fuel" type="text" placeholder="Contoh: 15 menit uji beban..." class="w-full p-2 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none text-[12px]"/>
+              </div>
+              <div class="mt-1 pt-1.5 border-t border-surface-container flex items-center justify-between text-[11.5px]">
+                <span class="text-outline">Estimasi Biaya:</span>
+                <span id="subtotal-fuel" class="font-bold text-primary">Rp 0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Gas LPG -->
+          <div class="p-4 rounded-2xl bg-surface border border-surface-container hover:border-secondary/50 transition-colors flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2 font-bold text-on-surface">
+                <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-[14px]">🔥</span>
+                <span>Gas LPG</span>
+              </div>
+              <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200">Satuan kg</span>
+            </div>
+            <div class="flex flex-col gap-2">
+              <div>
+                <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Gas (kg)</label>
+                <input id="usage-val-gas" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 20" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-outline mb-1">Tarif Gas per kg (Rp, Opsional)</label>
+                <input id="usage-cost-gas" type="number" step="100" oninput="calcDailyUsageTotals()" placeholder="Tarif per kg jika ada..." class="w-full p-2 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none text-[12px]"/>
+              </div>
+              <div class="mt-1 pt-1.5 border-t border-surface-container flex items-center justify-between text-[11.5px]">
+                <span class="text-outline">Estimasi Biaya:</span>
+                <span id="subtotal-gas" class="font-bold text-primary">Rp 0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Catatan Umum -->
         <div>
-          <label class="block text-outline font-semibold mb-1">Kategori Input *</label>
-          <select id="usage-category" onchange="handleUsageCategoryChange(this.value)" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
-            <option value="Listrik PLN">1. Listrik PLN (kWh)</option>
-            <option value="Air PDAM">2. Air PDAM (m³)</option>
-            <option value="Fuel Genset">3. Fuel Genset (Liter)</option>
-            <option value="Gas LPG">4. Gas LPG (kg)</option>
-            <option value="Opex Daily">5. Opex Daily (Belanja Harian - Rp)</option>
-          </select>
+          <label class="block text-outline font-semibold mb-1">Catatan Operasional Hari Ini (Opsional)</label>
+          <input id="usage-notes" type="text" placeholder="Contoh: Beban villa penuh, restoran normal, uji genset rutin..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
         </div>
-        <div>
-          <label class="block text-outline font-semibold mb-1">Tanggal *</label>
-          <input id="usage-date" type="date" value="2026-05-19" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+
+        <!-- Total Summary Bar -->
+        <div class="p-3.5 rounded-xl bg-primary-container/10 border border-primary/20 flex items-center justify-between">
+          <div>
+            <div class="text-[11px] uppercase tracking-wider text-outline font-bold">Total Akumulasi Biaya Energi Hari Ini</div>
+            <div class="text-[11px] text-on-surface-variant">Dihitung otomatis berdasarkan formula tarif resmi</div>
+          </div>
+          <div id="usage-total-estimate" class="text-[18px] font-bold text-primary">Rp 0</div>
         </div>
-        <div id="usage-item-container" class="hidden">
-          <label class="block text-outline font-semibold mb-1">Nama Barang / Uraian Belanja *</label>
-          <input id="usage-item-name" type="text" placeholder="Contoh: Beli sparepart kran, cat, chemical pool..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
-        </div>
-        <div>
-          <label class="block text-outline font-semibold mb-1" id="usage-val-label">Jumlah Pemakaian Bersih *</label>
-          <input id="usage-val" type="number" step="0.01" required placeholder="Contoh: 30" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
-        </div>
-        <div>
-          <label class="block text-outline font-semibold mb-1">Catatan Operasional</label>
-          <input id="usage-notes" type="text" placeholder="Restoran normal / Uji beban / Toko pembelian..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
-        </div>
-        <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
-          <button type="button" onclick="closeModal('modal-daily-usage')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan Data</button>
+
+        <!-- Action Buttons -->
+        <div class="pt-3 border-t border-surface-container flex items-center justify-between">
+          <button type="button" onclick="resetDailyUsageForm()" class="px-3.5 py-2 rounded-xl text-outline hover:text-error hover:bg-surface-container-low flex items-center gap-1.5 text-[12px] font-medium">
+            <span class="material-symbols-outlined text-[17px]">restart_alt</span>
+            <span>Kosongkan Form</span>
+          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closeModal('modal-daily-usage')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold flex items-center gap-2 shadow-sm">
+              <span class="material-symbols-outlined text-[18px]">save</span>
+              <span>Simpan Semua Pemakaian</span>
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -2368,6 +2483,12 @@
 
         if (action === 'energy.list') {
           return { success: true, data: [...mockStore.energy] };
+        }
+
+        if (action === 'energy.createBatch') {
+          const items = payload.items || [];
+          items.forEach(item => this.mockFallback('energy.create', item));
+          return { success: true, message: `${items.length} catatan pemakaian energi berhasil disimpan!` };
         }
 
         if (action === 'energy.create') {
@@ -3528,109 +3649,162 @@
       }
     };
 
-    window.handleUsageCategoryChange = function(val) {
-      const lbl = document.getElementById('usage-val-label');
-      const inp = document.getElementById('usage-val');
-      const itemContainer = document.getElementById('usage-item-container');
-      if (!lbl || !inp) return;
+    window.calcDailyUsageTotals = function() {
+      const vListrik = parseFloat(document.getElementById('usage-val-listrik').value) || 0;
+      const vAir = parseFloat(document.getElementById('usage-val-air').value) || 0;
+      const vFuel = parseFloat(document.getElementById('usage-val-fuel').value) || 0;
+      const vGas = parseFloat(document.getElementById('usage-val-gas').value) || 0;
+      const pGas = parseFloat(document.getElementById('usage-cost-gas').value) || 0;
 
-      if (val === 'Opex Daily') {
-        lbl.innerText = 'Nominal Pengeluaran Harian (Rp) *';
-        inp.placeholder = 'Contoh: 150000';
-        inp.step = '100';
-        if (itemContainer) itemContainer.classList.remove('hidden');
-      } else {
-        lbl.innerText = 'Jumlah Pemakaian Bersih *';
-        inp.step = '0.01';
-        if (itemContainer) itemContainer.classList.add('hidden');
-        if (val === 'Listrik PLN') inp.placeholder = 'Contoh: 45 (kWh)';
-        else if (val === 'Air PDAM') inp.placeholder = 'Contoh: 30 (m³)';
-        else if (val === 'Fuel Genset') inp.placeholder = 'Contoh: 25 (Liter)';
-        else if (val === 'Gas LPG') inp.placeholder = 'Contoh: 15 (kg)';
-      }
+      // Formula resmi: Listrik PLN Rp 2.005/kWh + PPJU 7%
+      const cListrik = Math.round(vListrik * 2005 * 1.07);
+      // Formula resmi: Air PDAM Rp 18.862/m3
+      const cAir = Math.round(vAir * 18862);
+      // Formula resmi: Solar Genset Rp 22.000/Liter
+      const cFuel = Math.round(vFuel * 22000);
+      // Gas LPG: kg * tarif (jika diisi)
+      const cGas = Math.round(vGas * pGas);
+
+      const elSubL = document.getElementById('subtotal-listrik');
+      if (elSubL) elSubL.innerText = 'Rp ' + cListrik.toLocaleString('id-ID');
+
+      const elSubA = document.getElementById('subtotal-air');
+      if (elSubA) elSubA.innerText = 'Rp ' + cAir.toLocaleString('id-ID');
+
+      const elSubF = document.getElementById('subtotal-fuel');
+      if (elSubF) elSubF.innerText = 'Rp ' + cFuel.toLocaleString('id-ID');
+
+      const elSubG = document.getElementById('subtotal-gas');
+      if (elSubG) elSubG.innerText = cGas > 0 ? ('Rp ' + cGas.toLocaleString('id-ID')) : (vGas > 0 ? (vGas + ' kg') : 'Rp 0');
+
+      const totalAll = cListrik + cAir + cFuel + cGas;
+      const elTot = document.getElementById('usage-total-estimate');
+      if (elTot) elTot.innerText = 'Rp ' + totalAll.toLocaleString('id-ID');
+    };
+
+    window.resetDailyUsageForm = function() {
+      const f = document.getElementById('form-daily-usage');
+      if (f) f.reset();
+      document.getElementById('usage-date').value = '2026-05-19';
+      calcDailyUsageTotals();
+      showToast('Form pemakaian harian telah dikosongkan.');
     };
 
     window.submitEnergyUsage = async function(e) {
       e.preventDefault();
-      const cat = document.getElementById('usage-category').value;
       const date = document.getElementById('usage-date').value;
-      const val = parseFloat(document.getElementById('usage-val').value) || 0;
-      const itemName = document.getElementById('usage-item-name') ? document.getElementById('usage-item-name').value : '';
       const notes = document.getElementById('usage-notes').value;
 
-      showToast('Menyimpan ' + cat + '...');
+      const vListrik = parseFloat(document.getElementById('usage-val-listrik').value) || 0;
+      const mListrik = document.getElementById('usage-meter-listrik').value;
 
-      if (cat === 'Opex Daily') {
-        const nextId = 'OPX-' + state.currentPeriod.replace('-', '') + '-' + String((state.opexDaily || []).length + 1).padStart(3, '0');
-        const newOpex = {
-          opex_id: nextId,
-          record_date: date,
-          reporting_period: state.currentPeriod,
-          category: 'Operasional Umum',
-          item_name: itemName || notes || 'Belanja Harian Opex',
-          qty: 1,
-          unit: 'Transaksi',
-          unit_price: val,
-          total_amount: val,
-          vendor: '-',
-          receipt_no: '-',
-          notes: notes
-        };
-        // Optimistic UI update
-        state.opexDaily.unshift(newOpex);
-        filterDailyOpex();
-        recalcOpexKPIs();
+      const vAir = parseFloat(document.getElementById('usage-val-air').value) || 0;
+      const mAir = document.getElementById('usage-meter-air').value;
 
-        closeModal('modal-daily-usage');
-        // KOSONGKAN FORM KEMBALI
-        e.target.reset();
-        document.getElementById('usage-date').value = '2026-05-19';
-        handleUsageCategoryChange('Listrik PLN');
-        showToast('Pengeluaran Opex harian Rp ' + val.toLocaleString('id-ID') + ' berhasil dicatat!');
+      const vFuel = parseFloat(document.getElementById('usage-val-fuel').value) || 0;
+      const mFuel = document.getElementById('usage-meter-fuel').value;
 
-        // Background sync to GAS
-        ApiClient.call('opex.create', newOpex);
-      } else {
-        let unit = 'kWh';
-        let cost = 0;
-        if (cat === 'Listrik PLN') { unit = 'kWh'; cost = Math.round(val * 2005 * 1.07); }
-        else if (cat === 'Air PDAM') { unit = 'm³'; cost = Math.round(val * 18862); }
-        else if (cat === 'Fuel Genset') { unit = 'Liter'; cost = Math.round(val * 22000); }
-        else if (cat === 'Gas LPG') { unit = 'kg'; cost = 0; }
+      const vGas = parseFloat(document.getElementById('usage-val-gas').value) || 0;
+      const pGas = parseFloat(document.getElementById('usage-cost-gas').value) || 0;
 
-        const nextId = 'ENG-' + date.replace(/-/g, '') + '-' + String((state.energy || []).length + 1).padStart(2, '0');
+      // Kumpulkan item yang diisi
+      const itemsToSave = [];
+
+      if (vListrik > 0 || mListrik) {
+        itemsToSave.push({
+          category: 'Listrik PLN',
+          usage_value: vListrik,
+          unit: 'kWh',
+          meter_reading: mListrik,
+          calculated_cost: Math.round(vListrik * 2005 * 1.07),
+          input_method: mListrik ? 'Meter Reading' : 'Daily Usage'
+        });
+      }
+
+      if (vAir > 0 || mAir) {
+        itemsToSave.push({
+          category: 'Air PDAM',
+          usage_value: vAir,
+          unit: 'm³',
+          meter_reading: mAir,
+          calculated_cost: Math.round(vAir * 18862),
+          input_method: mAir ? 'Meter Reading' : 'Daily Usage'
+        });
+      }
+
+      if (vFuel > 0 || mFuel) {
+        itemsToSave.push({
+          category: 'Fuel Genset',
+          usage_value: vFuel,
+          unit: 'Liter',
+          meter_reading: mFuel,
+          calculated_cost: Math.round(vFuel * 22000),
+          input_method: 'Daily Usage'
+        });
+      }
+
+      if (vGas > 0) {
+        itemsToSave.push({
+          category: 'Gas LPG',
+          usage_value: vGas,
+          unit: 'kg',
+          tarif_per_kg: pGas,
+          calculated_cost: Math.round(vGas * pGas),
+          input_method: 'Daily Usage'
+        });
+      }
+
+      if (itemsToSave.length === 0) {
+        alert('Silakan masukkan minimal salah satu pemakaian energi (Listrik, Air, Fuel, atau Gas)!');
+        return;
+      }
+
+      showToast(`Menyimpan ${itemsToSave.length} data pemakaian energi...`);
+
+      // Optimistic UI update ke state.energy lokal
+      const dateFormatted = date.replace(/-/g, '');
+      const backendPayloads = [];
+
+      itemsToSave.forEach((item, idx) => {
+        const nextId = 'ENG-' + dateFormatted + '-' + String((state.energy || []).length + 1 + idx).padStart(2, '0');
         const newRecord = {
           energy_record_id: nextId,
           record_date: date,
-          category: cat,
-          input_method: 'Daily Usage',
-          meter_reading: '',
-          usage_value: val,
-          unit: unit,
-          calculated_cost: cost,
+          category: item.category,
+          input_method: item.input_method,
+          meter_reading: item.meter_reading || '',
+          usage_value: item.usage_value,
+          unit: item.unit,
+          calculated_cost: item.calculated_cost,
           validation_status: 'Valid',
           notes: notes
         };
-        // Optimistic UI update
         state.energy.unshift(newRecord);
-        filterEnergy();
 
-        closeModal('modal-daily-usage');
-        // KOSONGKAN FORM KEMBALI
-        e.target.reset();
-        document.getElementById('usage-date').value = '2026-05-19';
-        handleUsageCategoryChange('Listrik PLN');
-        showToast('Pemakaian ' + cat + ' berhasil disimpan!');
-
-        // Background sync to GAS
-        ApiClient.call('energy.create', {
-          category: cat,
+        backendPayloads.push({
+          category: item.category,
           record_date: date,
-          input_method: 'Daily Usage',
-          usage_value: val,
+          input_method: item.input_method,
+          meter_reading: item.meter_reading || '',
+          usage_value: item.usage_value,
+          tarif_per_kg: item.tarif_per_kg || 0,
+          validation_status: 'Valid',
           notes: notes
         });
-      }
+      });
+
+      filterEnergy();
+
+      // Tutup modal & KOSONGKAN FORM KEMBALI SECARA OTOMATIS
+      closeModal('modal-daily-usage');
+      e.target.reset();
+      document.getElementById('usage-date').value = '2026-05-19';
+      calcDailyUsageTotals();
+
+      showToast(`Berhasil menyimpan ${itemsToSave.length} data energi & formulir telah dikosongkan!`);
+
+      // Sync ke backend Google Apps Script
+      ApiClient.call('energy.createBatch', { items: backendPayloads });
     };
 
     // DAILY OPEX MODULE LOGIC
