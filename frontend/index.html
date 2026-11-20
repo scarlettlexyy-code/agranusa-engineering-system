@@ -1047,9 +1047,9 @@
               <span class="material-symbols-outlined text-[18px] text-primary">download</span>
               <span>Export Laporan</span>
             </button>
-            <button onclick="openModal('modal-meter-reading')" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-high text-primary text-[13px] font-semibold hover:bg-surface-container-highest transition-all">
-              <span class="material-symbols-outlined text-[18px]">speed</span>
-              <span>+ Input Meter Reading</span>
+            <button onclick="openModal('modal-budget')" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-high text-primary text-[13px] font-semibold hover:bg-surface-container-highest transition-all">
+              <span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+              <span>Set Budget</span>
             </button>
             <button onclick="openModal('modal-daily-usage')" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-white text-[13px] font-semibold shadow-sm hover:bg-primary-container transition-all">
               <span class="material-symbols-outlined text-[18px]">add_circle</span>
@@ -1183,15 +1183,15 @@
             <table class="w-full text-left text-[12.5px] border-collapse">
               <thead>
                 <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
-                  <th class="py-3 px-4">Record ID</th>
                   <th class="py-3 px-4">Tanggal</th>
                   <th class="py-3 px-4">Kategori</th>
-                  <th class="py-3 px-4">Metode Input</th>
-                  <th class="py-3 px-4">Meter Kumulatif</th>
-                  <th class="py-3 px-4">Pemakaian Bersih</th>
-                  <th class="py-3 px-4">Tarif Unit</th>
-                  <th class="py-3 px-4">Estimasi Biaya</th>
-                  <th class="py-3 px-4">Status Validasi</th>
+                  <th class="py-3 px-4">Pemakaian Hari Ini</th>
+                  <th class="py-3 px-4">Pemakaian Kemarin</th>
+                  <th class="py-3 px-4">Selisih Volume</th>
+                  <th class="py-3 px-4">Naik / Turun %</th>
+                  <th class="py-3 px-4">Biaya Hari Ini</th>
+                  <th class="py-3 px-4">Selisih Harga</th>
+                  <th class="py-3 px-4">Status</th>
                   <th class="py-3 px-4">Catatan</th>
                 </tr>
               </thead>
@@ -1870,14 +1870,17 @@
               <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 font-semibold border border-amber-200">Rp 2.005/kWh + 7%</span>
             </div>
             <div class="flex flex-col gap-2">
-              <div>
-                <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Bersih (kWh)</label>
-                <input id="usage-val-listrik" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 920" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Hari Ini (kWh) *</label>
+                  <input id="usage-val-listrik" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 920" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Kemarin (kWh)</label>
+                  <input id="usage-prev-listrik" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Kemarin..." class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none text-[12px]"/>
+                </div>
               </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-outline mb-1">Stand Meter Akhir (Opsional)</label>
-                <input id="usage-meter-listrik" type="number" step="1" placeholder="Stand meter PLN..." class="w-full p-2 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none text-[12px]"/>
-              </div>
+              <div id="diff-listrik" class="hidden text-[11px] px-2 py-1 rounded-lg bg-surface-container-low font-semibold"></div>
               <div class="mt-1 pt-1.5 border-t border-surface-container flex items-center justify-between text-[11.5px]">
                 <span class="text-outline">Estimasi Biaya:</span>
                 <span id="subtotal-listrik" class="font-bold text-primary">Rp 0</span>
@@ -1895,14 +1898,17 @@
               <span class="text-[10.5px] px-2 py-0.5 rounded-full bg-sky-50 text-sky-800 font-semibold border border-sky-200">Rp 18.862/m³</span>
             </div>
             <div class="flex flex-col gap-2">
-              <div>
-                <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Bersih (m³)</label>
-                <input id="usage-val-air" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 65" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Hari Ini (m³) *</label>
+                  <input id="usage-val-air" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 65" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Kemarin (m³)</label>
+                  <input id="usage-prev-air" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Kemarin..." class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none text-[12px]"/>
+                </div>
               </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-outline mb-1">Stand Meter Akhir (Opsional)</label>
-                <input id="usage-meter-air" type="number" step="1" placeholder="Stand meter PDAM..." class="w-full p-2 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none text-[12px]"/>
-              </div>
+              <div id="diff-air" class="hidden text-[11px] px-2 py-1 rounded-lg bg-surface-container-low font-semibold"></div>
               <div class="mt-1 pt-1.5 border-t border-surface-container flex items-center justify-between text-[11.5px]">
                 <span class="text-outline">Estimasi Biaya:</span>
                 <span id="subtotal-air" class="font-bold text-primary">Rp 0</span>
@@ -1923,10 +1929,6 @@
               <div>
                 <label class="block text-[11px] font-semibold text-outline mb-1">Pemakaian Solar (Liter)</label>
                 <input id="usage-val-fuel" type="number" step="0.01" oninput="calcDailyUsageTotals()" placeholder="Contoh: 35" class="w-full p-2.5 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface"/>
-              </div>
-              <div>
-                <label class="block text-[11px] font-semibold text-outline mb-1">Running Hours / Jam Operasi (Opsional)</label>
-                <input id="usage-meter-fuel" type="text" placeholder="Contoh: 15 menit uji beban..." class="w-full p-2 rounded-xl bg-white border border-surface-container focus:border-secondary focus:outline-none text-[12px]"/>
               </div>
               <div class="mt-1 pt-1.5 border-t border-surface-container flex items-center justify-between text-[11.5px]">
                 <span class="text-outline">Estimasi Biaya:</span>
@@ -1989,6 +1991,70 @@
               <span>Simpan Semua Pemakaian</span>
             </button>
           </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Budget Operasional Bulanan -->
+  <div id="modal-budget" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-surface-container overflow-hidden max-h-[92vh] flex flex-col">
+      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50 shrink-0">
+        <div>
+          <h3 class="text-[17px] font-bold text-primary flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary">account_balance_wallet</span> Set Budget Operasional Bulanan
+          </h3>
+          <p class="text-[12px] text-outline mt-0.5">Tetapkan anggaran per kategori untuk memantau efisiensi pengeluaran.</p>
+        </div>
+        <button onclick="closeModal('modal-budget')" class="text-outline hover:text-on-surface p-1 rounded-lg">
+          <span class="material-symbols-outlined text-[22px]">close</span>
+        </button>
+      </div>
+      <form id="form-budget" onsubmit="saveBudget(event)" class="p-6 overflow-y-auto flex flex-col gap-4 text-[13px]">
+        <!-- Periode -->
+        <div class="flex flex-col gap-1">
+          <label class="text-[11px] font-semibold text-outline">Periode Budget (Bulan)</label>
+          <input id="budget-period" type="month" class="p-2.5 rounded-xl bg-surface border border-surface-container focus:border-secondary focus:outline-none font-semibold text-on-surface" required/>
+        </div>
+        <!-- Grid 2 kolom untuk 6 kategori -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+            <label class="block text-[11px] font-bold text-amber-800 mb-1.5">⚡ Budget Listrik PLN (Rp/bln)</label>
+            <input id="budget-listrik" type="number" step="10000" oninput="calcBudgetTotal()" placeholder="Contoh: 45000000" class="w-full p-2 rounded-lg bg-white border border-amber-200 focus:border-amber-400 focus:outline-none font-semibold text-on-surface text-[12px]"/>
+          </div>
+          <div class="p-3 rounded-xl bg-sky-50 border border-sky-200">
+            <label class="block text-[11px] font-bold text-sky-800 mb-1.5">💧 Budget Air PDAM (Rp/bln)</label>
+            <input id="budget-air" type="number" step="10000" oninput="calcBudgetTotal()" placeholder="Contoh: 18000000" class="w-full p-2 rounded-lg bg-white border border-sky-200 focus:border-sky-400 focus:outline-none font-semibold text-on-surface text-[12px]"/>
+          </div>
+          <div class="p-3 rounded-xl bg-orange-50 border border-orange-200">
+            <label class="block text-[11px] font-bold text-orange-800 mb-1.5">⛽ Budget Fuel / Solar (Rp/bln)</label>
+            <input id="budget-fuel" type="number" step="10000" oninput="calcBudgetTotal()" placeholder="Contoh: 7000000" class="w-full p-2 rounded-lg bg-white border border-orange-200 focus:border-orange-400 focus:outline-none font-semibold text-on-surface text-[12px]"/>
+          </div>
+          <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+            <label class="block text-[11px] font-bold text-emerald-800 mb-1.5">🔥 Budget Gas LPG (Rp/bln)</label>
+            <input id="budget-gas" type="number" step="10000" oninput="calcBudgetTotal()" placeholder="Contoh: 8000000" class="w-full p-2 rounded-lg bg-white border border-emerald-200 focus:border-emerald-400 focus:outline-none font-semibold text-on-surface text-[12px]"/>
+          </div>
+          <div class="p-3 rounded-xl bg-violet-50 border border-violet-200">
+            <label class="block text-[11px] font-bold text-violet-800 mb-1.5">🛒 Budget Belanja Barang/Material (Rp/bln)</label>
+            <input id="budget-barang" type="number" step="10000" oninput="calcBudgetTotal()" placeholder="Contoh: 15000000" class="w-full p-2 rounded-lg bg-white border border-violet-200 focus:border-violet-400 focus:outline-none font-semibold text-on-surface text-[12px]"/>
+          </div>
+          <div class="p-3 rounded-xl bg-rose-50 border border-rose-200">
+            <label class="block text-[11px] font-bold text-rose-800 mb-1.5">💸 Budget Pengeluaran Harian/Opex (Rp/bln)</label>
+            <input id="budget-opex" type="number" step="10000" oninput="calcBudgetTotal()" placeholder="Contoh: 10000000" class="w-full p-2 rounded-lg bg-white border border-rose-200 focus:border-rose-400 focus:outline-none font-semibold text-on-surface text-[12px]"/>
+          </div>
+        </div>
+        <!-- Total Preview -->
+        <div class="p-3 rounded-xl bg-primary-container/10 border border-primary/20 flex items-center justify-between">
+          <span class="text-[12px] font-semibold text-outline">Total Budget Bulanan</span>
+          <span id="budget-total-preview" class="text-[16px] font-bold text-primary">Rp 0</span>
+        </div>
+        <!-- Buttons -->
+        <div class="pt-2 border-t border-surface-container flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-budget')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low text-[13px]">Batal</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold flex items-center gap-2 shadow-sm text-[13px]">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            <span>Simpan Budget</span>
+          </button>
         </div>
       </form>
     </div>
@@ -2627,7 +2693,29 @@
 
     window.openModal = function(id) {
       const modal = document.getElementById(id);
-      if (modal) modal.classList.remove('hidden');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      // Load saved budget ketika modal-budget dibuka
+      if (id === 'modal-budget') {
+        const bp = document.getElementById('budget-period');
+        if (bp && !bp.value) {
+          const now = new Date();
+          bp.value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+        }
+        if (bp && bp.value) {
+          const saved = localStorage.getItem('agranusa_budget_' + bp.value);
+          if (saved) {
+            try {
+              const data = JSON.parse(saved);
+              ['listrik','air','fuel','gas','barang','opex'].forEach(k => {
+                const el = document.getElementById('budget-' + k);
+                if (el && data[k]) el.value = data[k];
+              });
+              calcBudgetTotal();
+            } catch(err) {}
+          }
+        }
+      }
     };
 
     window.closeModal = function(id) {
@@ -3228,6 +3316,17 @@
       if (!tbody) return;
       tbody.innerHTML = '';
 
+      // Buat index sorted per kategori untuk cari "kemarin"
+      const byCategory = {};
+      (state.energy || []).forEach(e => {
+        if (!byCategory[e.category]) byCategory[e.category] = [];
+        byCategory[e.category].push(e);
+      });
+      // Sort ascending per kategori
+      Object.keys(byCategory).forEach(cat => {
+        byCategory[cat].sort((a, b) => a.record_date.localeCompare(b.record_date));
+      });
+
       state.filteredEnergy.forEach(e => {
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-surface-container-low/40 transition-colors';
@@ -3237,21 +3336,48 @@
           ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-error-container text-error">● Anomali</span>`
           : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-secondary-container text-on-secondary-container">● Valid</span>`;
 
-        let tariffLabel = '—';
-        if (e.category === 'Listrik PLN') tariffLabel = 'Rp 2.005/kWh (+7%)';
-        else if (e.category === 'Air PDAM') tariffLabel = 'Rp 18.862/m³';
-        else if (e.category === 'Fuel Genset') tariffLabel = 'Rp 22.000/L';
-        else if (e.category === 'Gas LPG') tariffLabel = 'TBD (Manual)';
+        // Cari record sebelumnya (kemarin) untuk kategori yang sama
+        const catList = byCategory[e.category] || [];
+        const eIdx = catList.findIndex(x => x.energy_record_id === e.energy_record_id && x.record_date === e.record_date);
+        const prevRecord = eIdx > 0 ? catList[eIdx - 1] : null;
+
+        // Gunakan prev_usage dari data jika tersedia, atau dari record sebelumnya
+        const prevUsage = (e.prev_usage && e.prev_usage > 0)
+          ? e.prev_usage
+          : (prevRecord ? (prevRecord.usage_value || 0) : null);
+        const prevCost = prevRecord ? (prevRecord.calculated_cost || 0) : null;
+
+        const unit = e.unit || '';
+        let selisihVolHtml = '—';
+        let selisihPctHtml = '—';
+        if (prevUsage !== null && prevUsage > 0) {
+          const diff = (e.usage_value || 0) - prevUsage;
+          const pct = ((diff / prevUsage) * 100).toFixed(1);
+          const isUp = diff >= 0;
+          const colorCls = isUp ? 'text-red-600' : 'text-green-600';
+          selisihVolHtml = `<span class="${colorCls} font-semibold">${isUp ? '▲ +' : '▼ '}${diff.toFixed(2)} ${unit}</span>`;
+          selisihPctHtml = `<span class="${colorCls} font-bold">${isUp ? '+' : ''}${pct}%</span>`;
+        }
+
+        let selisihHargaHtml = '—';
+        if (prevCost !== null) {
+          const dCost = (e.calculated_cost || 0) - prevCost;
+          const isUp = dCost >= 0;
+          const colorCls = isUp ? 'text-red-600' : 'text-green-600';
+          selisihHargaHtml = `<span class="${colorCls} font-semibold">${isUp ? '+' : ''}Rp ${Math.abs(dCost).toLocaleString('id-ID')}</span>`;
+        }
+
+        const catIcon = e.category === 'Listrik PLN' ? '⚡' : e.category === 'Air PDAM' ? '💧' : e.category === 'Fuel Genset' ? '⛽' : '🔥';
 
         tr.innerHTML = `
-          <td class="py-3 px-4 font-mono font-bold text-primary">${e.energy_record_id}</td>
-          <td class="py-3 px-4 font-medium">${e.record_date}</td>
-          <td class="py-3 px-4 font-semibold text-on-surface">${e.category}</td>
-          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-surface-container text-outline text-[11px]">${e.input_method}</span></td>
-          <td class="py-3 px-4 font-mono">${e.meter_reading ? Number(e.meter_reading).toLocaleString('id-ID') : '—'}</td>
-          <td class="py-3 px-4 font-bold ${isAnomali ? 'text-error' : 'text-primary'}">${Number(e.usage_value).toLocaleString('id-ID')} ${e.unit || ''}</td>
-          <td class="py-3 px-4 text-outline font-medium text-[11.5px]">${tariffLabel}</td>
+          <td class="py-3 px-4 font-medium text-[12px]">${e.record_date}</td>
+          <td class="py-3 px-4 font-semibold text-on-surface">${catIcon} ${e.category}</td>
+          <td class="py-3 px-4 font-bold ${isAnomali ? 'text-error' : 'text-primary'}">${Number(e.usage_value).toLocaleString('id-ID')} ${unit}</td>
+          <td class="py-3 px-4 text-outline text-[12px]">${prevUsage !== null ? (Number(prevUsage).toLocaleString('id-ID') + ' ' + unit) : '—'}</td>
+          <td class="py-3 px-4">${selisihVolHtml}</td>
+          <td class="py-3 px-4">${selisihPctHtml}</td>
           <td class="py-3 px-4 font-bold text-on-surface">Rp ${Number(e.calculated_cost || 0).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4">${selisihHargaHtml}</td>
           <td class="py-3 px-4">${statusBadge}</td>
           <td class="py-3 px-4 text-[11.5px] max-w-xs ${isAnomali ? 'text-error font-medium' : 'text-outline'}">${e.notes || '-'}</td>
         `;
@@ -3651,7 +3777,9 @@
 
     window.calcDailyUsageTotals = function() {
       const vListrik = parseFloat(document.getElementById('usage-val-listrik').value) || 0;
+      const pListrik = parseFloat(document.getElementById('usage-prev-listrik') ? document.getElementById('usage-prev-listrik').value : 0) || 0;
       const vAir = parseFloat(document.getElementById('usage-val-air').value) || 0;
+      const pAir = parseFloat(document.getElementById('usage-prev-air') ? document.getElementById('usage-prev-air').value : 0) || 0;
       const vFuel = parseFloat(document.getElementById('usage-val-fuel').value) || 0;
       const vGas = parseFloat(document.getElementById('usage-val-gas').value) || 0;
       const pGas = parseFloat(document.getElementById('usage-cost-gas').value) || 0;
@@ -3677,6 +3805,32 @@
       const elSubG = document.getElementById('subtotal-gas');
       if (elSubG) elSubG.innerText = cGas > 0 ? ('Rp ' + cGas.toLocaleString('id-ID')) : (vGas > 0 ? (vGas + ' kg') : 'Rp 0');
 
+      // Selisih Listrik vs Kemarin
+      const diffEl = document.getElementById('diff-listrik');
+      if (diffEl) {
+        if (vListrik > 0 && pListrik > 0) {
+          const diff = vListrik - pListrik;
+          const pct = ((diff / pListrik) * 100).toFixed(1);
+          const isUp = diff >= 0;
+          diffEl.className = `text-[11px] px-2 py-1 rounded-lg font-semibold ${isUp ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`;
+          diffEl.innerHTML = `${isUp ? '▲' : '▼'} Selisih: ${isUp ? '+' : ''}${diff.toFixed(2)} kWh (${isUp ? '+' : ''}${pct}%) vs kemarin`;
+          diffEl.classList.remove('hidden');
+        } else { diffEl.classList.add('hidden'); }
+      }
+
+      // Selisih Air vs Kemarin
+      const diffAir = document.getElementById('diff-air');
+      if (diffAir) {
+        if (vAir > 0 && pAir > 0) {
+          const diff = vAir - pAir;
+          const pct = ((diff / pAir) * 100).toFixed(1);
+          const isUp = diff >= 0;
+          diffAir.className = `text-[11px] px-2 py-1 rounded-lg font-semibold ${isUp ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`;
+          diffAir.innerHTML = `${isUp ? '▲' : '▼'} Selisih: ${isUp ? '+' : ''}${diff.toFixed(2)} m³ (${isUp ? '+' : ''}${pct}%) vs kemarin`;
+          diffAir.classList.remove('hidden');
+        } else { diffAir.classList.add('hidden'); }
+      }
+
       const totalAll = cListrik + cAir + cFuel + cGas;
       const elTot = document.getElementById('usage-total-estimate');
       if (elTot) elTot.innerText = 'Rp ' + totalAll.toLocaleString('id-ID');
@@ -3690,19 +3844,61 @@
       showToast('Form pemakaian harian telah dikosongkan.');
     };
 
+    // ===================== BUDGET OPERASIONAL =====================
+    function calcBudgetTotal() {
+      const ids = ['budget-listrik','budget-air','budget-fuel','budget-gas','budget-barang','budget-opex'];
+      let total = 0;
+      ids.forEach(id => { total += parseFloat(document.getElementById(id) ? document.getElementById(id).value : 0) || 0; });
+      const el = document.getElementById('budget-total-preview');
+      if (el) el.innerText = 'Rp ' + Math.round(total).toLocaleString('id-ID');
+    }
+
+    // Wire up auto-total on input — gunakan oninput langsung di HTML masing-masing input budget
+    // Set default period setelah halaman load
+    (function() {
+      const bp = document.getElementById('budget-period');
+      if (bp && !bp.value) {
+        const now = new Date();
+        bp.value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+      }
+    })();
+
+
+    window.saveBudget = async function(e) {
+      e.preventDefault();
+      const period = document.getElementById('budget-period').value;
+      const payload = {
+        period,
+        listrik: parseFloat(document.getElementById('budget-listrik').value) || 0,
+        air: parseFloat(document.getElementById('budget-air').value) || 0,
+        fuel: parseFloat(document.getElementById('budget-fuel').value) || 0,
+        gas: parseFloat(document.getElementById('budget-gas').value) || 0,
+        barang: parseFloat(document.getElementById('budget-barang').value) || 0,
+        opex: parseFloat(document.getElementById('budget-opex').value) || 0,
+      };
+      // Simpan ke localStorage
+      localStorage.setItem('agranusa_budget_' + period, JSON.stringify(payload));
+      // Simpan state lokal
+      state.budget = payload;
+      // Sync ke backend (async, tidak blocking)
+      ApiClient.call('budget.save', payload).catch(() => {});
+      closeModal('modal-budget');
+      showToast('✅ Budget operasional berhasil disimpan!');
+    };
+    // ===================== END BUDGET =====================
+
     window.submitEnergyUsage = async function(e) {
       e.preventDefault();
       const date = document.getElementById('usage-date').value;
       const notes = document.getElementById('usage-notes').value;
 
       const vListrik = parseFloat(document.getElementById('usage-val-listrik').value) || 0;
-      const mListrik = document.getElementById('usage-meter-listrik').value;
+      const pListrik = parseFloat(document.getElementById('usage-prev-listrik') ? document.getElementById('usage-prev-listrik').value : 0) || 0;
 
       const vAir = parseFloat(document.getElementById('usage-val-air').value) || 0;
-      const mAir = document.getElementById('usage-meter-air').value;
+      const pAir = parseFloat(document.getElementById('usage-prev-air') ? document.getElementById('usage-prev-air').value : 0) || 0;
 
       const vFuel = parseFloat(document.getElementById('usage-val-fuel').value) || 0;
-      const mFuel = document.getElementById('usage-meter-fuel').value;
 
       const vGas = parseFloat(document.getElementById('usage-val-gas').value) || 0;
       const pGas = parseFloat(document.getElementById('usage-cost-gas').value) || 0;
@@ -3710,34 +3906,34 @@
       // Kumpulkan item yang diisi
       const itemsToSave = [];
 
-      if (vListrik > 0 || mListrik) {
+      if (vListrik > 0) {
         itemsToSave.push({
           category: 'Listrik PLN',
           usage_value: vListrik,
+          prev_usage: pListrik,
           unit: 'kWh',
-          meter_reading: mListrik,
           calculated_cost: Math.round(vListrik * 2005 * 1.07),
-          input_method: mListrik ? 'Meter Reading' : 'Daily Usage'
+          input_method: 'Daily Usage'
         });
       }
 
-      if (vAir > 0 || mAir) {
+      if (vAir > 0) {
         itemsToSave.push({
           category: 'Air PDAM',
           usage_value: vAir,
+          prev_usage: pAir,
           unit: 'm³',
-          meter_reading: mAir,
           calculated_cost: Math.round(vAir * 18862),
-          input_method: mAir ? 'Meter Reading' : 'Daily Usage'
+          input_method: 'Daily Usage'
         });
       }
 
-      if (vFuel > 0 || mFuel) {
+      if (vFuel > 0) {
         itemsToSave.push({
           category: 'Fuel Genset',
           usage_value: vFuel,
+          prev_usage: 0,
           unit: 'Liter',
-          meter_reading: mFuel,
           calculated_cost: Math.round(vFuel * 22000),
           input_method: 'Daily Usage'
         });
@@ -3772,8 +3968,8 @@
           record_date: date,
           category: item.category,
           input_method: item.input_method,
-          meter_reading: item.meter_reading || '',
           usage_value: item.usage_value,
+          prev_usage: item.prev_usage || 0,
           unit: item.unit,
           calculated_cost: item.calculated_cost,
           validation_status: 'Valid',
@@ -3785,8 +3981,8 @@
           category: item.category,
           record_date: date,
           input_method: item.input_method,
-          meter_reading: item.meter_reading || '',
           usage_value: item.usage_value,
+          prev_usage: item.prev_usage || 0,
           tarif_per_kg: item.tarif_per_kg || 0,
           validation_status: 'Valid',
           notes: notes
