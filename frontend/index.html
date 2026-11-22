@@ -94,13 +94,9 @@
           <span class="material-symbols-outlined text-[20px]">grid_view</span>
           <span>Dashboard</span>
         </button>
-        <button onclick="navigateTo('work-orders')" data-path="work-orders" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
-          <span class="material-symbols-outlined text-[20px]">task_alt</span>
-          <span>Work Order (WO)</span>
-        </button>
-        <button onclick="navigateTo('activity-report')" data-path="activity-report" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
+        <button onclick="navigateTo('activity-report'); switchActivityTab('activity');" data-path="activity-report" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
           <span class="material-symbols-outlined text-[20px]">assignment</span>
-          <span>Activity Report</span>
+          <span>Activity & Work Order</span>
         </button>
         <button onclick="navigateTo('project-monitoring')" data-path="project-monitoring" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
           <span class="material-symbols-outlined text-[20px]">build</span>
@@ -548,359 +544,375 @@
         </div>
       </section>
 
-      <!-- ========================================== -->
-      <!-- VIEW: WORK ORDER (WO) MANAGEMENT -->
-      <!-- ========================================== -->
-      <section id="view-work-orders" class="view-panel hidden flex flex-col gap-6">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <div class="flex items-center gap-2.5">
-              <h1 class="text-[26px] font-bold text-primary tracking-tight">Work Order (WO) Management</h1>
-              <span class="px-2.5 py-0.5 rounded-full bg-secondary-container/50 text-on-secondary-container text-[11px] font-semibold">
-                Sistem Tiket Lintas Departemen
-              </span>
-            </div>
-            <p class="text-[13px] text-outline mt-0.5">Monitoring dan tindak lanjut permintaan kerja dari Housekeeping, Front Office, Security, Villa Manager, dan departemen lain.</p>
-          </div>
-          <div class="flex flex-wrap items-center gap-3">
-            <button onclick="exportWorkOrdersCsv()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-on-surface text-[13px] font-semibold shadow-sm transition-all">
-              <span class="material-symbols-outlined text-[18px] text-primary">download</span>
-              <span>Export CSV</span>
-            </button>
-            <button onclick="openModal('modal-work-order')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
-              <span class="material-symbols-outlined text-[18px] text-secondary-fixed">add_task</span>
-              <span>+ Buat Work Order Baru</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 4 KPI Cards (Work Orders) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Work Orders</span>
-              <div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
-                <span class="material-symbols-outlined text-[20px]">assignment</span>
-              </div>
-            </div>
-            <div class="my-3 text-[28px] font-bold text-on-surface" id="wo-kpi-total">0</div>
-            <div class="pt-2 border-t border-surface-container flex items-center gap-1.5 text-[11px] text-outline">
-              Semua tiket terdaftar bulan ini
-            </div>
-          </div>
-
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Menunggu (Open)</span>
-              <div class="w-9 h-9 rounded-xl bg-error-container/50 flex items-center justify-center text-error">
-                <span class="material-symbols-outlined text-[20px]">pending_actions</span>
-              </div>
-            </div>
-            <div class="my-3 flex items-baseline justify-between">
-              <span class="text-[28px] font-bold text-error" id="wo-kpi-open">0</span>
-              <span class="text-[12px] font-semibold text-outline" id="wo-kpi-open-pct">0%</span>
-            </div>
-            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
-              <span class="px-2 py-0.5 rounded-full bg-error-container text-error font-semibold">Perlu Tindakan Cepat</span>
-            </div>
-          </div>
-
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Dikerjakan (In Progress)</span>
-              <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
-                <span class="material-symbols-outlined text-[20px]">engineering</span>
-              </div>
-            </div>
-            <div class="my-3 flex items-baseline justify-between">
-              <span class="text-[28px] font-bold text-primary" id="wo-kpi-progress">0</span>
-              <span class="text-[12px] font-semibold text-outline" id="wo-kpi-progress-pct">0%</span>
-            </div>
-            <div class="pt-2 border-t border-surface-container flex items-center gap-1 text-[11px] text-outline">
-              Sedang dalam penanganan teknisi
-            </div>
-          </div>
-
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Selesai (Completed)</span>
-              <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-on-secondary-container">
-                <span class="material-symbols-outlined text-[20px]">check_circle</span>
-              </div>
-            </div>
-            <div class="my-3 flex items-baseline justify-between">
-              <span class="text-[28px] font-bold text-secondary" id="wo-kpi-completed">0</span>
-              <span class="text-[12px] font-semibold text-secondary" id="wo-kpi-completed-pct">0%</span>
-            </div>
-            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
-              <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-semibold">Closed / Done</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Department Breakdown Summary -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
-            <div class="text-[11px] text-outline font-semibold uppercase">Housekeeping</div>
-            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-hk">0</div>
-          </div>
-          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
-            <div class="text-[11px] text-outline font-semibold uppercase">Front Office</div>
-            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-fo">0</div>
-          </div>
-          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
-            <div class="text-[11px] text-outline font-semibold uppercase">Security</div>
-            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-sec">0</div>
-          </div>
-          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
-            <div class="text-[11px] text-outline font-semibold uppercase">Villa Manager</div>
-            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-vm">0</div>
-          </div>
-          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
-            <div class="text-[11px] text-outline font-semibold uppercase">F&B / Kitchen</div>
-            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-fb">0</div>
-          </div>
-          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
-            <div class="text-[11px] text-outline font-semibold uppercase">Internal Eng</div>
-            <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-eng">0</div>
-          </div>
-        </div>
-
-        <!-- Filter & Search Toolbar -->
-        <div class="bg-white rounded-2xl p-4 border border-surface-container shadow-sm flex flex-wrap items-center justify-between gap-3">
-          <div class="flex flex-wrap items-center gap-3 flex-1">
-            <div class="relative min-w-[220px]">
-              <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[18px]">search</span>
-              <input id="wo-search" oninput="filterWorkOrders()" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] focus:outline-none focus:bg-white border border-transparent focus:border-secondary/40" placeholder="Cari WO ID, judul, lokasi, PIC..." type="text"/>
-            </div>
-            <select id="wo-filter-dept" onchange="filterWorkOrders()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
-              <option value="Semua Departemen">Semua Departemen</option>
-              <option value="Housekeeping">Housekeeping</option>
-              <option value="Front Office">Front Office</option>
-              <option value="Security">Security</option>
-              <option value="Villa Manager">Villa Manager</option>
-              <option value="F&B / Kitchen">F&B / Kitchen</option>
-              <option value="Engineering Internal">Engineering Internal</option>
-            </select>
-            <select id="wo-filter-cat" onchange="filterWorkOrders()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
-              <option value="Semua Tipikal">Semua Tipikal</option>
-              <option value="IT">IT</option>
-              <option value="Electrical">Electrical</option>
-              <option value="Plumbing">Plumbing</option>
-              <option value="Civil">Civil</option>
-              <option value="Mechanical">Mechanical</option>
-            </select>
-            <select id="wo-filter-status" onchange="filterWorkOrders()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
-              <option value="Semua Status">Semua Status</option>
-              <option value="Open">Open (Menunggu)</option>
-              <option value="In Progress">In Progress (Dikerjakan)</option>
-              <option value="Completed">Completed (Selesai)</option>
-              <option value="Pending">Pending (Tertunda)</option>
-            </select>
-          </div>
-          <button onclick="resetWorkOrderFilters()" class="text-[12px] text-outline hover:text-primary underline">Reset Filter</button>
-        </div>
-
-        <!-- Work Orders Table -->
-        <div class="bg-white rounded-2xl border border-surface-container shadow-sm overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-[12.5px] border-collapse">
-              <thead>
-                <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
-                  <th class="py-3 px-4">WO ID</th>
-                  <th class="py-3 px-4">Tanggal</th>
-                  <th class="py-3 px-4">Pengaju (Dept)</th>
-                  <th class="py-3 px-4">Lokasi</th>
-                  <th class="py-3 px-4">Uraian Masalah</th>
-                  <th class="py-3 px-4">Tipikal</th>
-                  <th class="py-3 px-4">Prioritas</th>
-                  <th class="py-3 px-4">PIC Teknisi</th>
-                  <th class="py-3 px-4">Status</th>
-                  <th class="py-3 px-4 text-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="workorder-table-body" class="divide-y divide-surface-container">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-          <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline bg-surface-container-low/30">
-            <span id="wo-table-count">Menampilkan 0 Work Orders</span>
-          </div>
-        </div>
-      </section>
 
       <!-- ========================================== -->
-      <!-- VIEW 2: ACTIVITY REPORT (MODUL B) -->
+      <!-- VIEW 2: ACTIVITY REPORT & WORK ORDERS (MODUL B) -->
       <!-- ========================================== -->
       <section id="view-activity-report" class="view-panel hidden flex flex-col gap-6">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <!-- Main Header with Subtab Navigation Switcher -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-surface-container pb-4">
           <div>
             <div class="flex items-center gap-2.5">
-              <h1 class="text-[26px] font-bold text-primary tracking-tight">Laporan Aktivitas Pekerjaan</h1>
+              <h1 class="text-[26px] font-bold text-primary tracking-tight">Laporan Aktivitas & Work Order</h1>
               <span class="px-2.5 py-0.5 rounded-full bg-secondary-container/50 text-on-secondary-container text-[11px] font-semibold">
                 Modul B: Operasional
               </span>
             </div>
-            <p class="text-[13px] text-outline mt-0.5">Pencatatan dan monitoring aktivitas harian & mingguan teknisi Engineering Agranusa Signature Villa.</p>
+            <p class="text-[13px] text-outline mt-0.5">Monitoring pekerjaan teknisi serta sistem pencatatan & tindak lanjut Work Order lintas departemen.</p>
           </div>
-          <div class="flex flex-wrap items-center gap-3">
+
+          <!-- Sub-Tabs: Aktivitas Teknisi VS Laporan Work Order -->
+          <div class="inline-flex p-1 rounded-2xl bg-surface-container-high/80 text-[13px] font-bold shadow-inner" id="act-subtabs">
+            <button id="tab-btn-activity" onclick="switchActivityTab('activity')" class="px-4 py-2 rounded-xl bg-white text-primary shadow-sm flex items-center gap-2 transition-all font-bold">
+              <span class="material-symbols-outlined text-[19px]">engineering</span>
+              <span>Aktivitas Teknisi</span>
+            </button>
+            <button id="tab-btn-wo" onclick="switchActivityTab('wo')" class="px-4 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-2 transition-all">
+              <span class="material-symbols-outlined text-[19px]">task_alt</span>
+              <span>Laporan Work Order</span>
+              <span id="wo-subtab-badge" class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ================= SUB-TAB 1: AKTIVITAS TEKNISI ================= -->
+        <div id="subtab-activity-content" class="flex flex-col gap-6">
+          <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white shadow-sm border border-surface-container text-[13px] font-semibold text-on-surface">
               <span class="material-symbols-outlined text-[18px] text-secondary">date_range</span>
               <span id="act-period-label">Mei 2026 — Minggu ke-3</span>
             </div>
-            <button onclick="openModal('modal-weekly')" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-primary-container text-[13px] font-semibold shadow-sm transition-all">
-              <span class="material-symbols-outlined text-[18px] text-secondary">library_add</span>
-              <span>+ Input Mingguan</span>
-            </button>
-            <button onclick="openModal('modal-daily')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
-              <span class="material-symbols-outlined text-[18px] text-secondary-fixed">add_circle</span>
-              <span>+ Input Aktivitas Harian</span>
-            </button>
+            <div class="flex flex-wrap items-center gap-3">
+              <button onclick="openModal('modal-weekly')" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-primary-container text-[13px] font-semibold shadow-sm transition-all">
+                <span class="material-symbols-outlined text-[18px] text-secondary">library_add</span>
+                <span>+ Input Mingguan</span>
+              </button>
+              <button onclick="openModal('modal-daily')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
+                <span class="material-symbols-outlined text-[18px] text-secondary-fixed">add_circle</span>
+                <span>+ Input Aktivitas Harian</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 KPI Cards (Activity) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Pekerjaan</span>
+                <div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
+                  <span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
+                </div>
+              </div>
+              <div class="my-3 text-[28px] font-bold text-on-surface" id="act-kpi-total">148</div>
+              <div class="pt-2 border-t border-surface-container flex items-center gap-1.5 text-[12px] text-secondary font-semibold">
+                <span class="material-symbols-outlined text-[15px]">trending_up</span> +12.4% vs minggu lalu
+              </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Selesai (Done)</span>
+                <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-on-secondary-container">
+                  <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                </div>
+              </div>
+              <div class="my-3 flex items-baseline justify-between">
+                <span class="text-[28px] font-bold text-on-surface" id="act-kpi-done">118</span>
+                <span class="text-[16px] font-bold text-secondary" id="act-kpi-percent">79.7%</span>
+              </div>
+              <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
+                <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-semibold">Target Tercapai >75%</span>
+                <span class="text-outline">Formula AC-01</span>
+              </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Dalam Pengerjaan</span>
+                <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
+                  <span class="material-symbols-outlined text-[20px]">engineering</span>
+                </div>
+              </div>
+              <div class="my-3 flex items-baseline justify-between">
+                <span class="text-[28px] font-bold text-on-surface" id="act-kpi-progress">22</span>
+                <span class="text-[15px] font-semibold text-outline">14.9%</span>
+              </div>
+              <div class="pt-2 border-t border-surface-container flex items-center gap-1 text-[11px] text-outline">
+                <span class="material-symbols-outlined text-[15px] text-primary">schedule</span> Akan dibawa ke periode berikutnya
+              </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Tertunda (Pending)</span>
+                <div class="w-9 h-9 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-container">
+                  <span class="material-symbols-outlined text-[20px]">error_outline</span>
+                </div>
+              </div>
+              <div class="my-3 flex items-baseline justify-between">
+                <span class="text-[28px] font-bold text-on-surface" id="act-kpi-pending">8</span>
+                <span class="text-[15px] font-semibold text-on-tertiary-container">5.4%</span>
+              </div>
+              <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
+                <span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-container font-semibold">Wajib Catatan Alasan</span>
+                <span class="text-outline">Sec 5.2</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar (Activity) -->
+          <div class="bg-white rounded-2xl p-4 border border-surface-container shadow-sm flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3 flex-1">
+              <div class="relative min-w-[240px]">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[18px]">search</span>
+                <input id="act-search" oninput="filterActivities()" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] focus:outline-none focus:bg-white border border-transparent focus:border-secondary/40" placeholder="Cari ID, aktivitas, deskripsi atau lokasi..." type="text"/>
+              </div>
+              <select id="act-filter-location" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+                <option value="Semua Lokasi">Semua Lokasi</option>
+                <option value="Villa 12">Villa 12</option>
+                <option value="Central Plant">Central Plant</option>
+                <option value="Villa 08">Villa 08</option>
+                <option value="Genset House">Genset House</option>
+                <option value="Public Area">Public Area</option>
+                <option value="Kitchen">Kitchen</option>
+                <option value="Main Dining Pavilion">Main Dining Pavilion</option>
+              </select>
+              <select id="act-filter-status" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+                <option value="Semua Status">Semua Status</option>
+                <option value="Done">Done (Selesai)</option>
+                <option value="In Progress">In Progress (Sedang Berjalan)</option>
+                <option value="Pending">Pending (Tertunda)</option>
+              </select>
+              <select id="act-filter-category" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+                <option value="Semua Tipikal">Semua Tipikal</option>
+                <option value="IT">IT</option>
+                <option value="Electrical">Electrical</option>
+                <option value="Plumbing">Plumbing</option>
+                <option value="Civil">Civil</option>
+                <option value="Mechanical">Mechanical</option>
+              </select>
+              <select id="act-filter-worker" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+                <option value="Semua Teknisi">Semua Teknisi</option>
+                <option value="Wayan G.">Wayan G.</option>
+                <option value="Made S.">Made S.</option>
+                <option value="Ketut A.">Ketut A.</option>
+                <option value="Komang D.">Komang D.</option>
+                <option value="Nyoman Sudiarta">Nyoman Sudiarta</option>
+              </select>
+              <button onclick="resetActivityFilters()" title="Reset Filter" class="p-2 text-outline hover:text-on-surface rounded-xl hover:bg-surface-container-high transition-colors">
+                <span class="material-symbols-outlined text-[18px]">refresh</span>
+              </button>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="exportActivitiesCsv()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-[12.5px] font-semibold text-primary transition-all">
+                <span class="material-symbols-outlined text-[18px]">download</span> Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Table of Activities -->
+          <div class="bg-white rounded-2xl border border-surface-container shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-[12.5px] border-collapse">
+                <thead>
+                  <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
+                    <th class="py-3 px-4">Activity ID</th>
+                    <th class="py-3 px-4">Tanggal & Mode</th>
+                    <th class="py-3 px-4">Pekerjaan & Deskripsi</th>
+                    <th class="py-3 px-4">Lokasi</th>
+                    <th class="py-3 px-4">Teknisi / Tim</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4">Catatan / Alasan</th>
+                    <th class="py-3 px-3 text-center">Ubah Status</th>
+                  </tr>
+                </thead>
+                <tbody id="activity-table-body" class="divide-y divide-surface-container">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+            <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline">
+              <span id="act-pagination-info">Menampilkan aktivitas tercatat (Google Sheets: tab ACTIVITIES)</span>
+              <div class="flex items-center gap-1" id="act-pagination-buttons">
+                <!-- Dynamically populated pagination -->
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- 4 KPI Cards (Activity) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Pekerjaan</span>
-              <div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
-                <span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
+        <!-- ================= SUB-TAB 2: LAPORAN WORK ORDER ================= -->
+        <div id="subtab-wo-content" class="hidden flex flex-col gap-6">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 class="text-[17px] font-bold text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary">task_alt</span> Laporan Work Order Lintas Departemen
+              </h2>
+              <p class="text-[12px] text-outline mt-0.5">Monitoring tiket permintaan kerja dari FO, HK, Security, Villa Manager, FnB, dan departemen lainnya.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <button onclick="exportWorkOrdersCsv()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-on-surface text-[13px] font-semibold shadow-sm transition-all">
+                <span class="material-symbols-outlined text-[18px] text-primary">download</span>
+                <span>Export CSV</span>
+              </button>
+              <button onclick="openModal('modal-work-order')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
+                <span class="material-symbols-outlined text-[18px] text-secondary-fixed">add_task</span>
+                <span>+ Buat Work Order Baru</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 KPI Cards (Work Orders) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Work Orders</span>
+                <div class="w-9 h-9 rounded-xl bg-surface-container-low flex items-center justify-center text-primary-container">
+                  <span class="material-symbols-outlined text-[20px]">assignment</span>
+                </div>
+              </div>
+              <div class="my-3 text-[28px] font-bold text-on-surface" id="wo-kpi-total">0</div>
+              <div class="pt-2 border-t border-surface-container flex items-center gap-1.5 text-[11px] text-outline">
+                Semua tiket terdaftar bulan ini
               </div>
             </div>
-            <div class="my-3 text-[28px] font-bold text-on-surface" id="act-kpi-total">148</div>
-            <div class="pt-2 border-t border-surface-container flex items-center gap-1.5 text-[12px] text-secondary font-semibold">
-              <span class="material-symbols-outlined text-[15px]">trending_up</span> +12.4% vs minggu lalu
-            </div>
-          </div>
 
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Selesai (Done)</span>
-              <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-on-secondary-container">
-                <span class="material-symbols-outlined text-[20px]">check_circle</span>
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Menunggu (Open)</span>
+                <div class="w-9 h-9 rounded-xl bg-error-container/50 flex items-center justify-center text-error">
+                  <span class="material-symbols-outlined text-[20px]">pending_actions</span>
+                </div>
+              </div>
+              <div class="my-3 flex items-baseline justify-between">
+                <span class="text-[28px] font-bold text-error" id="wo-kpi-open">0</span>
+                <span class="text-[12px] font-semibold text-outline" id="wo-kpi-open-pct">0%</span>
+              </div>
+              <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
+                <span class="px-2 py-0.5 rounded-full bg-error-container text-error font-semibold">Perlu Tindakan Cepat</span>
               </div>
             </div>
-            <div class="my-3 flex items-baseline justify-between">
-              <span class="text-[28px] font-bold text-on-surface" id="act-kpi-done">118</span>
-              <span class="text-[16px] font-bold text-secondary" id="act-kpi-percent">79.7%</span>
-            </div>
-            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
-              <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-semibold">Target Tercapai >75%</span>
-              <span class="text-outline">Formula AC-01</span>
-            </div>
-          </div>
 
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Dalam Pengerjaan</span>
-              <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
-                <span class="material-symbols-outlined text-[20px]">engineering</span>
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Dikerjakan (In Progress)</span>
+                <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
+                  <span class="material-symbols-outlined text-[20px]">engineering</span>
+                </div>
+              </div>
+              <div class="my-3 flex items-baseline justify-between">
+                <span class="text-[28px] font-bold text-primary" id="wo-kpi-progress">0</span>
+                <span class="text-[12px] font-semibold text-outline" id="wo-kpi-progress-pct">0%</span>
+              </div>
+              <div class="pt-2 border-t border-surface-container flex items-center gap-1 text-[11px] text-outline">
+                Sedang dalam penanganan teknisi
               </div>
             </div>
-            <div class="my-3 flex items-baseline justify-between">
-              <span class="text-[28px] font-bold text-on-surface" id="act-kpi-progress">22</span>
-              <span class="text-[15px] font-semibold text-outline">14.9%</span>
-            </div>
-            <div class="pt-2 border-t border-surface-container flex items-center gap-1 text-[11px] text-outline">
-              <span class="material-symbols-outlined text-[15px] text-primary">schedule</span> Akan dibawa ke periode berikutnya
-            </div>
-          </div>
 
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Tertunda (Pending)</span>
-              <div class="w-9 h-9 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-container">
-                <span class="material-symbols-outlined text-[20px]">error_outline</span>
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Selesai (Completed)</span>
+                <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-on-secondary-container">
+                  <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                </div>
+              </div>
+              <div class="my-3 flex items-baseline justify-between">
+                <span class="text-[28px] font-bold text-secondary" id="wo-kpi-completed">0</span>
+                <span class="text-[12px] font-semibold text-secondary" id="wo-kpi-completed-pct">0%</span>
+              </div>
+              <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
+                <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-semibold">Closed / Done</span>
               </div>
             </div>
-            <div class="my-3 flex items-baseline justify-between">
-              <span class="text-[28px] font-bold text-on-surface" id="act-kpi-pending">8</span>
-              <span class="text-[15px] font-semibold text-on-tertiary-container">5.4%</span>
-            </div>
-            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
-              <span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-container font-semibold">Wajib Catatan Alasan</span>
-              <span class="text-outline">Sec 5.2</span>
-            </div>
           </div>
-        </div>
 
-        <!-- Filter & Search Toolbar -->
-        <div class="bg-white rounded-2xl p-4 border border-surface-container shadow-sm flex flex-wrap items-center justify-between gap-3">
-          <div class="flex flex-wrap items-center gap-3 flex-1">
-            <div class="relative min-w-[240px]">
-              <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[18px]">search</span>
-              <input id="act-search" oninput="filterActivities()" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] focus:outline-none focus:bg-white border border-transparent focus:border-secondary/40" placeholder="Cari ID, aktivitas, deskripsi atau lokasi..." type="text"/>
+          <!-- Department Breakdown Summary -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="wo-dept-breakdown-grid">
+            <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+              <div class="text-[11px] text-outline font-semibold uppercase">Housekeeping (HK)</div>
+              <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-hk">0</div>
             </div>
-            <select id="act-filter-location" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
-              <option value="Semua Lokasi">Semua Lokasi</option>
-              <option value="Villa 12">Villa 12</option>
-              <option value="Central Plant">Central Plant</option>
-              <option value="Villa 08">Villa 08</option>
-              <option value="Genset House">Genset House</option>
-              <option value="Public Area">Public Area</option>
-              <option value="Kitchen">Kitchen</option>
-              <option value="Main Dining Pavilion">Main Dining Pavilion</option>
-            </select>
-            <select id="act-filter-status" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
-              <option value="Semua Status">Semua Status</option>
-              <option value="Done">Done (Selesai)</option>
-              <option value="In Progress">In Progress (Sedang Berjalan)</option>
-              <option value="Pending">Pending (Tertunda)</option>
-            </select>
-            <select id="act-filter-category" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
-              <option value="Semua Tipikal">Semua Tipikal</option>
-              <option value="IT">IT</option>
-              <option value="Electrical">Electrical</option>
-              <option value="Plumbing">Plumbing</option>
-              <option value="Civil">Civil</option>
-              <option value="Mechanical">Mechanical</option>
-            </select>
-            <select id="act-filter-worker" onchange="filterActivities()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
-              <option value="Semua Teknisi">Semua Teknisi</option>
-              <option value="Wayan G.">Wayan G.</option>
-              <option value="Made S.">Made S.</option>
-              <option value="Ketut A.">Ketut A.</option>
-              <option value="Komang D.">Komang D.</option>
-              <option value="Nyoman Sudiarta">Nyoman Sudiarta</option>
-            </select>
-            <button onclick="resetActivityFilters()" title="Reset Filter" class="p-2 text-outline hover:text-on-surface rounded-xl hover:bg-surface-container-high transition-colors">
-              <span class="material-symbols-outlined text-[18px]">refresh</span>
-            </button>
+            <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+              <div class="text-[11px] text-outline font-semibold uppercase">Front Office (FO)</div>
+              <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-fo">0</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+              <div class="text-[11px] text-outline font-semibold uppercase">Security</div>
+              <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-sec">0</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+              <div class="text-[11px] text-outline font-semibold uppercase">Villa Manager</div>
+              <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-vm">0</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+              <div class="text-[11px] text-outline font-semibold uppercase">F&B / Kitchen (FnB)</div>
+              <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-fb">0</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm text-center">
+              <div class="text-[11px] text-outline font-semibold uppercase">Internal Eng</div>
+              <div class="text-[20px] font-bold text-on-surface mt-1" id="wo-dept-eng">0</div>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="exportActivitiesCsv()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-[12.5px] font-semibold text-primary transition-all">
-              <span class="material-symbols-outlined text-[18px]">download</span> Export CSV
-            </button>
-          </div>
-        </div>
 
-        <!-- Table of Activities -->
-        <div class="bg-white rounded-2xl border border-surface-container shadow-sm overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-[12.5px] border-collapse">
-              <thead>
-                <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
-                  <th class="py-3 px-4">Activity ID</th>
-                  <th class="py-3 px-4">Tanggal & Mode</th>
-                  <th class="py-3 px-4">Pekerjaan & Deskripsi</th>
-                  <th class="py-3 px-4">Lokasi</th>
-                  <th class="py-3 px-4">Teknisi / Tim</th>
-                  <th class="py-3 px-4">Status</th>
-                  <th class="py-3 px-4">Catatan / Alasan</th>
-                  <th class="py-3 px-3 text-center">Ubah Status</th>
-                </tr>
-              </thead>
-              <tbody id="activity-table-body" class="divide-y divide-surface-container">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
+          <!-- Filter & Search Toolbar (Work Orders) -->
+          <div class="bg-white rounded-2xl p-4 border border-surface-container shadow-sm flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3 flex-1">
+              <div class="relative min-w-[220px]">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[18px]">search</span>
+                <input id="wo-search" oninput="filterWorkOrders()" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] focus:outline-none focus:bg-white border border-transparent focus:border-secondary/40" placeholder="Cari WO ID, judul, lokasi, PIC..." type="text"/>
+              </div>
+              <select id="wo-filter-dept" onchange="filterWorkOrders()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+                <option value="Semua Departemen">Semua Departemen</option>
+                <option value="FO">Front Office (FO)</option>
+                <option value="HK">Housekeeping (HK)</option>
+                <option value="Security">Security</option>
+                <option value="Villa Manager">Villa Manager</option>
+                <option value="FnB">F&B / Kitchen (FnB)</option>
+                <option value="Engineering Internal">Engineering Internal</option>
+              </select>
+              <select id="wo-filter-cat" onchange="filterWorkOrders()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+                <option value="Semua Tipikal">Semua Tipikal</option>
+                <option value="IT">IT</option>
+                <option value="Electrical">Electrical</option>
+                <option value="Plumbing">Plumbing</option>
+                <option value="Civil">Civil</option>
+                <option value="Mechanical">Mechanical</option>
+              </select>
+              <select id="wo-filter-status" onchange="filterWorkOrders()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+                <option value="Semua Status">Semua Status</option>
+                <option value="Open">Open (Menunggu)</option>
+                <option value="In Progress">In Progress (Dikerjakan)</option>
+                <option value="Completed">Completed (Selesai)</option>
+                <option value="Pending">Pending (Tertunda)</option>
+              </select>
+            </div>
+            <button onclick="resetWorkOrderFilters()" class="text-[12px] text-outline hover:text-primary underline">Reset Filter</button>
           </div>
-          <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline">
-            <span id="act-pagination-info">Menampilkan aktivitas tercatat (Google Sheets: tab ACTIVITIES)</span>
-            <div class="flex items-center gap-1" id="act-pagination-buttons">
-              <!-- Dynamically populated pagination -->
+
+          <!-- Work Orders Table -->
+          <div class="bg-white rounded-2xl border border-surface-container shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-[12.5px] border-collapse">
+                <thead>
+                  <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
+                    <th class="py-3 px-4">WO ID</th>
+                    <th class="py-3 px-4">Tanggal</th>
+                    <th class="py-3 px-4">Pengaju (Dept)</th>
+                    <th class="py-3 px-4">Lokasi</th>
+                    <th class="py-3 px-4">Uraian Masalah</th>
+                    <th class="py-3 px-4">Tipikal</th>
+                    <th class="py-3 px-4">Prioritas</th>
+                    <th class="py-3 px-4">PIC Teknisi</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="workorder-table-body" class="divide-y divide-surface-container">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+            <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline bg-surface-container-low/30">
+              <span id="wo-table-count">Menampilkan 0 Work Orders</span>
             </div>
           </div>
         </div>
@@ -1574,13 +1586,19 @@
             <input id="form-wo-date" type="date" required value="2026-05-19" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
           </div>
           <div>
-            <label class="block text-outline font-semibold mb-1">Work Order Dari *</label>
-            <select id="form-wo-dept" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
-              <option value="Housekeeping">Housekeeping</option>
-              <option value="Front Office">Front Office</option>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-outline font-semibold">Work Order Dari *</label>
+              <button type="button" onclick="promptAddDepartment()" class="text-[11px] font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors px-1.5 py-0.5 rounded-lg hover:bg-secondary-container/40">
+                <span class="material-symbols-outlined text-[14px]">add_circle</span>
+                <span>+ Tambah Dept</span>
+              </button>
+            </div>
+            <select id="form-wo-dept" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none font-medium text-on-surface">
+              <option value="FO">Front Office (FO)</option>
+              <option value="HK">Housekeeping (HK)</option>
               <option value="Security">Security</option>
               <option value="Villa Manager">Villa Manager</option>
-              <option value="F&B / Kitchen">F&B / Kitchen</option>
+              <option value="FnB">F&B / Kitchen (FnB)</option>
               <option value="Engineering Internal">Engineering Internal</option>
             </select>
           </div>
@@ -2669,6 +2687,11 @@
 
     // Navigation Handler
     window.navigateTo = function(viewId) {
+      if (viewId === 'work-orders') {
+        navigateTo('activity-report');
+        switchActivityTab('wo');
+        return;
+      }
       state.activeView = viewId;
       document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
       const activePanel = document.getElementById('view-' + viewId);
@@ -2686,6 +2709,37 @@
 
       if (viewId === 'report-generator') {
         previewReport();
+      }
+    };
+
+    // Subtab switcher inside Activity Report
+    window.switchActivityTab = function(tab) {
+      state.activitySubTab = tab;
+      const actSec = document.getElementById('subtab-activity-content');
+      const woSec = document.getElementById('subtab-wo-content');
+      const btnAct = document.getElementById('tab-btn-activity');
+      const btnWo = document.getElementById('tab-btn-wo');
+
+      if (tab === 'wo') {
+        if (actSec) actSec.classList.add('hidden');
+        if (woSec) woSec.classList.remove('hidden');
+        if (btnAct) {
+          btnAct.className = 'px-4 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-2 transition-all font-semibold';
+        }
+        if (btnWo) {
+          btnWo.className = 'px-4 py-2 rounded-xl bg-white text-primary shadow-sm flex items-center gap-2 transition-all font-bold';
+        }
+        renderWorkOrders();
+      } else {
+        if (actSec) actSec.classList.remove('hidden');
+        if (woSec) woSec.classList.add('hidden');
+        if (btnAct) {
+          btnAct.className = 'px-4 py-2 rounded-xl bg-white text-primary shadow-sm flex items-center gap-2 transition-all font-bold';
+        }
+        if (btnWo) {
+          btnWo.className = 'px-4 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-2 transition-all font-semibold';
+        }
+        renderActivityPage();
       }
     };
 
@@ -3536,14 +3590,112 @@
       const elProgPct = document.getElementById('wo-kpi-progress-pct'); if (elProgPct) elProgPct.innerText = `${Math.round(((kpis.inProgress || 0) / total) * 100)}%`;
       const elCompPct = document.getElementById('wo-kpi-completed-pct'); if (elCompPct) elCompPct.innerText = `${Math.round(((kpis.completed || 0) / total) * 100)}%`;
 
-      if (kpis.byDept) {
-        const dHk = document.getElementById('wo-dept-hk'); if (dHk) dHk.innerText = kpis.byDept.hk || 0;
-        const dFo = document.getElementById('wo-dept-fo'); if (dFo) dFo.innerText = kpis.byDept.fo || 0;
-        const dSec = document.getElementById('wo-dept-sec'); if (dSec) dSec.innerText = kpis.byDept.sec || 0;
-        const dVm = document.getElementById('wo-dept-vm'); if (dVm) dVm.innerText = kpis.byDept.vm || 0;
-        const dFb = document.getElementById('wo-dept-fb'); if (dFb) dFb.innerText = kpis.byDept.fb || 0;
-        const dEng = document.getElementById('wo-dept-eng'); if (dEng) dEng.innerText = kpis.byDept.eng || 0;
+      // Update badge di tombol subtab Activity Report
+      const subBadge = document.getElementById('wo-subtab-badge');
+      if (subBadge) subBadge.innerText = kpis.total || (state.workOrders ? state.workOrders.length : 0);
+
+      // Hitung rincian per departemen dari state.workOrders
+      const wos = state.workOrders || [];
+      const dHk = document.getElementById('wo-dept-hk');
+      const dFo = document.getElementById('wo-dept-fo');
+      const dSec = document.getElementById('wo-dept-sec');
+      const dVm = document.getElementById('wo-dept-vm');
+      const dFb = document.getElementById('wo-dept-fb');
+      const dEng = document.getElementById('wo-dept-eng');
+
+      if (dHk) dHk.innerText = wos.filter(w => {
+        const d = (w.department || '').toLowerCase();
+        return d.includes('housekeeping') || d === 'hk';
+      }).length;
+
+      if (dFo) dFo.innerText = wos.filter(w => {
+        const d = (w.department || '').toLowerCase();
+        return d.includes('front office') || d === 'fo';
+      }).length;
+
+      if (dSec) dSec.innerText = wos.filter(w => (w.department || '').toLowerCase().includes('security')).length;
+
+      if (dVm) dVm.innerText = wos.filter(w => {
+        const d = (w.department || '').toLowerCase();
+        return d.includes('villa manager') || d === 'vm';
+      }).length;
+
+      if (dFb) dFb.innerText = wos.filter(w => {
+        const d = (w.department || '').toLowerCase();
+        return d.includes('f&b') || d.includes('kitchen') || d === 'fnb';
+      }).length;
+
+      if (dEng) dEng.innerText = wos.filter(w => {
+        const d = (w.department || '').toLowerCase();
+        return d.includes('engineering') || d === 'eng';
+      }).length;
+    }
+
+    // Dynamic Department Manager
+    window.promptAddDepartment = function() {
+      const deptName = prompt('Tambah Departemen Pemohon Work Order:\nMasukkan nama departemen (contoh: Spa & Wellness, Sales & Marketing, Accounting, Landscape):');
+      if (!deptName || !deptName.trim()) return;
+      const clean = deptName.trim();
+      addDepartmentOption(clean, true);
+      showToast(`Departemen "${clean}" berhasil ditambahkan!`);
+    };
+
+    function addDepartmentOption(deptName, autoSelect = false) {
+      if (!deptName) return;
+      let customDepts = [];
+      try {
+        customDepts = JSON.parse(localStorage.getItem('agranusa_custom_depts') || '[]');
+      } catch (e) {}
+
+      if (!customDepts.includes(deptName)) {
+        customDepts.push(deptName);
+        localStorage.setItem('agranusa_custom_depts', JSON.stringify(customDepts));
       }
+
+      // Tambahkan ke dropdown select di Modal Work Order
+      const select = document.getElementById('form-wo-dept');
+      if (select) {
+        let exists = false;
+        for (let i = 0; i < select.options.length; i++) {
+          if (select.options[i].value.toLowerCase() === deptName.toLowerCase()) {
+            exists = true;
+            if (autoSelect) select.selectedIndex = i;
+            break;
+          }
+        }
+        if (!exists) {
+          const opt = document.createElement('option');
+          opt.value = deptName;
+          opt.textContent = deptName;
+          select.appendChild(opt);
+          if (autoSelect) opt.selected = true;
+        }
+      }
+
+      // Tambahkan ke filter dropdown tabel Work Order
+      const filterSelect = document.getElementById('wo-filter-dept');
+      if (filterSelect) {
+        let exists = false;
+        for (let i = 0; i < filterSelect.options.length; i++) {
+          if (filterSelect.options[i].value.toLowerCase() === deptName.toLowerCase()) {
+            exists = true;
+            break;
+          }
+        }
+        if (!exists) {
+          const opt = document.createElement('option');
+          opt.value = deptName;
+          opt.textContent = deptName;
+          filterSelect.appendChild(opt);
+        }
+      }
+    }
+
+    function initCustomDepartments() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('agranusa_custom_depts') || '[]');
+        saved.forEach(d => addDepartmentOption(d, false));
+      } catch (e) {}
     }
 
     window.filterWorkOrders = function() {
@@ -3557,7 +3709,17 @@
       const status = statusSelect ? statusSelect.value : 'Semua Status';
 
       state.filteredWorkOrders = state.workOrders.filter(w => {
-        if (dept !== 'Semua Departemen' && w.department !== dept) return false;
+        if (dept !== 'Semua Departemen') {
+          const wDept = (w.department || '').toLowerCase();
+          const dFilter = dept.toLowerCase();
+          const isMatch = wDept === dFilter ||
+            (dFilter === 'fo' && (wDept.includes('front office') || wDept === 'fo')) ||
+            (dFilter === 'hk' && (wDept.includes('housekeeping') || wDept === 'hk')) ||
+            (dFilter === 'fnb' && (wDept.includes('f&b') || wDept.includes('kitchen') || wDept === 'fnb')) ||
+            (dFilter.includes('engineering') && wDept.includes('engineering')) ||
+            wDept.includes(dFilter);
+          if (!isMatch) return false;
+        }
         if (cat !== 'Semua Tipikal' && (w.job_category || '') !== cat) return false;
         if (status !== 'Semua Status' && !w.status.includes(status)) return false;
         if (q) {
@@ -3677,8 +3839,11 @@
 
       if (res && res.success) {
         closeModal('modal-work-order');
+        e.target.reset();
+        document.getElementById('form-wo-date').value = '2026-05-19';
         showToast(res.message);
         loadAllData();
+        switchActivityTab('wo');
       }
     };
 
@@ -4310,6 +4475,7 @@
         }
       });
       initPwa();
+      initCustomDepartments();
       loadAllData();
     });
   </script>
