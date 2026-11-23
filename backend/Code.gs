@@ -19,6 +19,7 @@ const ALL_SCHEMAS = {
   ENERGY_DAILY: ['energy_record_id', 'category', 'record_date', 'input_method', 'usage_value', 'meter_reading', 'unit', 'tariff_id', 'calculated_cost', 'validation_status', 'notes', 'created_at', 'updated_at'],
   OPEX_DAILY: ['opex_id', 'record_date', 'reporting_period', 'category', 'item_name', 'qty', 'unit', 'unit_price', 'total_amount', 'vendor', 'receipt_no', 'notes', 'created_at', 'updated_at'],
   PURCHASE_SUMMARY: ['purchase_summary_id', 'reporting_period', 'total_amount', 'description', 'notes', 'created_at', 'updated_at'],
+  ASSETS: ['asset_id', 'asset_name', 'category', 'location_id', 'purchase_date', 'purchase_cost', 'useful_life_years', 'status', 'notes', 'created_at', 'updated_at'],
   MONTHLY_REPORTS: ['report_id', 'reporting_period', 'report_status', 'generated_at', 'generated_by', 'pdf_file_reference', 'data_version'],
   EVALUATION_RESULTS: ['evaluation_id', 'reporting_period', 'evaluation_category', 'title', 'finding', 'actual_value', 'comparison_value', 'severity', 'recommendation', 'generated_at'],
   AUDIT_LOG: ['audit_id', 'user_id', 'action', 'entity_type', 'entity_id', 'previous_value', 'new_value', 'timestamp']
@@ -79,7 +80,7 @@ function ensureTab(tabName) {
 }
 
 function ensureAllNewTabs() {
-  ['ENERGY_LISTRIK', 'ENERGY_AIR', 'ENERGY_FUEL', 'ENERGY_GAS', 'WORK_ORDERS', 'OPEX_DAILY'].forEach(t => ensureTab(t));
+  ['ENERGY_LISTRIK', 'ENERGY_AIR', 'ENERGY_FUEL', 'ENERGY_GAS', 'WORK_ORDERS', 'OPEX_DAILY', 'ASSETS'].forEach(t => ensureTab(t));
 }
 
 function getTableData(tabName) {
@@ -312,6 +313,7 @@ function dispatchAction(action, payload) {
         },
         energy: { data: energyRecords },
         workOrders: { kpis: { total: woTotal, open: woOpen, inProgress: woProg, completed: woComp, pending: woPend, byDept: woByDept }, data: workOrders },
+        assets: { data: getTableData('ASSETS') },
         opexDaily: {
           kpis: {
             totalAmount: opexTotal,
@@ -981,6 +983,37 @@ function dispatchAction(action, payload) {
     case 'opex.update': {
       updateTableRow('OPEX_DAILY', 'opex_id', payload.opex_id, payload);
       return { success: true, message: `Data Opex ${payload.opex_id} berhasil diperbarui!` };
+    }
+
+    case 'asset.list': {
+      const assets = getTableData('ASSETS');
+      return { success: true, data: assets };
+    }
+
+    case 'asset.create': {
+      const existing = getTableData('ASSETS');
+      const prefix = payload.category === 'AC' ? 'AC' : (payload.category === 'Mesin' ? 'MSN' : (payload.category === 'Audio' ? 'AUD' : (payload.category === 'Televisi' ? 'TV' : 'ELK')));
+      const nextId = 'AST-' + prefix + '-' + String(existing.length + 1).padStart(3, '0');
+      const newRow = {
+        asset_id: nextId,
+        asset_name: payload.asset_name || 'Asset Baru',
+        category: payload.category || 'Elektronik',
+        location_id: payload.location_id || 'Public Area',
+        purchase_date: payload.purchase_date || '2026-01-01',
+        purchase_cost: parseFloat(payload.purchase_cost) || 0,
+        useful_life_years: parseFloat(payload.useful_life_years) || 5,
+        status: payload.status || 'Baik / Normal',
+        notes: payload.notes || '-',
+        created_at: now,
+        updated_at: now
+      };
+      appendTableRow('ASSETS', newRow);
+      return { success: true, message: `Asset ${nextId} (${newRow.asset_name}) berhasil dicatat!`, data: newRow };
+    }
+
+    case 'asset.update': {
+      updateTableRow('ASSETS', 'asset_id', payload.asset_id, payload);
+      return { success: true, message: `Asset ${payload.asset_id} berhasil diperbarui!` };
     }
 
     case 'evaluation.get':

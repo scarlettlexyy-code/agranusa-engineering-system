@@ -106,13 +106,13 @@
           <span class="material-symbols-outlined text-[20px]">bolt</span>
           <span>Energy Consumption</span>
         </button>
-        <button onclick="navigateTo('daily-opex')" data-path="daily-opex" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
+        <button onclick="navigateTo('opex'); switchOpexTab('daily');" data-path="opex" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
           <span class="material-symbols-outlined text-[20px]">payments</span>
-          <span>Opex Harian</span>
+          <span>OPEX</span>
         </button>
-        <button onclick="navigateTo('monthly-purchase')" data-path="monthly-purchase" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
-          <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
-          <span>Monthly Purchase</span>
+        <button onclick="navigateTo('asset-management')" data-path="asset-management" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
+          <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+          <span>Asset Management</span>
         </button>
 
         <div class="text-[10.5px] uppercase tracking-wider text-on-primary-container/80 px-3 pt-4 pb-1 font-semibold">Reporting & Insights</div>
@@ -1216,115 +1216,325 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- VIEW: DAILY OPEX DASHBOARD (MODUL E.1) -->
+      <!-- VIEW: OPEX (BIAYA OPERASIONAL: DAILY & MONTHLY) -->
       <!-- ========================================== -->
-      <section id="view-daily-opex" class="view-panel hidden flex flex-col gap-6">
+      <section id="view-opex" class="view-panel hidden flex flex-col gap-6">
+        <!-- Main Header with Subtab Navigation Switcher -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-surface-container pb-4">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h1 class="text-[26px] font-bold text-primary tracking-tight">Biaya Operasional (OPEX)</h1>
+              <span class="px-2.5 py-0.5 rounded-full bg-secondary-container/50 text-on-secondary-container text-[11px] font-semibold">
+                Operational Expenditure
+              </span>
+            </div>
+            <p class="text-[13px] text-outline mt-0.5">Monitoring seluruh pengeluaran harian dan rekapitulasi belanja bulanan (cukup memasukkan nominal tanpa detail barang).</p>
+          </div>
+
+          <!-- Sub-Tabs: Pengeluaran Harian VS Belanja Bulanan -->
+          <div class="inline-flex p-1 rounded-2xl bg-surface-container-high/80 text-[13px] font-bold shadow-inner" id="opex-subtabs">
+            <button id="tab-btn-daily-opex" onclick="switchOpexTab('daily')" class="px-4 py-2 rounded-xl bg-white text-primary shadow-sm flex items-center gap-2 transition-all font-bold">
+              <span class="material-symbols-outlined text-[19px]">payments</span>
+              <span>Pengeluaran Harian</span>
+            </button>
+            <button id="tab-btn-monthly-purchase" onclick="switchOpexTab('purchase')" class="px-4 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-2 transition-all font-semibold">
+              <span class="material-symbols-outlined text-[19px]">shopping_bag</span>
+              <span>Belanja Bulanan</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ================= SUB-TAB 1: PENGELUARAN HARIAN (DAILY OPEX) ================= -->
+        <div id="subtab-daily-opex-content" class="flex flex-col gap-6">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 class="text-[17px] font-bold text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary">today</span> Catatan Pengeluaran Harian
+              </h2>
+              <p class="text-[12px] text-outline mt-0.5">Input nominal total biaya pengeluaran operasional setiap hari tanpa perlu rincian material satu per satu.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <button onclick="exportDailyOpexCsv()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-on-surface text-[13px] font-semibold shadow-sm transition-all">
+                <span class="material-symbols-outlined text-[18px] text-primary">download</span>
+                <span>Export CSV</span>
+              </button>
+              <button onclick="openModal('modal-daily-opex')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
+                <span class="material-symbols-outlined text-[18px] text-secondary-fixed">add_circle</span>
+                <span>+ Catat Pengeluaran Hari Ini</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 KPI Cards (Opex Harian) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Opex Bulan Ini</span>
+                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <span class="material-symbols-outlined text-[20px]">payments</span>
+                </div>
+              </div>
+              <div class="my-3 text-[26px] font-bold text-primary" id="opex-kpi-total">Rp 0</div>
+              <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
+                <span>Akumulasi berjalan</span>
+                <span class="font-semibold text-secondary">Periode Aktif</span>
+              </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Pengeluaran Hari Ini</span>
+                <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-on-secondary-container">
+                  <span class="material-symbols-outlined text-[20px]">today</span>
+                </div>
+              </div>
+              <div class="my-3 text-[26px] font-bold text-on-surface" id="opex-kpi-today">Rp 0</div>
+              <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
+                <span id="opex-today-badge">19 Mei 2026</span>
+                <span class="text-secondary font-semibold">Realtime</span>
+              </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Rata-Rata per Hari</span>
+                <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
+                  <span class="material-symbols-outlined text-[20px]">show_chart</span>
+                </div>
+              </div>
+              <div class="my-3 text-[26px] font-bold text-on-surface" id="opex-kpi-avg">Rp 0</div>
+              <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
+                <span>Rerata hari aktif</span>
+                <span class="text-outline">Rasio Efisiensi</span>
+              </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Jumlah Hari Tercatat</span>
+                <div class="w-9 h-9 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-container">
+                  <span class="material-symbols-outlined text-[20px]">calendar_today</span>
+                </div>
+              </div>
+              <div class="my-3 text-[26px] font-bold text-on-surface" id="opex-kpi-count">0</div>
+              <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
+                <span>Hari aktif transaksi</span>
+                <span class="text-on-tertiary-container font-semibold">Tercatat</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar -->
+          <div class="bg-white rounded-2xl p-4 border border-surface-container shadow-sm flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3 flex-1">
+              <div class="relative min-w-[220px]">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[18px]">search</span>
+                <input id="opex-search" oninput="filterDailyOpex()" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] focus:outline-none focus:bg-white border border-transparent focus:border-secondary/40" placeholder="Cari keterangan, catatan, ID..." type="text"/>
+              </div>
+              <input id="opex-filter-date" type="date" onchange="filterDailyOpex()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent" title="Filter Tanggal Tertentu"/>
+            </div>
+            <button onclick="resetDailyOpexFilters()" class="text-[12px] text-outline hover:text-primary underline">Reset Filter</button>
+          </div>
+
+          <!-- Daily Opex Table (Simple Nominal) -->
+          <div class="bg-white rounded-2xl border border-surface-container shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-[12.5px] border-collapse">
+                <thead>
+                  <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
+                    <th class="py-3 px-4">Opex ID</th>
+                    <th class="py-3 px-4">Tanggal</th>
+                    <th class="py-3 px-4">Total Pengeluaran (Rp)</th>
+                    <th class="py-3 px-4">Keterangan / Catatan Pengeluaran</th>
+                    <th class="py-3 px-4">Periode</th>
+                    <th class="py-3 px-4 text-center">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="daily-opex-table-body" class="divide-y divide-surface-container">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+            <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline bg-surface-container-low/30">
+              <span id="daily-opex-table-count">Menampilkan 0 Catatan Pengeluaran</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SUB-TAB 2: BELANJA BULANAN (MONTHLY PURCHASE) ================= -->
+        <div id="subtab-monthly-purchase-content" class="hidden flex flex-col gap-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-[17px] font-bold text-primary flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary">shopping_bag</span> Ringkasan Belanja Bulanan
+              </h2>
+              <p class="text-[12px] text-outline mt-0.5">Pencatatan total belanja operasional bulanan (cukup memasukkan nominal tanpa detail barang).</p>
+            </div>
+            <button onclick="openModal('modal-purchase')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-[13px] font-semibold shadow-sm hover:bg-primary-container transition-all">
+              <span class="material-symbols-outlined text-[18px]">add_circle</span>
+              <span>+ Input / Update Belanja Bulan Ini</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="p-6 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Belanja Bulan Ini (<span id="pur-period-title">Mei 2026</span>)</span>
+              <div class="my-4 text-[30px] font-bold text-primary" id="pur-current-amount">Rp 35.400.000</div>
+              <div class="p-3 rounded-xl bg-surface-container-low text-[12px] text-outline" id="pur-current-desc">
+                Belanja suku cadang perbaikan kolam, mechanical seal pompa, pelumas genset, dan chemical pool.
+              </div>
+            </div>
+            <div class="p-6 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Belanja Bulan Lalu</span>
+              <div class="my-4 text-[30px] font-bold text-on-surface" id="pur-prev-amount">Rp 32.500.000</div>
+              <div class="p-3 rounded-xl bg-surface-container-low text-[12px] text-outline" id="pur-prev-desc">
+                Realisasi belanja suku cadang AC dan operasional bulan sebelumnya.
+              </div>
+            </div>
+            <div class="p-6 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Perbandingan & Selisih</span>
+              <div class="my-4 flex items-baseline gap-2">
+                <span class="text-[28px] font-bold text-secondary" id="pur-diff-amount">+Rp 2.900.000</span>
+                <span class="text-[14px] font-semibold text-secondary" id="pur-diff-percent">(+8.9%)</span>
+              </div>
+              <div class="p-3 rounded-xl bg-secondary-container/20 border border-secondary-container text-[12px] text-secondary font-semibold" id="pur-status-box">
+                Status Belanja: Terkendali (Hemat dari alokasi budget Opex).
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW: ASSET MANAGEMENT (MONITORING ASSET VILLA) -->
+      <!-- ========================================== -->
+      <section id="view-asset-management" class="view-panel hidden flex flex-col gap-6">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2.5">
-              <h1 class="text-[26px] font-bold text-primary tracking-tight">Dashboard Opex Harian</h1>
+              <h1 class="text-[26px] font-bold text-primary tracking-tight">Monitoring Asset Villa & Depresiasi</h1>
               <span class="px-2.5 py-0.5 rounded-full bg-secondary-container/50 text-on-secondary-container text-[11px] font-semibold">
-                Daily Operating Expenses
+                Villa Asset Tracking
               </span>
             </div>
-            <p class="text-[13px] text-outline mt-0.5">Pencatatan rincian biaya pemakaian & belanja operasional harian teknisi Agranusa Signature Villa.</p>
+            <p class="text-[13px] text-outline mt-0.5">Pemantauan inventaris aset villa, kalkulasi otomatis penyusutan/depresiasi garis lurus, dan monitoring barang rusak.</p>
           </div>
           <div class="flex flex-wrap items-center gap-3">
-            <button onclick="navigateTo('monthly-purchase')" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-on-surface text-[13px] font-semibold shadow-sm transition-all">
-              <span class="material-symbols-outlined text-[18px] text-primary">calendar_month</span>
-              <span>Rekap Belanja Bulanan</span>
-            </button>
-            <button onclick="exportDailyOpexCsv()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-on-surface text-[13px] font-semibold shadow-sm transition-all">
+            <button onclick="exportAssetsCsv()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-on-surface text-[13px] font-semibold shadow-sm transition-all">
               <span class="material-symbols-outlined text-[18px] text-primary">download</span>
               <span>Export CSV</span>
             </button>
-            <button onclick="openModal('modal-daily-opex')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
+            <button onclick="openModal('modal-asset')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
               <span class="material-symbols-outlined text-[18px] text-secondary-fixed">add_circle</span>
-              <span>+ Input Opex Harian</span>
+              <span>+ Tambah Asset Baru</span>
             </button>
           </div>
         </div>
 
-        <!-- 4 KPI Cards (Opex Harian) -->
+        <!-- 4 Top KPI Cards (Asset Valuation & Health) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
             <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Opex Bulan Ini</span>
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Nilai Perolehan</span>
               <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                <span class="material-symbols-outlined text-[20px]">payments</span>
+                <span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
               </div>
             </div>
-            <div class="my-3 text-[26px] font-bold text-primary" id="opex-kpi-total">Rp 0</div>
+            <div class="my-3 text-[24px] font-bold text-on-surface" id="asset-kpi-cost">Rp 0</div>
             <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
-              <span>Akumulasi berjalan</span>
-              <span class="font-semibold text-secondary">Periode Mei 2026</span>
+              <span>Akumulasi harga beli</span>
+              <span class="font-semibold text-primary" id="asset-kpi-count-total">0 Unit</span>
             </div>
           </div>
 
           <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
             <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Pengeluaran Hari Ini</span>
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Akumulasi Depresiasi</span>
+              <div class="w-9 h-9 rounded-xl bg-tertiary-fixed/60 flex items-center justify-center text-on-tertiary-container">
+                <span class="material-symbols-outlined text-[20px]">trending_down</span>
+              </div>
+            </div>
+            <div class="my-3 text-[24px] font-bold text-tertiary" id="asset-kpi-deprec">Rp 0</div>
+            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
+              <span>Penyusutan berjalan</span>
+              <span class="font-semibold text-outline" id="asset-kpi-deprec-pct">0%</span>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Nilai Buku Saat Ini</span>
               <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-on-secondary-container">
-                <span class="material-symbols-outlined text-[20px]">today</span>
+                <span class="material-symbols-outlined text-[20px]">verified</span>
               </div>
             </div>
-            <div class="my-3 text-[26px] font-bold text-on-surface" id="opex-kpi-today">Rp 0</div>
+            <div class="my-3 text-[24px] font-bold text-secondary" id="asset-kpi-bookvalue">Rp 0</div>
             <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
-              <span id="opex-today-badge">19 Mei 2026</span>
-              <span class="text-secondary font-semibold">Realtime</span>
+              <span>Net Book Value</span>
+              <span class="text-secondary font-semibold">Real Asset Value</span>
             </div>
           </div>
 
           <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
             <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Rata-Rata per Hari</span>
-              <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
-                <span class="material-symbols-outlined text-[20px]">show_chart</span>
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Barang Rusak / Perbaikan</span>
+              <div class="w-9 h-9 rounded-xl bg-error-container flex items-center justify-center text-error">
+                <span class="material-symbols-outlined text-[20px]">warning</span>
               </div>
             </div>
-            <div class="my-3 text-[26px] font-bold text-on-surface" id="opex-kpi-avg">Rp 0</div>
-            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
-              <span>Rerata hari aktif</span>
-              <span class="text-outline">AC-05</span>
-            </div>
-          </div>
-
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Jumlah Transaksi</span>
-              <div class="w-9 h-9 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-container">
-                <span class="material-symbols-outlined text-[20px]">receipt_long</span>
-              </div>
-            </div>
-            <div class="my-3 text-[26px] font-bold text-on-surface" id="opex-kpi-count">0</div>
-            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
-              <span>Struk & nota tercatat</span>
-              <span class="text-on-tertiary-container font-semibold">Valid</span>
+            <div class="my-3 text-[24px] font-bold text-error" id="asset-kpi-damaged">0 Unit</div>
+            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
+              <span class="text-outline">Perlu Penanganan</span>
+              <span class="px-2 py-0.5 rounded-full bg-error-container text-error font-semibold text-[10px]" id="asset-kpi-repair-detail">0 Rusak • 0 Perbaikan</span>
             </div>
           </div>
         </div>
 
-        <!-- Category Breakdown Cards -->
+        <!-- 5 Category Breakdown Summary (Mesin, Audio, Televisi, Elektronik, AC) -->
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm">
-            <div class="text-[11px] text-outline font-semibold uppercase">Material / Sparepart</div>
-            <div class="text-[16px] font-bold text-primary mt-1" id="opex-cat-sparepart">Rp 0</div>
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-[18px]">⚙️</div>
+            <div>
+              <div class="text-[11px] text-outline font-semibold uppercase">Mesin</div>
+              <div class="text-[16px] font-bold text-on-surface" id="asset-cat-mesin">0 Unit</div>
+              <div class="text-[10px] text-outline truncate" id="asset-cat-cost-mesin">Rp 0</div>
+            </div>
           </div>
-          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm">
-            <div class="text-[11px] text-outline font-semibold uppercase">Chemical & Pool</div>
-            <div class="text-[16px] font-bold text-secondary mt-1" id="opex-cat-chemical">Rp 0</div>
+
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center text-[18px]">🔊</div>
+            <div>
+              <div class="text-[11px] text-outline font-semibold uppercase">Audio</div>
+              <div class="text-[16px] font-bold text-on-surface" id="asset-cat-audio">0 Unit</div>
+              <div class="text-[10px] text-outline truncate" id="asset-cat-cost-audio">Rp 0</div>
+            </div>
           </div>
-          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm">
-            <div class="text-[11px] text-outline font-semibold uppercase">Perbaikan / Repair</div>
-            <div class="text-[16px] font-bold text-error mt-1" id="opex-cat-repair">Rp 0</div>
+
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-[18px]">📺</div>
+            <div>
+              <div class="text-[11px] text-outline font-semibold uppercase">Televisi</div>
+              <div class="text-[16px] font-bold text-on-surface" id="asset-cat-tv">0 Unit</div>
+              <div class="text-[10px] text-outline truncate" id="asset-cat-cost-tv">Rp 0</div>
+            </div>
           </div>
-          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm">
-            <div class="text-[11px] text-outline font-semibold uppercase">Perlengkapan / Tools</div>
-            <div class="text-[16px] font-bold text-on-surface mt-1" id="opex-cat-tools">Rp 0</div>
+
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-[18px]">⚡</div>
+            <div>
+              <div class="text-[11px] text-outline font-semibold uppercase">Elektronik</div>
+              <div class="text-[16px] font-bold text-on-surface" id="asset-cat-elektronik">0 Unit</div>
+              <div class="text-[10px] text-outline truncate" id="asset-cat-cost-elektronik">Rp 0</div>
+            </div>
           </div>
-          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm">
-            <div class="text-[11px] text-outline font-semibold uppercase">Operasional Umum</div>
-            <div class="text-[16px] font-bold text-on-surface-variant mt-1" id="opex-cat-general">Rp 0</div>
+
+          <div class="p-3.5 rounded-xl bg-white border border-surface-container shadow-sm flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center text-[18px]">❄️</div>
+            <div>
+              <div class="text-[11px] text-outline font-semibold uppercase">AC</div>
+              <div class="text-[16px] font-bold text-on-surface" id="asset-cat-ac">0 Unit</div>
+              <div class="text-[10px] text-outline truncate" id="asset-cat-cost-ac">Rp 0</div>
+            </div>
           </div>
         </div>
 
@@ -1333,92 +1543,53 @@
           <div class="flex flex-wrap items-center gap-3 flex-1">
             <div class="relative min-w-[220px]">
               <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[18px]">search</span>
-              <input id="opex-search" oninput="filterDailyOpex()" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] focus:outline-none focus:bg-white border border-transparent focus:border-secondary/40" placeholder="Cari nama barang, vendor, no nota..." type="text"/>
+              <input id="asset-search" oninput="filterAssets()" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] focus:outline-none focus:bg-white border border-transparent focus:border-secondary/40" placeholder="Cari Asset ID, nama, lokasi, catatan..." type="text"/>
             </div>
-            <select id="opex-filter-cat" onchange="filterDailyOpex()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
-              <option value="Semua Kategori">Semua Kategori</option>
-              <option value="Material / Sparepart">Material / Sparepart</option>
-              <option value="Chemical & Pool">Chemical & Pool</option>
-              <option value="Perbaikan / Repair">Perbaikan / Repair</option>
-              <option value="Perlengkapan / Tools">Perlengkapan / Tools</option>
-              <option value="Operasional Umum">Operasional Umum</option>
+            <select id="asset-filter-cat" onchange="filterAssets()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+              <option value="Semua Kategori">Semua Kategori (5)</option>
+              <option value="Mesin">Mesin</option>
+              <option value="Audio">Audio</option>
+              <option value="Televisi">Televisi</option>
+              <option value="Elektronik">Elektronik</option>
+              <option value="AC">AC</option>
             </select>
-            <input id="opex-filter-date" type="date" onchange="filterDailyOpex()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent" title="Filter Tanggal Tertentu"/>
+            <select id="asset-filter-status" onchange="filterAssets()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+              <option value="Semua Status">Semua Status</option>
+              <option value="Baik / Normal">Baik / Normal</option>
+              <option value="Perlu Perbaikan">Perlu Perbaikan</option>
+              <option value="Rusak">Rusak</option>
+            </select>
           </div>
-          <button onclick="resetDailyOpexFilters()" class="text-[12px] text-outline hover:text-primary underline">Reset Filter</button>
+          <button onclick="resetAssetFilters()" class="text-[12px] text-outline hover:text-primary underline">Reset Filter</button>
         </div>
 
-        <!-- Daily Opex Table -->
+        <!-- Asset Table -->
         <div class="bg-white rounded-2xl border border-surface-container shadow-sm overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-[12.5px] border-collapse">
               <thead>
                 <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
-                  <th class="py-3 px-4">Opex ID</th>
-                  <th class="py-3 px-4">Tanggal</th>
+                  <th class="py-3 px-4">Asset ID</th>
+                  <th class="py-3 px-4">Nama Asset</th>
                   <th class="py-3 px-4">Kategori</th>
-                  <th class="py-3 px-4">Nama Barang / Uraian</th>
-                  <th class="py-3 px-4">Qty</th>
-                  <th class="py-3 px-4">Harga Satuan</th>
-                  <th class="py-3 px-4">Total Biaya</th>
-                  <th class="py-3 px-4">Vendor / Toko</th>
-                  <th class="py-3 px-4">No. Nota</th>
+                  <th class="py-3 px-4">Lokasi</th>
+                  <th class="py-3 px-4">Tgl Beli</th>
+                  <th class="py-3 px-4">Harga Beli</th>
+                  <th class="py-3 px-4">Umur</th>
+                  <th class="py-3 px-4">Akumulasi Depresiasi</th>
+                  <th class="py-3 px-4">Nilai Buku Saat Ini</th>
+                  <th class="py-3 px-4">Status Kondisi</th>
                   <th class="py-3 px-4">Catatan</th>
+                  <th class="py-3 px-4 text-center">Aksi</th>
                 </tr>
               </thead>
-              <tbody id="daily-opex-table-body" class="divide-y divide-surface-container">
+              <tbody id="asset-table-body" class="divide-y divide-surface-container">
                 <!-- Dynamically populated -->
               </tbody>
             </table>
           </div>
           <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline bg-surface-container-low/30">
-            <span id="daily-opex-table-count">Menampilkan 0 Transaksi Opex</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- ========================================== -->
-      <!-- VIEW 5: MONTHLY PURCHASE SUMMARY (MODUL E) -->
-      <!-- ========================================== -->
-      <section id="view-monthly-purchase" class="view-panel hidden flex flex-col gap-6">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded-full bg-secondary-container/50 text-on-secondary-container text-[11px] font-bold">Modul E: Belanja Operasional</span>
-            </div>
-            <h1 class="text-[26px] font-bold text-primary tracking-tight mt-1">Ringkasan Belanja Bulanan (Monthly Purchase)</h1>
-            <p class="text-[13px] text-outline mt-0.5">Pencatatan total belanja operasional bulanan (Opex) sesuai PRD Bab 5.5.</p>
-          </div>
-          <button onclick="openModal('modal-purchase')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-[13px] font-semibold shadow-sm hover:bg-primary-container transition-all">
-            <span class="material-symbols-outlined text-[18px]">add_circle</span>
-            <span>+ Input / Update Belanja Bulan Ini</span>
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="p-6 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Belanja Bulan Ini (<span id="pur-period-title">Mei 2026</span>)</span>
-            <div class="my-4 text-[30px] font-bold text-primary" id="pur-current-amount">Rp 35.400.000</div>
-            <div class="p-3 rounded-xl bg-surface-container-low text-[12px] text-outline" id="pur-current-desc">
-              Belanja suku cadang perbaikan kolam, mechanical seal pompa, pelumas genset, dan chemical pool.
-            </div>
-          </div>
-          <div class="p-6 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Belanja Bulan Lalu</span>
-            <div class="my-4 text-[30px] font-bold text-on-surface" id="pur-prev-amount">Rp 32.500.000</div>
-            <div class="p-3 rounded-xl bg-surface-container-low text-[12px] text-outline" id="pur-prev-desc">
-              Realisasi belanja suku cadang AC dan operasional bulan sebelumnya.
-            </div>
-          </div>
-          <div class="p-6 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
-            <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Perbandingan & Selisih</span>
-            <div class="my-4 flex items-baseline gap-2">
-              <span class="text-[28px] font-bold text-secondary" id="pur-diff-amount">+Rp 2.900.000</span>
-              <span class="text-[14px] font-semibold text-secondary" id="pur-diff-percent">(+8.9%)</span>
-            </div>
-            <div class="p-3 rounded-xl bg-secondary-container/20 border border-secondary-container text-[12px] text-secondary font-semibold" id="pur-status-box">
-              Status Belanja: Terkendali (Hemat dari alokasi budget Opex).
-            </div>
+            <span id="asset-table-count">Menampilkan 0 Asset</span>
           </div>
         </div>
       </section>
@@ -2076,9 +2247,9 @@
     </div>
   </div>
 
-  <!-- Modal: Input Opex Harian Terperinci -->
+  <!-- Modal: Input Opex Harian Sederhana (Hanya Nominal Total) -->
   <div id="modal-daily-opex" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-surface-container overflow-hidden">
+    <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-surface-container overflow-hidden">
       <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
         <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
           <span class="material-symbols-outlined text-secondary">payments</span> + Input Pengeluaran Opex Harian
@@ -2088,73 +2259,35 @@
         </button>
       </div>
       <form id="form-daily-opex" onsubmit="submitDailyOpex(event)" class="p-5 flex flex-col gap-4 text-[13px]">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-outline font-semibold mb-1">Tanggal Transaksi *</label>
-            <input id="form-opex-date" type="date" value="2026-05-19" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
-          </div>
-          <div>
-            <label class="block text-outline font-semibold mb-1">Kategori Opex *</label>
-            <select id="form-opex-cat" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
-              <option value="Material / Sparepart">Material / Sparepart</option>
-              <option value="Chemical & Pool">Chemical & Pool</option>
-              <option value="Perbaikan / Repair">Perbaikan / Repair</option>
-              <option value="Perlengkapan / Tools">Perlengkapan / Tools</option>
-              <option value="Operasional Umum">Operasional Umum</option>
-            </select>
-          </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Tanggal Transaksi *</label>
+          <input id="form-opex-date" type="date" value="2026-05-19" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
         </div>
         <div>
-          <label class="block text-outline font-semibold mb-1">Nama Barang / Uraian Pengeluaran *</label>
-          <input id="form-opex-item" type="text" required placeholder="Contoh: Mechanical Seal Pompa Kolam 2 Inch" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          <label class="block text-outline font-semibold mb-1">Nominal Total Pengeluaran Hari Ini (Rp) *</label>
+          <input id="form-opex-total-input" type="number" step="1000" min="0" required placeholder="Contoh: 850000" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none font-bold text-primary text-[15px]"/>
+          <span class="text-[11px] text-outline mt-1 block">Cukup masukkan total pengeluaran kumulatif harian tanpa merinci barang.</span>
         </div>
-        <div class="grid grid-cols-3 gap-3">
-          <div>
-            <label class="block text-outline font-semibold mb-1">Kuantitas (Qty) *</label>
-            <input id="form-opex-qty" type="number" step="0.1" value="1" required oninput="calcOpexTotal()" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
-          </div>
-          <div>
-            <label class="block text-outline font-semibold mb-1">Satuan *</label>
-            <select id="form-opex-unit" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
-              <option value="Pcs">Pcs</option>
-              <option value="Unit">Unit</option>
-              <option value="Liter">Liter</option>
-              <option value="Kg">Kg</option>
-              <option value="Box">Box</option>
-              <option value="Set">Set</option>
-              <option value="Roll">Roll</option>
-              <option value="Meter">Meter</option>
-              <option value="Pail">Pail / Galon</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-outline font-semibold mb-1">Harga Satuan (Rp) *</label>
-            <input id="form-opex-price" type="number" step="100" required placeholder="0" oninput="calcOpexTotal()" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
-          </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Kategori Alokasi Pengeluaran *</label>
+          <select id="form-opex-cat" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+            <option value="Material / Sparepart">Material / Sparepart</option>
+            <option value="Chemical & Pool">Chemical & Pool</option>
+            <option value="Perbaikan / Repair">Perbaikan / Repair</option>
+            <option value="Perlengkapan / Tools">Perlengkapan / Tools</option>
+            <option value="Operasional Umum" selected>Operasional Umum</option>
+          </select>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-outline font-semibold mb-1">Total Biaya (Rp) *</label>
-            <input id="form-opex-total" type="number" step="100" required readonly class="w-full p-2.5 rounded-xl bg-surface-container font-bold text-primary focus:outline-none cursor-not-allowed"/>
-          </div>
-          <div>
-            <label class="block text-outline font-semibold mb-1">Vendor / Toko Pembelian</label>
-            <input id="form-opex-vendor" type="text" placeholder="Contoh: Mitra10, UD Bangun Jaya..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-outline font-semibold mb-1">No. Nota / Faktur</label>
-            <input id="form-opex-receipt" type="text" placeholder="No. Struk kasir" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
-          </div>
-          <div>
-            <label class="block text-outline font-semibold mb-1">Catatan Tambahan</label>
-            <input id="form-opex-notes" type="text" placeholder="Keterangan alokasi/villa..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
-          </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Keterangan / Catatan Singkat (Opsional)</label>
+          <input id="form-opex-notes" type="text" placeholder="Contoh: Belanja darurat fitting & tools maintenance..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
         </div>
         <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
           <button type="button" onclick="closeModal('modal-daily-opex')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
-          <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan ke Google Sheets</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold flex items-center gap-2 shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            <span>Simpan Pengeluaran</span>
+          </button>
         </div>
       </form>
     </div>
@@ -2222,7 +2355,7 @@
         </div>
         <div>
           <label class="block text-outline font-semibold mb-1">Keterangan Belanja</label>
-          <textarea id="purchase-desc" rows="2" placeholder="Uraian logistik dan sparepart utama..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"></textarea>
+          <textarea id="purchase-desc" rows="2" placeholder="Uraian logistik dan operasional utama..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"></textarea>
         </div>
         <div>
           <label class="block text-outline font-semibold mb-1">Catatan Tambahan</label>
@@ -2231,6 +2364,78 @@
         <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
           <button type="button" onclick="closeModal('modal-purchase')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
           <button type="submit" class="px-5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold">Simpan Ringkasan Belanja</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Tambah Asset Baru Villa -->
+  <div id="modal-asset" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-surface-container overflow-hidden">
+      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
+        <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary">inventory_2</span> + Tambah Aset Villa Baru
+        </h3>
+        <button onclick="closeModal('modal-asset')" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form id="form-asset" onsubmit="submitAsset(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+        <div>
+          <label class="block text-outline font-semibold mb-1">Nama Aset / Perangkat *</label>
+          <input id="form-asset-name" type="text" required placeholder="Contoh: Pompa Sirkulasi Kolam Utama / Smart TV 55 Inch" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Kategori Aset *</label>
+            <select id="form-asset-category" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Mesin">Mesin</option>
+              <option value="Audio">Audio</option>
+              <option value="Televisi">Televisi</option>
+              <option value="Elektronik">Elektronik</option>
+              <option value="AC" selected>AC</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Lokasi / Villa *</label>
+            <input id="form-asset-location" type="text" required placeholder="Contoh: Villa 01 / Pump Room" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Tanggal Perolehan *</label>
+            <input id="form-asset-date" type="date" value="2024-01-15" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Harga Perolehan (Rp) *</label>
+            <input id="form-asset-cost" type="number" step="1000" min="0" required placeholder="Contoh: 12500000" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none font-semibold"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Umur Ekonomis (Tahun) *</label>
+            <input id="form-asset-life" type="number" step="0.5" min="1" max="20" value="5" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+            <span class="text-[11px] text-outline mt-1 block">Metode Garis Lurus (Straight-line).</span>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Status Kondisi *</label>
+            <select id="form-asset-status" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Baik / Normal" selected>Baik / Normal</option>
+              <option value="Perlu Perbaikan">Perlu Perbaikan</option>
+              <option value="Rusak">Rusak</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Catatan / Spesifikasi Singkat</label>
+          <input id="form-asset-notes" type="text" placeholder="Contoh: Daikin Inverter 2 PK, Serial No: DKN-9921..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-asset')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold flex items-center gap-2 shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            <span>Simpan Aset</span>
+          </button>
         </div>
       </form>
     </div>
@@ -2337,6 +2542,18 @@
         { opex_id: 'OPX-202605-002', record_date: '2026-05-18', reporting_period: '2026-05', category: 'Chemical & Pool', item_name: 'Kaporit Granular 70% & PAC Tawas', qty: 3, unit: 'Pail', unit_price: 450000, total_amount: 1350000, vendor: 'UD Tirta Abadi', receipt_no: 'TR-4421', notes: 'Treatment air kolam cluster B' },
         { opex_id: 'OPX-202605-003', record_date: '2026-05-18', reporting_period: '2026-05', category: 'Perbaikan / Repair', item_name: 'Jasa Las & Fitting Pipa Stainless Chiller', qty: 1, unit: 'Set', unit_price: 850000, total_amount: 850000, vendor: 'Bengkel Teknik Presisi', receipt_no: 'KW-091', notes: 'Perbaikan darurat kebocoran bypass valve' },
         { opex_id: 'OPX-202605-004', record_date: '2026-05-17', reporting_period: '2026-05', category: 'Perlengkapan / Tools', item_name: 'Bohlam LED Warm White 12W & Fitting E27', qty: 10, unit: 'Pcs', unit_price: 65000, total_amount: 650000, vendor: 'Toko Surya Elektrik', receipt_no: 'FKT-3129', notes: 'Penggantian lampu penerangan walkway' }
+      ],
+      assets: [
+        { asset_id: 'AST-AC-001', asset_name: 'AC Daikin Inverter Multi-S 2 PK', category: 'AC', location_id: 'Villa 01 - Master Bedroom', purchase_date: '2023-01-15', purchase_cost: 14500000, useful_life_years: 5, status: 'Baik / Normal', notes: 'Perawatan cuci rutin tiap 2 bulan' },
+        { asset_id: 'AST-AC-002', asset_name: 'AC Panasonic Split 1.5 PK', category: 'AC', location_id: 'Villa 05 - Living Room', purchase_date: '2022-06-10', purchase_cost: 8500000, useful_life_years: 5, status: 'Perlu Perbaikan', notes: 'Thermostat kurang presisi, perlu kalibrasi sensor' },
+        { asset_id: 'AST-MSN-001', asset_name: 'Pompa Kolam Hayward Super Pump 2 HP', category: 'Mesin', location_id: 'Main Pool Pump Room', purchase_date: '2022-03-20', purchase_cost: 18500000, useful_life_years: 6, status: 'Baik / Normal', notes: 'Impeller & mechanical seal diganti Mei 2026' },
+        { asset_id: 'AST-MSN-002', asset_name: 'Genset Perkins Silent 250 kVA + ATS', category: 'Mesin', location_id: 'Central Powerhouse', purchase_date: '2021-08-05', purchase_cost: 285000000, useful_life_years: 10, status: 'Baik / Normal', notes: 'Uji beban rutin tiap minggu lancar' },
+        { asset_id: 'AST-TV-001', asset_name: 'Samsung 65 Inch 4K Smart UHD TV', category: 'Televisi', location_id: 'Villa 08 - Living Pavilion', purchase_date: '2023-11-01', purchase_cost: 13200000, useful_life_years: 4, status: 'Baik / Normal', notes: 'Koneksi WiFi LAN stabil' },
+        { asset_id: 'AST-TV-002', asset_name: 'LG 55 Inch 4K UHD TV Villa Suite', category: 'Televisi', location_id: 'Villa 03 - Bedroom', purchase_date: '2022-09-12', purchase_cost: 9500000, useful_life_years: 4, status: 'Rusak', notes: 'Panel layar bergaris vertikal setelah petir' },
+        { asset_id: 'AST-AUD-001', asset_name: 'Bose FreeSpace Public Address Amp & Speakers', category: 'Audio', location_id: 'Restaurant & Pool Deck', purchase_date: '2023-04-10', purchase_cost: 32000000, useful_life_years: 5, status: 'Baik / Normal', notes: 'Output 6 zona audio seimbang' },
+        { asset_id: 'AST-AUD-002', asset_name: 'Sonos Move 2 Wireless Sound Bar', category: 'Audio', location_id: 'Villa 12 - Gazebo Lounge', purchase_date: '2024-02-18', purchase_cost: 8900000, useful_life_years: 4, status: 'Baik / Normal', notes: 'Baterai sehat, dock charger terpasang' },
+        { asset_id: 'AST-ELK-001', asset_name: 'Kulkas Showcase 2 Pintu Beverage Chiller', category: 'Elektronik', location_id: 'Main Kitchen & Bar', purchase_date: '2022-12-05', purchase_cost: 16800000, useful_life_years: 6, status: 'Baik / Normal', notes: 'Kompresor stabil pada 3°C' },
+        { asset_id: 'AST-ELK-002', asset_name: 'Water Heater Heat Pump Stiebel Eltron 300L', category: 'Elektronik', location_id: 'Villa Cluster B Roof', purchase_date: '2021-05-20', purchase_cost: 27500000, useful_life_years: 7, status: 'Perlu Perbaikan', notes: 'Heating element sekunder perlu flushing descaling' }
       ]
     };
 
@@ -2548,6 +2765,31 @@
           return { success: true, message: `Data Opex ${payload.opex_id} berhasil diperbarui!` };
         }
 
+        if (action === 'asset.list') {
+          return { success: true, data: [...(mockStore.assets || [])] };
+        }
+
+        if (action === 'asset.create') {
+          const prefix = payload.category === 'AC' ? 'AC' : (payload.category === 'Mesin' ? 'MSN' : (payload.category === 'Audio' ? 'AUD' : (payload.category === 'Televisi' ? 'TV' : 'ELK')));
+          const nextId = 'AST-' + prefix + '-' + String((mockStore.assets || []).length + 1).padStart(3, '0');
+          const cost = parseFloat(payload.purchase_cost) || 0;
+          const life = parseFloat(payload.useful_life_years) || 5;
+          const newAst = Object.assign({
+            asset_id: nextId,
+            purchase_cost: cost,
+            useful_life_years: life,
+            status: payload.status || 'Baik / Normal'
+          }, payload);
+          (mockStore.assets || []).unshift(newAst);
+          return { success: true, message: `Aset ${nextId} (${newAst.asset_name}) berhasil dicatat!`, data: newAst };
+        }
+
+        if (action === 'asset.update') {
+          const item = (mockStore.assets || []).find(a => a.asset_id === payload.asset_id);
+          if (item) Object.assign(item, payload);
+          return { success: true, message: `Aset ${payload.asset_id} berhasil diperbarui!` };
+        }
+
         if (action === 'sync.all') {
           return {
             success: true,
@@ -2559,6 +2801,7 @@
             workOrders: this.mockFallback('workorder.list', payload),
             opexDaily: this.mockFallback('opex.list', payload),
             purchase: this.mockFallback('purchase.get', payload),
+            assets: this.mockFallback('asset.list', payload),
             evaluations: mockStore.evaluations
           };
         }
@@ -2681,6 +2924,9 @@
       filteredWorkOrders: [],
       opexDaily: [],
       filteredOpexDaily: [],
+      opexSubTab: 'daily',
+      assets: [],
+      filteredAssets: [],
       purchases: [],
       evaluations: []
     };
@@ -2692,6 +2938,17 @@
         switchActivityTab('wo');
         return;
       }
+      if (viewId === 'daily-opex') {
+        navigateTo('opex');
+        switchOpexTab('daily');
+        return;
+      }
+      if (viewId === 'monthly-purchase') {
+        navigateTo('opex');
+        switchOpexTab('purchase');
+        return;
+      }
+
       state.activeView = viewId;
       document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
       const activePanel = document.getElementById('view-' + viewId);
@@ -2707,6 +2964,14 @@
         }
       });
 
+      if (viewId === 'asset-management') {
+        renderAssets();
+        recalcAssetKPIs();
+      }
+      if (viewId === 'opex') {
+        renderDailyOpex();
+        recalcOpexKPIs();
+      }
       if (viewId === 'report-generator') {
         previewReport();
       }
@@ -2740,6 +3005,36 @@
           btnWo.className = 'px-4 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-2 transition-all font-semibold';
         }
         renderActivityPage();
+      }
+    };
+
+    // Subtab switcher inside OPEX (Daily Opex vs Monthly Purchase)
+    window.switchOpexTab = function(tab) {
+      state.opexSubTab = tab;
+      const dailySec = document.getElementById('subtab-daily-opex-content');
+      const purchaseSec = document.getElementById('subtab-monthly-purchase-content');
+      const btnDaily = document.getElementById('tab-btn-daily-opex');
+      const btnPurchase = document.getElementById('tab-btn-monthly-purchase');
+
+      if (tab === 'purchase') {
+        if (dailySec) dailySec.classList.add('hidden');
+        if (purchaseSec) purchaseSec.classList.remove('hidden');
+        if (btnDaily) {
+          btnDaily.className = 'px-4 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-2 transition-all font-semibold';
+        }
+        if (btnPurchase) {
+          btnPurchase.className = 'px-4 py-2 rounded-xl bg-white text-primary shadow-sm flex items-center gap-2 transition-all font-bold';
+        }
+      } else {
+        if (dailySec) dailySec.classList.remove('hidden');
+        if (purchaseSec) purchaseSec.classList.add('hidden');
+        if (btnDaily) {
+          btnDaily.className = 'px-4 py-2 rounded-xl bg-white text-primary shadow-sm flex items-center gap-2 transition-all font-bold';
+        }
+        if (btnPurchase) {
+          btnPurchase.className = 'px-4 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-2 transition-all font-semibold';
+        }
+        renderDailyOpex();
       }
     };
 
@@ -2889,7 +3184,7 @@
       }
 
       // 2. Parallel Fallback (Promise.all) if backend still running previous version
-      const [meRes, masterRes, dashRes, actRes, prjRes, engRes, woRes, opexRes, purRes, evalRes] = await Promise.all([
+      const [meRes, masterRes, dashRes, actRes, prjRes, engRes, woRes, opexRes, purRes, evalRes, astRes] = await Promise.all([
         ApiClient.call('auth.me', {}),
         ApiClient.call('master.get', {}),
         ApiClient.call('dashboard.get', { period: state.currentPeriod }),
@@ -2899,7 +3194,8 @@
         ApiClient.call('workorder.list', { period: state.currentPeriod }),
         ApiClient.call('opex.list', { period: state.currentPeriod }),
         ApiClient.call('purchase.get', { period: state.currentPeriod }),
-        ApiClient.call('evaluation.get', { period: state.currentPeriod })
+        ApiClient.call('evaluation.get', { period: state.currentPeriod }),
+        ApiClient.call('asset.list', {})
       ]);
 
       if (meRes && meRes.success && meRes.user) {
@@ -2944,6 +3240,12 @@
         state.evaluations = evalRes.findings;
         renderEvaluations(evalRes.findings);
       }
+      if (astRes && astRes.success && astRes.data) {
+        state.assets = astRes.data;
+        state.filteredAssets = [...astRes.data];
+        filterAssets();
+        recalcAssetKPIs();
+      }
     }
 
     function applySyncedBundle(bundle, saveToCache = true) {
@@ -2985,6 +3287,12 @@
         updateDailyOpexKPIs(bundle.opexDaily.kpis);
       }
       if (bundle.purchase) renderPurchase(bundle.purchase);
+      if (bundle.assets && bundle.assets.data) {
+        state.assets = bundle.assets.data;
+        state.filteredAssets = [...bundle.assets.data];
+        filterAssets();
+        recalcAssetKPIs();
+      }
       if (bundle.evaluations) {
         state.evaluations = bundle.evaluations;
         renderEvaluations(bundle.evaluations);
@@ -4204,27 +4512,18 @@
       ApiClient.call('energy.createBatch', { items: backendPayloads });
     };
 
-    // DAILY OPEX MODULE LOGIC
-    window.calcOpexTotal = function() {
-      const q = parseFloat(document.getElementById('form-opex-qty').value) || 0;
-      const p = parseFloat(document.getElementById('form-opex-price').value) || 0;
-      const tot = Math.round(q * p);
-      const el = document.getElementById('form-opex-total');
-      if (el) el.value = tot;
-    };
-
+    // DAILY OPEX MODULE LOGIC (SIMPLIFIED NOMINAL-ONLY)
     window.submitDailyOpex = async function(e) {
       e.preventDefault();
       const date = document.getElementById('form-opex-date').value;
+      const total = parseFloat(document.getElementById('form-opex-total-input').value) || 0;
       const cat = document.getElementById('form-opex-cat').value;
-      const item = document.getElementById('form-opex-item').value;
-      const qty = parseFloat(document.getElementById('form-opex-qty').value) || 1;
-      const unit = document.getElementById('form-opex-unit').value;
-      const price = parseFloat(document.getElementById('form-opex-price').value) || 0;
-      const total = parseFloat(document.getElementById('form-opex-total').value) || (qty * price);
-      const vendor = document.getElementById('form-opex-vendor').value;
-      const receipt = document.getElementById('form-opex-receipt').value;
-      const notes = document.getElementById('form-opex-notes').value;
+      const notes = document.getElementById('form-opex-notes').value || '';
+
+      if (total <= 0) {
+        alert('Silakan masukkan nominal pengeluaran lebih dari 0.');
+        return;
+      }
 
       showToast('Menyimpan Opex harian...');
 
@@ -4234,13 +4533,13 @@
         record_date: date,
         reporting_period: state.currentPeriod,
         category: cat,
-        item_name: item,
-        qty: qty,
-        unit: unit,
-        unit_price: price,
+        item_name: notes || ('Pengeluaran Opex ' + cat),
+        qty: 1,
+        unit: 'Total',
+        unit_price: total,
         total_amount: total,
-        vendor: vendor || '-',
-        receipt_no: receipt || '-',
+        vendor: '-',
+        receipt_no: '-',
         notes: notes
       };
 
@@ -4252,7 +4551,6 @@
       closeModal('modal-daily-opex');
       e.target.reset();
       document.getElementById('form-opex-date').value = '2026-05-19';
-      document.getElementById('form-opex-qty').value = '1';
       showToast('Opex ' + nextId + ' (Rp ' + total.toLocaleString('id-ID') + ') berhasil disimpan!');
 
       // Sync to backend
@@ -4315,8 +4613,6 @@
           const m = String(o.opex_id || '').toLowerCase().includes(q) ||
                     String(o.item_name || '').toLowerCase().includes(q) ||
                     String(o.category || '').toLowerCase().includes(q) ||
-                    String(o.vendor || '').toLowerCase().includes(q) ||
-                    String(o.receipt_no || '').toLowerCase().includes(q) ||
                     String(o.notes || '').toLowerCase().includes(q);
           if (!m) return false;
         }
@@ -4344,38 +4640,295 @@
       if (countEl) countEl.innerText = `Menampilkan ${list.length} dari ${(state.opexDaily || []).length} Transaksi Opex tercatat`;
 
       if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-outline">Tidak ada data Opex harian pada kriteria ini.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-outline">Tidak ada data Opex harian pada kriteria ini.</td></tr>`;
         return;
       }
 
       list.forEach(o => {
         const tr = document.createElement('tr');
-        tr.className = 'hover:bg-surface-container-low/40 transition-colors';
+        tr.className = 'hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/50';
 
         tr.innerHTML = `
           <td class="py-3 px-4 font-mono font-bold text-primary">${o.opex_id}</td>
           <td class="py-3 px-4 font-medium">${o.record_date || '—'}</td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded-lg bg-surface-container-high text-primary font-semibold text-[11px]">${o.category}</span>
+          <td class="py-3 px-4 font-bold text-primary text-[14px]">Rp ${Number(o.total_amount || 0).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4 text-on-surface">
+            <div class="font-semibold">${o.item_name || o.notes || 'Pengeluaran Opex'}</div>
+            <div class="text-[11px] text-outline">${o.category || 'Operasional Umum'}</div>
           </td>
-          <td class="py-3 px-4 font-bold text-on-surface">${o.item_name}</td>
-          <td class="py-3 px-4 font-medium">${o.qty || 1} ${o.unit || 'Pcs'}</td>
-          <td class="py-3 px-4 text-outline">Rp ${Number(o.unit_price || 0).toLocaleString('id-ID')}</td>
-          <td class="py-3 px-4 font-bold text-primary">Rp ${Number(o.total_amount || 0).toLocaleString('id-ID')}</td>
-          <td class="py-3 px-4 text-on-surface">${o.vendor || '-'}</td>
-          <td class="py-3 px-4 font-mono text-[11px] text-outline">${o.receipt_no || '-'}</td>
-          <td class="py-3 px-4 text-[11.5px] text-outline max-w-xs truncate">${o.notes || '-'}</td>
+          <td class="py-3 px-4 font-mono text-[11.5px] text-outline">${o.reporting_period || state.currentPeriod}</td>
+          <td class="py-3 px-4 text-center">
+            <span class="px-2 py-0.5 rounded-lg bg-green-50 text-green-700 font-semibold text-[11px]">Tercatat</span>
+          </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
     window.exportDailyOpexCsv = function() {
-      let csv = 'Opex ID,Tanggal,Kategori,Nama Barang,Qty,Satuan,Harga Satuan,Total Biaya,Vendor,No Nota,Catatan\n';
+      let csv = 'Opex ID,Tanggal,Nominal Total (Rp),Kategori,Keterangan,Periode\n';
       (state.filteredOpexDaily || state.opexDaily || []).forEach(o => {
-        csv += `"${o.opex_id}","${o.record_date}","${o.category}","${o.item_name}","${o.qty}","${o.unit}","${o.unit_price}","${o.total_amount}","${o.vendor}","${o.receipt_no}","${o.notes || ''}"\n`;
+        csv += `"${o.opex_id}","${o.record_date}","${o.total_amount}","${o.category}","${o.item_name || o.notes || ''}","${o.reporting_period || state.currentPeriod}"\n`;
       });
       downloadCsv(csv, `Opex_Harian_Agranusa_${state.currentPeriod}.csv`);
+    };
+
+    // ==========================================
+    // ASSET MANAGEMENT & DEPRECIATION MODULE
+    // ==========================================
+    window.calcAssetDepreciation = function(asset) {
+      const cost = parseFloat(asset.purchase_cost) || 0;
+      const lifeYears = parseFloat(asset.useful_life_years) || 5;
+      const totalMonths = Math.max(1, Math.round(lifeYears * 12));
+      const monthlyRate = cost / totalMonths;
+
+      const pDate = new Date(asset.purchase_date || '2024-01-01');
+      const now = new Date('2026-05-19');
+      let monthsElapsed = (now.getFullYear() - pDate.getFullYear()) * 12 + (now.getMonth() - pDate.getMonth());
+      if (monthsElapsed < 0) monthsElapsed = 0;
+
+      const accumDeprec = Math.min(cost, Math.round(monthlyRate * monthsElapsed));
+      const bookValue = Math.max(0, cost - accumDeprec);
+      const pctDeprec = cost > 0 ? Math.min(100, Math.round((accumDeprec / cost) * 100)) : 0;
+
+      return {
+        totalMonths,
+        monthsElapsed: Math.min(totalMonths, monthsElapsed),
+        monthlyRate: Math.round(monthlyRate),
+        accumDeprec,
+        bookValue,
+        pctDeprec,
+        isFullyDepreciated: accumDeprec >= cost
+      };
+    };
+
+    window.recalcAssetKPIs = function() {
+      const list = state.assets || [];
+      let totalCost = 0;
+      let totalAccumDeprec = 0;
+      let totalBookValue = 0;
+      let damagedCount = 0;
+      let repairCount = 0;
+
+      const catCounts = { 'Mesin': 0, 'Audio': 0, 'Televisi': 0, 'Elektronik': 0, 'AC': 0 };
+      const catCosts = { 'Mesin': 0, 'Audio': 0, 'Televisi': 0, 'Elektronik': 0, 'AC': 0 };
+
+      list.forEach(a => {
+        const cost = parseFloat(a.purchase_cost) || 0;
+        const dep = calcAssetDepreciation(a);
+        totalCost += cost;
+        totalAccumDeprec += dep.accumDeprec;
+        totalBookValue += dep.bookValue;
+
+        if (a.status === 'Rusak') damagedCount++;
+        else if (a.status === 'Perlu Perbaikan') repairCount++;
+
+        const cat = a.category;
+        if (catCounts[cat] !== undefined) {
+          catCounts[cat]++;
+          catCosts[cat] += cost;
+        }
+      });
+
+      const elCost = document.getElementById('asset-kpi-cost');
+      if (elCost) elCost.innerText = `Rp ${Math.round(totalCost).toLocaleString('id-ID')}`;
+
+      const elCountTotal = document.getElementById('asset-kpi-count-total');
+      if (elCountTotal) elCountTotal.innerText = `${list.length} Unit Total`;
+
+      const elDeprec = document.getElementById('asset-kpi-deprec');
+      if (elDeprec) elDeprec.innerText = `Rp ${Math.round(totalAccumDeprec).toLocaleString('id-ID')}`;
+
+      const elDeprecPct = document.getElementById('asset-kpi-deprec-pct');
+      const totalPct = totalCost > 0 ? Math.round((totalAccumDeprec / totalCost) * 100) : 0;
+      if (elDeprecPct) elDeprecPct.innerText = `${totalPct}% Terdepresiasi`;
+
+      const elBook = document.getElementById('asset-kpi-bookvalue');
+      if (elBook) elBook.innerText = `Rp ${Math.round(totalBookValue).toLocaleString('id-ID')}`;
+
+      const elDamaged = document.getElementById('asset-kpi-damaged');
+      if (elDamaged) elDamaged.innerText = `${damagedCount + repairCount} Unit`;
+
+      const elRepairDetail = document.getElementById('asset-kpi-repair-detail');
+      if (elRepairDetail) elRepairDetail.innerText = `${damagedCount} Rusak • ${repairCount} Perlu Perbaikan`;
+
+      // 5 Categories breakdown
+      const elMesin = document.getElementById('asset-cat-mesin'); if (elMesin) elMesin.innerText = `${catCounts['Mesin']} Unit`;
+      const elCostMesin = document.getElementById('asset-cat-cost-mesin'); if (elCostMesin) elCostMesin.innerText = `Rp ${Number(catCosts['Mesin']).toLocaleString('id-ID')}`;
+
+      const elAudio = document.getElementById('asset-cat-audio'); if (elAudio) elAudio.innerText = `${catCounts['Audio']} Unit`;
+      const elCostAudio = document.getElementById('asset-cat-cost-audio'); if (elCostAudio) elCostAudio.innerText = `Rp ${Number(catCosts['Audio']).toLocaleString('id-ID')}`;
+
+      const elTv = document.getElementById('asset-cat-tv'); if (elTv) elTv.innerText = `${catCounts['Televisi']} Unit`;
+      const elCostTv = document.getElementById('asset-cat-cost-tv'); if (elCostTv) elCostTv.innerText = `Rp ${Number(catCosts['Televisi']).toLocaleString('id-ID')}`;
+
+      const elElk = document.getElementById('asset-cat-elektronik'); if (elElk) elElk.innerText = `${catCounts['Elektronik']} Unit`;
+      const elCostElk = document.getElementById('asset-cat-cost-elektronik'); if (elCostElk) elCostElk.innerText = `Rp ${Number(catCosts['Elektronik']).toLocaleString('id-ID')}`;
+
+      const elAc = document.getElementById('asset-cat-ac'); if (elAc) elAc.innerText = `${catCounts['AC']} Unit`;
+      const elCostAc = document.getElementById('asset-cat-cost-ac'); if (elCostAc) elCostAc.innerText = `Rp ${Number(catCosts['AC']).toLocaleString('id-ID')}`;
+    };
+
+    window.filterAssets = function() {
+      const qInput = document.getElementById('asset-search');
+      const q = (qInput ? qInput.value : '').toLowerCase();
+      const catSelect = document.getElementById('asset-filter-cat');
+      const cat = catSelect ? catSelect.value : 'Semua Kategori';
+      const statusSelect = document.getElementById('asset-filter-status');
+      const st = statusSelect ? statusSelect.value : 'Semua Status';
+
+      state.filteredAssets = (state.assets || []).filter(a => {
+        if (cat !== 'Semua Kategori' && a.category !== cat) return false;
+        if (st !== 'Semua Status' && a.status !== st) return false;
+        if (q) {
+          const m = String(a.asset_id || '').toLowerCase().includes(q) ||
+                    String(a.asset_name || '').toLowerCase().includes(q) ||
+                    String(a.category || '').toLowerCase().includes(q) ||
+                    String(a.location_id || '').toLowerCase().includes(q) ||
+                    String(a.notes || '').toLowerCase().includes(q);
+          if (!m) return false;
+        }
+        return true;
+      });
+
+      renderAssets();
+    };
+
+    window.resetAssetFilters = function() {
+      const q = document.getElementById('asset-search'); if (q) q.value = '';
+      const c = document.getElementById('asset-filter-cat'); if (c) c.value = 'Semua Kategori';
+      const s = document.getElementById('asset-filter-status'); if (s) s.value = 'Semua Status';
+      filterAssets();
+      showToast('Filter aset di-reset.');
+    };
+
+    function renderAssets() {
+      const tbody = document.getElementById('asset-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const list = state.filteredAssets || [];
+      const countEl = document.getElementById('asset-table-count');
+      if (countEl) countEl.innerText = `Menampilkan ${list.length} dari ${(state.assets || []).length} Aset Villa tercatat`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center py-6 text-outline">Tidak ada data aset villa pada kriteria ini.</td></tr>`;
+        return;
+      }
+
+      list.forEach(a => {
+        const dep = calcAssetDepreciation(a);
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/50';
+
+        let statusBadge = '<span class="px-2 py-0.5 rounded-lg bg-green-100 text-green-700 font-semibold text-[11px]">Baik / Normal</span>';
+        if (a.status === 'Perlu Perbaikan') {
+          statusBadge = '<span class="px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700 font-semibold text-[11px]">Perlu Perbaikan</span>';
+        } else if (a.status === 'Rusak') {
+          statusBadge = '<span class="px-2 py-0.5 rounded-lg bg-red-100 text-red-700 font-semibold text-[11px]">Rusak</span>';
+        }
+
+        let catBadge = 'bg-surface-container text-primary';
+        if (a.category === 'AC') catBadge = 'bg-sky-100 text-sky-800';
+        else if (a.category === 'Mesin') catBadge = 'bg-blue-100 text-blue-800';
+        else if (a.category === 'Audio') catBadge = 'bg-purple-100 text-purple-800';
+        else if (a.category === 'Televisi') catBadge = 'bg-amber-100 text-amber-800';
+        else if (a.category === 'Elektronik') catBadge = 'bg-emerald-100 text-emerald-800';
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono font-bold text-primary">${a.asset_id}</td>
+          <td class="py-3 px-4">
+            <div class="font-bold text-on-surface">${a.asset_name}</div>
+          </td>
+          <td class="py-3 px-4">
+            <span class="px-2 py-0.5 rounded-lg font-semibold text-[11px] ${catBadge}">${a.category}</span>
+          </td>
+          <td class="py-3 px-4 font-medium text-[12px] text-outline">${a.location_id || '-'}</td>
+          <td class="py-3 px-4 text-[12px] font-mono">${a.purchase_date || '-'}</td>
+          <td class="py-3 px-4 font-bold text-on-surface">Rp ${Number(a.purchase_cost || 0).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4 text-outline text-[12px]">${a.useful_life_years || 5} Thn (${dep.monthsElapsed}/${dep.totalMonths} Bln)</td>
+          <td class="py-3 px-4 text-error font-medium">Rp ${dep.accumDeprec.toLocaleString('id-ID')} (${dep.pctDeprec}%)</td>
+          <td class="py-3 px-4 font-bold text-primary">Rp ${dep.bookValue.toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4 cursor-pointer" onclick="updateAssetStatusPrompt('${a.asset_id}', '${a.status}')" title="Klik untuk ubah status">
+            ${statusBadge}
+          </td>
+          <td class="py-3 px-4 text-[11.5px] text-outline max-w-xs truncate">${a.notes || '-'}</td>
+          <td class="py-3 px-4 text-center">
+            <button onclick="updateAssetStatusPrompt('${a.asset_id}', '${a.status}')" class="px-2.5 py-1 rounded-lg text-outline hover:text-primary hover:bg-surface-container font-semibold text-[11px] transition-all flex items-center gap-1 mx-auto">
+              <span class="material-symbols-outlined text-[14px]">edit</span> Status
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.submitAsset = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('form-asset-name').value;
+      const cat = document.getElementById('form-asset-category').value;
+      const loc = document.getElementById('form-asset-location').value;
+      const date = document.getElementById('form-asset-date').value;
+      const cost = parseFloat(document.getElementById('form-asset-cost').value) || 0;
+      const life = parseFloat(document.getElementById('form-asset-life').value) || 5;
+      const status = document.getElementById('form-asset-status').value;
+      const notes = document.getElementById('form-asset-notes').value || '-';
+
+      showToast('Menyimpan data aset baru...');
+
+      const prefix = cat === 'AC' ? 'AC' : (cat === 'Mesin' ? 'MSN' : (cat === 'Audio' ? 'AUD' : (cat === 'Televisi' ? 'TV' : 'ELK')));
+      const nextId = 'AST-' + prefix + '-' + String((state.assets || []).length + 1).padStart(3, '0');
+
+      const newAst = {
+        asset_id: nextId,
+        asset_name: name,
+        category: cat,
+        location_id: loc,
+        purchase_date: date,
+        purchase_cost: cost,
+        useful_life_years: life,
+        status: status,
+        notes: notes
+      };
+
+      state.assets.unshift(newAst);
+      filterAssets();
+      recalcAssetKPIs();
+
+      closeModal('modal-asset');
+      e.target.reset();
+      document.getElementById('form-asset-date').value = '2024-01-15';
+      document.getElementById('form-asset-life').value = '5';
+      showToast(`Aset ${nextId} (${name}) berhasil disimpan!`);
+
+      const res = await ApiClient.call('asset.create', newAst);
+      if (res && res.data && res.data.asset_id) {
+        newAst.asset_id = res.data.asset_id;
+        renderAssets();
+      }
+    };
+
+    window.updateAssetStatusPrompt = async function(assetId, currentStatus) {
+      const newStatus = prompt(`Ubah Status Kondisi Aset [${assetId}]:\nPilihan: Baik / Normal, Perlu Perbaikan, Rusak`, currentStatus);
+      if (!newStatus || newStatus === currentStatus) return;
+
+      const ast = (state.assets || []).find(a => a.asset_id === assetId);
+      if (ast) {
+        ast.status = newStatus;
+        renderAssets();
+        recalcAssetKPIs();
+        showToast(`Status aset ${assetId} diubah menjadi ${newStatus}`);
+        await ApiClient.call('asset.update', { asset_id: assetId, status: newStatus });
+      }
+    };
+
+    window.exportAssetsCsv = function() {
+      let csv = 'Asset ID,Nama Asset,Kategori,Lokasi,Tanggal Perolehan,Harga Beli (Rp),Umur (Tahun),Akumulasi Depresiasi (Rp),Nilai Buku Saat Ini (Rp),Status,Catatan\n';
+      (state.filteredAssets || state.assets || []).forEach(a => {
+        const dep = calcAssetDepreciation(a);
+        csv += `"${a.asset_id}","${a.asset_name}","${a.category}","${a.location_id || ''}","${a.purchase_date}","${a.purchase_cost}","${a.useful_life_years}","${dep.accumDeprec}","${dep.bookValue}","${a.status}","${a.notes || ''}"\n`;
+      });
+      downloadCsv(csv, `Monitoring_Asset_Villa_Agranusa_${state.currentPeriod}.csv`);
     };
 
     window.submitMeterReading = async function(e) {
@@ -4455,10 +5008,14 @@
         const inp = document.getElementById('eng-search');
         if (inp) inp.value = q;
         filterEnergy();
-      } else if (state.activeView === 'daily-opex') {
+      } else if (state.activeView === 'daily-opex' || state.activeView === 'opex') {
         const inp = document.getElementById('opex-search');
         if (inp) inp.value = q;
         filterDailyOpex();
+      } else if (state.activeView === 'asset-management') {
+        const inp = document.getElementById('asset-search');
+        if (inp) inp.value = q;
+        filterAssets();
       }
     };
 
