@@ -19,7 +19,8 @@ const ALL_SCHEMAS = {
   ENERGY_DAILY: ['energy_record_id', 'category', 'record_date', 'input_method', 'usage_value', 'meter_reading', 'unit', 'tariff_id', 'calculated_cost', 'validation_status', 'notes', 'created_at', 'updated_at'],
   OPEX_DAILY: ['opex_id', 'record_date', 'reporting_period', 'category', 'item_name', 'qty', 'unit', 'unit_price', 'total_amount', 'vendor', 'receipt_no', 'notes', 'created_at', 'updated_at'],
   PURCHASE_SUMMARY: ['purchase_summary_id', 'reporting_period', 'total_amount', 'description', 'notes', 'created_at', 'updated_at'],
-  ASSETS: ['asset_id', 'asset_name', 'category', 'location_id', 'purchase_date', 'purchase_cost', 'useful_life_years', 'status', 'notes', 'created_at', 'updated_at'],
+  ASSETS: ['asset_id', 'asset_name', 'category', 'model', 'serial_number', 'location_id', 'purchase_date', 'purchase_cost', 'useful_life_years', 'status', 'notes', 'created_at', 'updated_at'],
+  ASSET_REPAIRS: ['repair_id', 'asset_id', 'asset_name', 'location_id', 'damage_description', 'reported_date', 'repaired_date', 'repaired_by_type', 'repaired_by_name', 'repair_cost', 'status', 'notes', 'created_at'],
   MONTHLY_REPORTS: ['report_id', 'reporting_period', 'report_status', 'generated_at', 'generated_by', 'pdf_file_reference', 'data_version'],
   EVALUATION_RESULTS: ['evaluation_id', 'reporting_period', 'evaluation_category', 'title', 'finding', 'actual_value', 'comparison_value', 'severity', 'recommendation', 'generated_at'],
   AUDIT_LOG: ['audit_id', 'user_id', 'action', 'entity_type', 'entity_id', 'previous_value', 'new_value', 'timestamp']
@@ -80,7 +81,7 @@ function ensureTab(tabName) {
 }
 
 function ensureAllNewTabs() {
-  ['ENERGY_LISTRIK', 'ENERGY_AIR', 'ENERGY_FUEL', 'ENERGY_GAS', 'WORK_ORDERS', 'OPEX_DAILY', 'ASSETS'].forEach(t => ensureTab(t));
+  ['ENERGY_LISTRIK', 'ENERGY_AIR', 'ENERGY_FUEL', 'ENERGY_GAS', 'WORK_ORDERS', 'OPEX_DAILY', 'ASSETS', 'ASSET_REPAIRS'].forEach(t => ensureTab(t));
 }
 
 function getTableData(tabName) {
@@ -314,6 +315,7 @@ function dispatchAction(action, payload) {
         energy: { data: energyRecords },
         workOrders: { kpis: { total: woTotal, open: woOpen, inProgress: woProg, completed: woComp, pending: woPend, byDept: woByDept }, data: workOrders },
         assets: { data: getTableData('ASSETS') },
+        assetRepairs: { data: getTableData('ASSET_REPAIRS') },
         opexDaily: {
           kpis: {
             totalAmount: opexTotal,
@@ -993,11 +995,16 @@ function dispatchAction(action, payload) {
     case 'asset.create': {
       const existing = getTableData('ASSETS');
       const prefix = payload.category === 'AC' ? 'AC' : (payload.category === 'Mesin' ? 'MSN' : (payload.category === 'Audio' ? 'AUD' : (payload.category === 'Televisi' ? 'TV' : 'ELK')));
-      const nextId = 'AST-' + prefix + '-' + String(existing.length + 1).padStart(3, '0');
+      const numStr = String(existing.length + 1).padStart(3, '0');
+      const nextId = 'AST-' + prefix + '-' + numStr;
+      const autoModel = payload.model && String(payload.model).trim() ? String(payload.model).trim() : ('MDL-' + prefix + '-' + numStr + '-OLD');
+      const autoSerial = payload.serial_number && String(payload.serial_number).trim() ? String(payload.serial_number).trim() : ('SN-' + prefix + '-' + Utilities.getUuid().substring(0, 6).toUpperCase());
       const newRow = {
         asset_id: nextId,
         asset_name: payload.asset_name || 'Asset Baru',
         category: payload.category || 'Elektronik',
+        model: autoModel,
+        serial_number: autoSerial,
         location_id: payload.location_id || 'Public Area',
         purchase_date: payload.purchase_date || '2026-01-01',
         purchase_cost: parseFloat(payload.purchase_cost) || 0,
@@ -1014,6 +1021,33 @@ function dispatchAction(action, payload) {
     case 'asset.update': {
       updateTableRow('ASSETS', 'asset_id', payload.asset_id, payload);
       return { success: true, message: `Asset ${payload.asset_id} berhasil diperbarui!` };
+    }
+
+    case 'asset.repairList': {
+      const repairs = getTableData('ASSET_REPAIRS');
+      return { success: true, data: repairs };
+    }
+
+    case 'asset.repairCreate': {
+      const existing = getTableData('ASSET_REPAIRS');
+      const nextId = 'RPR-' + period.replace('-', '') + '-' + String(existing.length + 1).padStart(3, '0');
+      const newRow = {
+        repair_id: nextId,
+        asset_id: payload.asset_id || '',
+        asset_name: payload.asset_name || '',
+        location_id: payload.location_id || '',
+        damage_description: payload.damage_description || '',
+        reported_date: payload.reported_date || Utilities.formatDate(new Date(), 'Asia/Makassar', 'yyyy-MM-dd'),
+        repaired_date: payload.repaired_date || '',
+        repaired_by_type: payload.repaired_by_type || 'Tim Engineering',
+        repaired_by_name: payload.repaired_by_name || '',
+        repair_cost: parseFloat(payload.repair_cost) || 0,
+        status: payload.status || 'Selesai',
+        notes: payload.notes || '-',
+        created_at: now
+      };
+      appendTableRow('ASSET_REPAIRS', newRow);
+      return { success: true, message: `Riwayat perbaikan ${nextId} berhasil dicatat!`, data: newRow };
     }
 
     case 'evaluation.get':

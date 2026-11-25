@@ -1612,7 +1612,7 @@
       <!-- VIEW: ASSET MANAGEMENT (MONITORING ASSET VILLA) -->
       <!-- ========================================== -->
       <section id="view-asset-management" class="view-panel hidden flex flex-col gap-6">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-surface-container pb-4">
           <div>
             <div class="flex items-center gap-2.5">
               <h1 class="text-[26px] font-bold text-primary tracking-tight">Monitoring Asset Villa & Depresiasi</h1>
@@ -1620,12 +1620,24 @@
                 Villa Asset Tracking
               </span>
             </div>
-            <p class="text-[13px] text-outline mt-0.5">Pemantauan inventaris aset villa, kalkulasi otomatis penyusutan/depresiasi garis lurus, dan monitoring barang rusak.</p>
+            <p class="text-[13px] text-outline mt-0.5">Pemantauan inventaris aset villa, model & nomor seri, depresiasi garis lurus, serta riwayat perbaikan asset.</p>
           </div>
           <div class="flex flex-wrap items-center gap-3">
-            <button onclick="exportAssetsCsv()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-on-surface text-[13px] font-semibold shadow-sm transition-all">
-              <span class="material-symbols-outlined text-[18px] text-primary">download</span>
-              <span>Export CSV</span>
+            <!-- Sub-Tabs: Daftar Asset VS Riwayat Perbaikan -->
+            <div class="inline-flex p-1 rounded-2xl bg-surface-container-high/80 text-[12.5px] font-bold shadow-inner">
+              <button id="tab-btn-asset-list" onclick="switchAssetTab('list')" class="px-3.5 py-2 rounded-xl bg-white text-primary shadow-sm flex items-center gap-1.5 transition-all font-bold">
+                <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+                <span>Daftar Asset</span>
+              </button>
+              <button id="tab-btn-asset-repairs" onclick="switchAssetTab('repairs')" class="px-3.5 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-1.5 transition-all font-semibold">
+                <span class="material-symbols-outlined text-[18px]">build_circle</span>
+                <span>Riwayat Perbaikan</span>
+                <span id="asset-repair-tab-badge" class="px-2 py-0.5 rounded-full bg-error-container text-error text-[10.5px] font-bold">0</span>
+              </button>
+            </div>
+            <button onclick="openAssetRepairModal()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-600 text-white hover:bg-amber-700 text-[13px] font-semibold shadow-sm transition-all">
+              <span class="material-symbols-outlined text-[18px]">handyman</span>
+              <span>+ Catat Perbaikan</span>
             </button>
             <button onclick="openModal('modal-asset')" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
               <span class="material-symbols-outlined text-[18px] text-secondary-fixed">add_circle</span>
@@ -1633,6 +1645,9 @@
             </button>
           </div>
         </div>
+
+        <!-- ================= SUB-TAB 1: DAFTAR & DEPRESIASI ASSET ================= -->
+        <div id="subtab-asset-list-content" class="flex flex-col gap-6">
 
         <!-- 4 Top KPI Cards (Asset Valuation & Health) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -1763,7 +1778,12 @@
               <option value="Rusak">Rusak</option>
             </select>
           </div>
-          <button onclick="resetAssetFilters()" class="text-[12px] text-outline hover:text-primary underline">Reset Filter</button>
+          <div class="flex items-center gap-3">
+            <button onclick="resetAssetFilters()" class="text-[12px] text-outline hover:text-primary underline">Reset Filter</button>
+            <button onclick="exportAssetsCsv()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-[12px] font-semibold text-primary transition-all">
+              <span class="material-symbols-outlined text-[16px]">download</span> Export CSV
+            </button>
+          </div>
         </div>
 
         <!-- Asset Table -->
@@ -1773,7 +1793,7 @@
               <thead>
                 <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
                   <th class="py-3 px-4">Asset ID</th>
-                  <th class="py-3 px-4">Nama Asset</th>
+                  <th class="py-3 px-4">Nama Asset, Model & No. Seri</th>
                   <th class="py-3 px-4">Kategori</th>
                   <th class="py-3 px-4">Lokasi</th>
                   <th class="py-3 px-4">Tgl Beli</th>
@@ -1782,7 +1802,7 @@
                   <th class="py-3 px-4">Akumulasi Depresiasi</th>
                   <th class="py-3 px-4">Nilai Buku Saat Ini</th>
                   <th class="py-3 px-4">Status Kondisi</th>
-                  <th class="py-3 px-4">Catatan</th>
+                  <th class="py-3 px-4">Spesifikasi & Catatan</th>
                   <th class="py-3 px-4 text-center">Aksi</th>
                 </tr>
               </thead>
@@ -1793,6 +1813,93 @@
           </div>
           <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline bg-surface-container-low/30">
             <span id="asset-table-count">Menampilkan 0 Asset</span>
+          </div>
+        </div>
+        </div><!-- End subtab-asset-list-content -->
+
+        <!-- ================= SUB-TAB 2: RIWAYAT PERBAIKAN ASSET ================= -->
+        <div id="subtab-asset-repairs-content" class="hidden flex flex-col gap-6">
+          <!-- 3 KPI Cards (Repair History) -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Kejadian Perbaikan</span>
+                <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center text-amber-800">
+                  <span class="material-symbols-outlined text-[20px]">handyman</span>
+                </div>
+              </div>
+              <div class="my-3 text-[26px] font-bold text-on-surface" id="repair-kpi-total">0 Kali</div>
+              <div class="pt-2 border-t border-surface-container text-[11px] text-outline">Akumulasi perbaikan seluruh asset villa</div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Biaya Perbaikan</span>
+                <div class="w-9 h-9 rounded-xl bg-error-container flex items-center justify-center text-error">
+                  <span class="material-symbols-outlined text-[20px]">payments</span>
+                </div>
+              </div>
+              <div class="my-3 text-[26px] font-bold text-error" id="repair-kpi-cost">Rp 0</div>
+              <div class="pt-2 border-t border-surface-container text-[11px] text-outline">Total biaya servis & penggantian sparepart</div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Pelaksana Perbaikan</span>
+                <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-on-secondary-container">
+                  <span class="material-symbols-outlined text-[20px]">engineering</span>
+                </div>
+              </div>
+              <div class="my-3 text-[20px] font-bold text-primary" id="repair-kpi-team-vs-vendor">0 Internal • 0 Vendor</div>
+              <div class="pt-2 border-t border-surface-container text-[11px] text-outline">Perbandingan pengerjaan Tim Engineering vs Vendor</div>
+            </div>
+          </div>
+
+          <!-- Filter & Search Toolbar (Repair History) -->
+          <div class="bg-white rounded-2xl p-4 border border-surface-container shadow-sm flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3 flex-1">
+              <div class="relative min-w-[240px]">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[18px]">search</span>
+                <input id="repair-search" oninput="filterAssetRepairs()" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] focus:outline-none focus:bg-white border border-transparent focus:border-secondary/40" placeholder="Cari nama asset, lokasi, kerusakan, atau teknisi/vendor..." type="text"/>
+              </div>
+              <select id="repair-filter-by" onchange="filterAssetRepairs()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+                <option value="Semua">Semua Pelaksana</option>
+                <option value="Tim Engineering">Tim Engineering</option>
+                <option value="Vendor">Vendor / Pihak Luar</option>
+              </select>
+            </div>
+            <div class="flex items-center gap-3">
+              <button onclick="resetAssetRepairFilters()" class="text-[12px] text-outline hover:text-primary underline">Reset Filter</button>
+              <button onclick="exportAssetRepairsCsv()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-[12px] font-semibold text-primary transition-all">
+                <span class="material-symbols-outlined text-[16px]">download</span> Export CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Repair History Table -->
+          <div class="bg-white rounded-2xl border border-surface-container shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-[12.5px] border-collapse">
+                <thead>
+                  <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
+                    <th class="py-3 px-4">ID Perbaikan</th>
+                    <th class="py-3 px-4">Asset & Lokasi</th>
+                    <th class="py-3 px-4">Penyebab / Kerusakan</th>
+                    <th class="py-3 px-4">Diperbaiki Oleh</th>
+                    <th class="py-3 px-4">Diketahui Tgl</th>
+                    <th class="py-3 px-4">Dikerjakan Tgl</th>
+                    <th class="py-3 px-4">Biaya Perbaikan</th>
+                    <th class="py-3 px-4">Status & Catatan</th>
+                  </tr>
+                </thead>
+                <tbody id="asset-repair-table-body" class="divide-y divide-surface-container">
+                  <!-- Dynamically populated -->
+                </tbody>
+              </table>
+            </div>
+            <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline bg-surface-container-low/30">
+              <span id="asset-repair-table-count">Menampilkan 0 Riwayat Perbaikan</span>
+            </div>
           </div>
         </div>
       </section>
@@ -2591,7 +2698,7 @@
           <span class="material-symbols-outlined text-[20px]">close</span>
         </button>
       </div>
-      <form id="form-asset" onsubmit="submitAsset(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+      <form id="form-asset" onsubmit="submitAsset(event)" class="p-5 flex flex-col gap-3.5 text-[13px] max-h-[82vh] overflow-y-auto">
         <div>
           <label class="block text-outline font-semibold mb-1">Nama Aset / Perangkat *</label>
           <input id="form-asset-name" type="text" required placeholder="Contoh: Pompa Sirkulasi Kolam Utama / Smart TV 55 Inch" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
@@ -2611,6 +2718,19 @@
             <label class="block text-outline font-semibold mb-1">Lokasi / Villa *</label>
             <input id="form-asset-location" type="text" required placeholder="Contoh: Villa 01 / Pump Room" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
           </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Model / Tipe Barang</label>
+            <input id="form-asset-model" type="text" placeholder="Kosongkan = otomatis (brg lama)" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Nomor Seri (Serial No.)</label>
+            <input id="form-asset-serial" type="text" placeholder="Kosongkan = otomatis (brg lama)" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none font-mono"/>
+          </div>
+        </div>
+        <div class="text-[11px] text-primary bg-surface-container-low/70 px-3 py-1.5 rounded-lg -mt-1">
+          💡 Jika Model / Nomor Seri kosong (barang lama), sistem akan membuat kode otomatis.
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
@@ -2638,14 +2758,94 @@
           </div>
         </div>
         <div>
-          <label class="block text-outline font-semibold mb-1">Catatan / Spesifikasi Singkat</label>
-          <input id="form-asset-notes" type="text" placeholder="Contoh: Daikin Inverter 2 PK, Serial No: DKN-9921..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          <label class="block text-outline font-semibold mb-1">Spesifikasi Barang & Catatan *</label>
+          <textarea id="form-asset-notes" rows="2" placeholder="Contoh: Daikin Inverter 2 PK, 18.000 BTU, Daya 1.500W, Freon R32, kapasitas tangki..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"></textarea>
         </div>
         <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
           <button type="button" onclick="closeModal('modal-asset')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
           <button type="submit" class="px-5 py-2.5 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold flex items-center gap-2 shadow-sm">
             <span class="material-symbols-outlined text-[18px]">save</span>
             <span>Simpan Aset</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Catat Riwayat Perbaikan Asset -->
+  <div id="modal-asset-repair" class="modal-backdrop fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-surface-container overflow-hidden">
+      <div class="p-5 border-b border-surface-container flex items-center justify-between bg-surface-container-low/50">
+        <h3 class="text-[16px] font-bold text-primary flex items-center gap-2">
+          <span class="material-symbols-outlined text-amber-600">handyman</span> + Catat Riwayat Perbaikan Asset
+        </h3>
+        <button onclick="closeModal('modal-asset-repair')" class="text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <form id="form-asset-repair" onsubmit="submitAssetRepair(event)" class="p-5 flex flex-col gap-3.5 text-[13px] max-h-[82vh] overflow-y-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Pilih Asset *</label>
+            <select id="form-repair-asset" onchange="onRepairAssetSelect()" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Lokasi Asset *</label>
+            <input id="form-repair-location" type="text" required placeholder="Lokasi asset berada..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Kerusakan Kenapa / Penyebab Kerusakan *</label>
+          <textarea id="form-repair-damage" rows="2" required placeholder="Contoh: Kompresor overheat karena kapasitor lemah & pipa drainase tersumbat..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Kapan Diketahui Kerusakan *</label>
+            <input id="form-repair-reported-date" type="date" value="2026-05-18" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Kapan Dikerjakan / Diperbaiki *</label>
+            <input id="form-repair-date" type="date" value="2026-05-19" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Diperbaiki Oleh *</label>
+            <select id="form-repair-by-type" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Tim Engineering">Tim Engineering (Internal)</option>
+              <option value="Vendor">Vendor / Pihak Luar</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Nama Teknisi / Nama Vendor *</label>
+            <input id="form-repair-by-name" type="text" required placeholder="Contoh: Wayan G. / CV Sejuk Mandiri" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-outline font-semibold mb-1">Biaya Perbaikan (Rp) *</label>
+            <input id="form-repair-cost" type="number" step="1000" min="0" value="0" required placeholder="0 jika tanpa biaya" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none font-bold text-primary"/>
+          </div>
+          <div>
+            <label class="block text-outline font-semibold mb-1">Status Perbaikan *</label>
+            <select id="form-repair-status" required class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none">
+              <option value="Selesai" selected>Selesai (Asset Normal)</option>
+              <option value="Sedang Dikerjakan">Sedang Dikerjakan</option>
+              <option value="Menunggu Sparepart">Menunggu Sparepart</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Catatan & Sparepart yang Diganti</label>
+          <input id="form-repair-notes" type="text" placeholder="Contoh: Ganti kapasitor 35uF + cuci evaporator..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div class="pt-3 border-t border-surface-container flex items-center justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-asset-repair')" class="px-4 py-2 rounded-xl text-outline hover:bg-surface-container-low">Batal</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-amber-600 text-white hover:bg-amber-700 font-semibold flex items-center gap-2 shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">save</span>
+            <span>Simpan Riwayat Perbaikan</span>
           </button>
         </div>
       </form>
@@ -2765,16 +2965,22 @@
         { opex_id: 'OPX-202605-004', record_date: '2026-05-17', reporting_period: '2026-05', category: 'Perlengkapan / Tools', item_name: 'Bohlam LED Warm White 12W & Fitting E27', qty: 10, unit: 'Pcs', unit_price: 65000, total_amount: 650000, vendor: 'Toko Surya Elektrik', receipt_no: 'FKT-3129', notes: 'Penggantian lampu penerangan walkway' }
       ],
       assets: [
-        { asset_id: 'AST-AC-001', asset_name: 'AC Daikin Inverter Multi-S 2 PK', category: 'AC', location_id: 'Villa 01 - Master Bedroom', purchase_date: '2023-01-15', purchase_cost: 14500000, useful_life_years: 5, status: 'Baik / Normal', notes: 'Perawatan cuci rutin tiap 2 bulan' },
-        { asset_id: 'AST-AC-002', asset_name: 'AC Panasonic Split 1.5 PK', category: 'AC', location_id: 'Villa 05 - Living Room', purchase_date: '2022-06-10', purchase_cost: 8500000, useful_life_years: 5, status: 'Perlu Perbaikan', notes: 'Thermostat kurang presisi, perlu kalibrasi sensor' },
-        { asset_id: 'AST-MSN-001', asset_name: 'Pompa Kolam Hayward Super Pump 2 HP', category: 'Mesin', location_id: 'Main Pool Pump Room', purchase_date: '2022-03-20', purchase_cost: 18500000, useful_life_years: 6, status: 'Baik / Normal', notes: 'Impeller & mechanical seal diganti Mei 2026' },
-        { asset_id: 'AST-MSN-002', asset_name: 'Genset Perkins Silent 250 kVA + ATS', category: 'Mesin', location_id: 'Central Powerhouse', purchase_date: '2021-08-05', purchase_cost: 285000000, useful_life_years: 10, status: 'Baik / Normal', notes: 'Uji beban rutin tiap minggu lancar' },
-        { asset_id: 'AST-TV-001', asset_name: 'Samsung 65 Inch 4K Smart UHD TV', category: 'Televisi', location_id: 'Villa 08 - Living Pavilion', purchase_date: '2023-11-01', purchase_cost: 13200000, useful_life_years: 4, status: 'Baik / Normal', notes: 'Koneksi WiFi LAN stabil' },
-        { asset_id: 'AST-TV-002', asset_name: 'LG 55 Inch 4K UHD TV Villa Suite', category: 'Televisi', location_id: 'Villa 03 - Bedroom', purchase_date: '2022-09-12', purchase_cost: 9500000, useful_life_years: 4, status: 'Rusak', notes: 'Panel layar bergaris vertikal setelah petir' },
-        { asset_id: 'AST-AUD-001', asset_name: 'Bose FreeSpace Public Address Amp & Speakers', category: 'Audio', location_id: 'Restaurant & Pool Deck', purchase_date: '2023-04-10', purchase_cost: 32000000, useful_life_years: 5, status: 'Baik / Normal', notes: 'Output 6 zona audio seimbang' },
-        { asset_id: 'AST-AUD-002', asset_name: 'Sonos Move 2 Wireless Sound Bar', category: 'Audio', location_id: 'Villa 12 - Gazebo Lounge', purchase_date: '2024-02-18', purchase_cost: 8900000, useful_life_years: 4, status: 'Baik / Normal', notes: 'Baterai sehat, dock charger terpasang' },
-        { asset_id: 'AST-ELK-001', asset_name: 'Kulkas Showcase 2 Pintu Beverage Chiller', category: 'Elektronik', location_id: 'Main Kitchen & Bar', purchase_date: '2022-12-05', purchase_cost: 16800000, useful_life_years: 6, status: 'Baik / Normal', notes: 'Kompresor stabil pada 3°C' },
-        { asset_id: 'AST-ELK-002', asset_name: 'Water Heater Heat Pump Stiebel Eltron 300L', category: 'Elektronik', location_id: 'Villa Cluster B Roof', purchase_date: '2021-05-20', purchase_cost: 27500000, useful_life_years: 7, status: 'Perlu Perbaikan', notes: 'Heating element sekunder perlu flushing descaling' }
+        { asset_id: 'AST-AC-001', asset_name: 'AC Daikin Inverter Multi-S 2 PK', category: 'AC', model: 'Daikin FTKC50TVM4', serial_number: 'DKN-2023-9921A', location_id: 'Villa 01 - Master Bedroom', purchase_date: '2023-01-15', purchase_cost: 14500000, useful_life_years: 5, status: 'Baik / Normal', notes: '2 PK Inverter, 18.000 BTU, Daya 1.360W, Freon R32' },
+        { asset_id: 'AST-AC-002', asset_name: 'AC Panasonic Split 1.5 PK', category: 'AC', model: 'CS-PU12XKJ', serial_number: 'PNS-2022-4410B', location_id: 'Villa 05 - Living Room', purchase_date: '2022-06-10', purchase_cost: 8500000, useful_life_years: 5, status: 'Perlu Perbaikan', notes: '1.5 PK EcoTough, 12.000 BTU, Freon R32, perlu kalibrasi sensor' },
+        { asset_id: 'AST-MSN-001', asset_name: 'Pompa Kolam Hayward Super Pump 2 HP', category: 'Mesin', model: 'SP2615X20', serial_number: 'HYW-2022-8812', location_id: 'Main Pool Pump Room', purchase_date: '2022-03-20', purchase_cost: 18500000, useful_life_years: 6, status: 'Baik / Normal', notes: '2 HP, 220V Single Phase, Pipa 2 Inch' },
+        { asset_id: 'AST-MSN-002', asset_name: 'Genset Perkins Silent 250 kVA + ATS', category: 'Mesin', model: 'Perkins 1106A-70TAG4', serial_number: 'PRK-2021-250KVA', location_id: 'Central Powerhouse', purchase_date: '2021-08-05', purchase_cost: 285000000, useful_life_years: 10, status: 'Baik / Normal', notes: '250 kVA 3-Phase 380V, Tangki Solar 500L, Panel ATS DeepSea' },
+        { asset_id: 'AST-TV-001', asset_name: 'Samsung 65 Inch 4K Smart UHD TV', category: 'Televisi', model: 'UA65CU8000', serial_number: 'SMG-2023-6508C', location_id: 'Villa 08 - Living Pavilion', purchase_date: '2023-11-01', purchase_cost: 13200000, useful_life_years: 4, status: 'Baik / Normal', notes: '65 Inch Crystal UHD 4K, WiFi 5, 3x HDMI' },
+        { asset_id: 'AST-TV-002', asset_name: 'LG 55 Inch 4K UHD TV Villa Suite', category: 'Televisi', model: '55UQ7500PSF', serial_number: 'LG-2022-5503X', location_id: 'Villa 03 - Bedroom', purchase_date: '2022-09-12', purchase_cost: 9500000, useful_life_years: 4, status: 'Rusak', notes: '55 Inch 4K WebOS — Panel layar bergaris vertikal setelah petir' },
+        { asset_id: 'AST-AUD-001', asset_name: 'Bose FreeSpace Public Address Amp & Speakers', category: 'Audio', model: 'IZA 2120-LZ', serial_number: 'BSE-2023-120Z', location_id: 'Restaurant & Pool Deck', purchase_date: '2023-04-10', purchase_cost: 32000000, useful_life_years: 5, status: 'Baik / Normal', notes: '2x120W Integrated Zone Amplifier + 6 Ceiling/Outdoor Speakers' },
+        { asset_id: 'AST-AUD-002', asset_name: 'Sonos Move 2 Wireless Sound Bar', category: 'Audio', model: 'MOVE2-BLK', serial_number: 'SNS-2024-7742', location_id: 'Villa 12 - Gazebo Lounge', purchase_date: '2024-02-18', purchase_cost: 8900000, useful_life_years: 4, status: 'Baik / Normal', notes: 'WiFi + Bluetooth 5.0, IP56 Weatherproof, Baterai 24 Jam' },
+        { asset_id: 'AST-ELK-001', asset_name: 'Kulkas Showcase 2 Pintu Beverage Chiller', category: 'Elektronik', model: 'RSA Opal 2-Door', serial_number: 'RSA-2022-0219', location_id: 'Main Kitchen & Bar', purchase_date: '2022-12-05', purchase_cost: 16800000, useful_life_years: 6, status: 'Baik / Normal', notes: 'Kapasitas 800 Liter, Suhu 2-8°C, Daya 580W' },
+        { asset_id: 'AST-ELK-002', asset_name: 'Water Heater Heat Pump Stiebel Eltron 300L', category: 'Elektronik', model: 'WWK 302', serial_number: 'STB-2021-300L', location_id: 'Villa Cluster B Roof', purchase_date: '2021-05-20', purchase_cost: 27500000, useful_life_years: 7, status: 'Perlu Perbaikan', notes: 'Kapasitas 300L, COP 3.8, Heating element sekunder perlu flushing' }
+      ],
+      assetRepairs: [
+        { repair_id: 'RPR-202605-001', asset_id: 'AST-MSN-001', asset_name: 'Pompa Kolam Hayward Super Pump 2 HP', location_id: 'Main Pool Pump Room', damage_description: 'Bocor pada as pompa & suara bearing kasar saat beroperasi', reported_date: '2026-05-14', repaired_date: '2026-05-15', repaired_by_type: 'Tim Engineering', repaired_by_name: 'Wayan G. & Made S.', repair_cost: 750000, status: 'Selesai', notes: 'Ganti mechanical seal 2 inch & bearing SKF 6203' },
+        { repair_id: 'RPR-202605-002', asset_id: 'AST-AC-002', asset_name: 'AC Panasonic Split 1.5 PK', location_id: 'Villa 05 - Living Room', damage_description: 'AC kurang dingin, evaporator membeku & thermostat tidak membaca suhu akurat', reported_date: '2026-05-17', repaired_date: '2026-05-18', repaired_by_type: 'Vendor', repaired_by_name: 'CV Bali Sejuk Mandiri', repair_cost: 1250000, status: 'Sedang Dikerjakan', notes: 'Penggantian sensor thermistor & tambah freon R32' },
+        { repair_id: 'RPR-202605-003', asset_id: 'AST-TV-002', asset_name: 'LG 55 Inch 4K UHD TV Villa Suite', location_id: 'Villa 03 - Bedroom', damage_description: 'Layar bergaris vertikal & modul T-Con rusak akibat lonjakan listrik saat petir', reported_date: '2026-05-10', repaired_date: '2026-05-12', repaired_by_type: 'Vendor', repaired_by_name: 'LG Authorized Service Center Denpasar', repair_cost: 3400000, status: 'Menunggu Sparepart', notes: 'Inden panel LCD 55 inch 4K estimasi 7 hari kerja' },
+        { repair_id: 'RPR-202604-004', asset_id: 'AST-ELK-002', asset_name: 'Water Heater Heat Pump Stiebel Eltron 300L', location_id: 'Villa Cluster B Roof', damage_description: 'Pemanasan lambat karena kerak kapur menumpuk pada coil kondensor', reported_date: '2026-04-20', repaired_date: '2026-04-21', repaired_by_type: 'Tim Engineering', repaired_by_name: 'Komang D. & Ketut A.', repair_cost: 350000, status: 'Selesai', notes: 'Descaling coil & flushing tangki 300L' }
       ]
     };
 
@@ -3011,6 +3217,17 @@
           return { success: true, message: `Aset ${payload.asset_id} berhasil diperbarui!` };
         }
 
+        if (action === 'asset.repairList') {
+          return { success: true, data: [...(mockStore.assetRepairs || [])] };
+        }
+
+        if (action === 'asset.repairCreate') {
+          const nextId = 'RPR-202605-' + String((mockStore.assetRepairs || []).length + 1).padStart(3, '0');
+          const newRep = Object.assign({ repair_id: nextId }, payload);
+          (mockStore.assetRepairs || []).unshift(newRep);
+          return { success: true, message: `Riwayat perbaikan ${nextId} berhasil dicatat!`, data: newRep };
+        }
+
         if (action === 'sync.all') {
           return {
             success: true,
@@ -3023,6 +3240,7 @@
             opexDaily: this.mockFallback('opex.list', payload),
             purchase: this.mockFallback('purchase.get', payload),
             assets: this.mockFallback('asset.list', payload),
+            assetRepairs: this.mockFallback('asset.repairList', payload),
             evaluations: mockStore.evaluations
           };
         }
@@ -3148,6 +3366,9 @@
       opexSubTab: 'daily',
       assets: [],
       filteredAssets: [],
+      assetRepairs: [],
+      filteredAssetRepairs: [],
+      assetSubTab: 'list',
       purchases: [],
       evaluations: []
     };
@@ -3195,6 +3416,8 @@
       if (viewId === 'asset-management') {
         renderAssets();
         recalcAssetKPIs();
+        renderAssetRepairs();
+        recalcAssetRepairKPIs();
       }
       if (viewId === 'opex') {
         renderDailyOpex();
@@ -3412,7 +3635,7 @@
       }
 
       // 2. Parallel Fallback (Promise.all) if backend still running previous version
-      const [meRes, masterRes, dashRes, actRes, prjRes, engRes, woRes, opexRes, purRes, evalRes, astRes] = await Promise.all([
+      const [meRes, masterRes, dashRes, actRes, prjRes, engRes, woRes, opexRes, purRes, evalRes, astRes, repRes] = await Promise.all([
         ApiClient.call('auth.me', {}),
         ApiClient.call('master.get', {}),
         ApiClient.call('dashboard.get', { period: state.currentPeriod }),
@@ -3423,7 +3646,8 @@
         ApiClient.call('opex.list', { period: state.currentPeriod }),
         ApiClient.call('purchase.get', { period: state.currentPeriod }),
         ApiClient.call('evaluation.get', { period: state.currentPeriod }),
-        ApiClient.call('asset.list', {})
+        ApiClient.call('asset.list', {}),
+        ApiClient.call('asset.repairList', {})
       ]);
 
       if (meRes && meRes.success && meRes.user) {
@@ -3474,6 +3698,12 @@
         filterAssets();
         recalcAssetKPIs();
       }
+      if (repRes && repRes.success && repRes.data) {
+        state.assetRepairs = repRes.data;
+        state.filteredAssetRepairs = [...repRes.data];
+        filterAssetRepairs();
+        recalcAssetRepairKPIs();
+      }
       renderRecurringJobAlerts();
       renderStaffPerformance();
       renderMaterialUsageDashboard();
@@ -3523,6 +3753,12 @@
         state.filteredAssets = [...bundle.assets.data];
         filterAssets();
         recalcAssetKPIs();
+      }
+      if (bundle.assetRepairs && bundle.assetRepairs.data) {
+        state.assetRepairs = bundle.assetRepairs.data;
+        state.filteredAssetRepairs = [...bundle.assetRepairs.data];
+        filterAssetRepairs();
+        recalcAssetRepairKPIs();
       }
       if (bundle.evaluations) {
         state.evaluations = bundle.evaluations;
@@ -5034,6 +5270,8 @@
         if (q) {
           const m = String(a.asset_id || '').toLowerCase().includes(q) ||
                     String(a.asset_name || '').toLowerCase().includes(q) ||
+                    String(a.model || '').toLowerCase().includes(q) ||
+                    String(a.serial_number || '').toLowerCase().includes(q) ||
                     String(a.category || '').toLowerCase().includes(q) ||
                     String(a.location_id || '').toLowerCase().includes(q) ||
                     String(a.notes || '').toLowerCase().includes(q);
@@ -5090,6 +5328,10 @@
           <td class="py-3 px-4 font-mono font-bold text-primary">${a.asset_id}</td>
           <td class="py-3 px-4">
             <div class="font-bold text-on-surface">${a.asset_name}</div>
+            <div class="text-[11px] text-outline mt-0.5 flex flex-wrap gap-1.5">
+              <span class="px-1.5 py-0.2 rounded bg-surface-container-low font-semibold">Model: ${a.model || '-'}</span>
+              <span class="px-1.5 py-0.2 rounded bg-surface-container-low font-mono">S/N: ${a.serial_number || '-'}</span>
+            </div>
           </td>
           <td class="py-3 px-4">
             <span class="px-2 py-0.5 rounded-lg font-semibold text-[11px] ${catBadge}">${a.category}</span>
@@ -5103,11 +5345,16 @@
           <td class="py-3 px-4 cursor-pointer" onclick="updateAssetStatusPrompt('${a.asset_id}', '${a.status}')" title="Klik untuk ubah status">
             ${statusBadge}
           </td>
-          <td class="py-3 px-4 text-[11.5px] text-outline max-w-xs truncate">${a.notes || '-'}</td>
+          <td class="py-3 px-4 text-[11.5px] text-outline max-w-xs">${a.notes || '-'}</td>
           <td class="py-3 px-4 text-center">
-            <button onclick="updateAssetStatusPrompt('${a.asset_id}', '${a.status}')" class="px-2.5 py-1 rounded-lg text-outline hover:text-primary hover:bg-surface-container font-semibold text-[11px] transition-all flex items-center gap-1 mx-auto">
-              <span class="material-symbols-outlined text-[14px]">edit</span> Status
-            </button>
+            <div class="flex items-center justify-center gap-1">
+              <button onclick="updateAssetStatusPrompt('${a.asset_id}', '${a.status}')" title="Ubah Status Kondisi" class="px-2 py-1 rounded-lg text-outline hover:text-primary hover:bg-surface-container font-semibold text-[11px] transition-all">
+                Status
+              </button>
+              <button onclick="openAssetRepairModal('${a.asset_id}')" title="Catat Perbaikan Aset Ini" class="px-2 py-1 rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 font-semibold text-[11px] transition-all">
+                + Perbaikan
+              </button>
+            </div>
           </td>
         `;
         tbody.appendChild(tr);
@@ -5119,6 +5366,8 @@
       const name = document.getElementById('form-asset-name').value;
       const cat = document.getElementById('form-asset-category').value;
       const loc = document.getElementById('form-asset-location').value;
+      const modelInput = document.getElementById('form-asset-model') ? document.getElementById('form-asset-model').value.trim() : '';
+      const serialInput = document.getElementById('form-asset-serial') ? document.getElementById('form-asset-serial').value.trim() : '';
       const date = document.getElementById('form-asset-date').value;
       const cost = parseFloat(document.getElementById('form-asset-cost').value) || 0;
       const life = parseFloat(document.getElementById('form-asset-life').value) || 5;
@@ -5128,12 +5377,19 @@
       showToast('Menyimpan data aset baru...');
 
       const prefix = cat === 'AC' ? 'AC' : (cat === 'Mesin' ? 'MSN' : (cat === 'Audio' ? 'AUD' : (cat === 'Televisi' ? 'TV' : 'ELK')));
-      const nextId = 'AST-' + prefix + '-' + String((state.assets || []).length + 1).padStart(3, '0');
+      const numStr = String((state.assets || []).length + 1).padStart(3, '0');
+      const nextId = 'AST-' + prefix + '-' + numStr;
+      const yearStr = String(date || '2024').substring(0, 4);
+      const rand4 = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const finalModel = modelInput || `MDL-${prefix}-${numStr}-OLD`;
+      const finalSerial = serialInput || `SN-${prefix}-${yearStr}-${rand4}`;
 
       const newAst = {
         asset_id: nextId,
         asset_name: name,
         category: cat,
+        model: finalModel,
+        serial_number: finalSerial,
         location_id: loc,
         purchase_date: date,
         purchase_cost: cost,
@@ -5150,7 +5406,7 @@
       e.target.reset();
       document.getElementById('form-asset-date').value = '2024-01-15';
       document.getElementById('form-asset-life').value = '5';
-      showToast(`Aset ${nextId} (${name}) berhasil disimpan!`);
+      showToast(`Aset ${nextId} (S/N: ${finalSerial}) berhasil disimpan!`);
 
       const res = await ApiClient.call('asset.create', newAst);
       if (res && res.data && res.data.asset_id) {
@@ -5174,12 +5430,224 @@
     };
 
     window.exportAssetsCsv = function() {
-      let csv = 'Asset ID,Nama Asset,Kategori,Lokasi,Tanggal Perolehan,Harga Beli (Rp),Umur (Tahun),Akumulasi Depresiasi (Rp),Nilai Buku Saat Ini (Rp),Status,Catatan\n';
+      let csv = 'Asset ID,Nama Asset,Model,Nomor Seri,Kategori,Lokasi,Tanggal Perolehan,Harga Beli (Rp),Umur (Tahun),Akumulasi Depresiasi (Rp),Nilai Buku Saat Ini (Rp),Status,Spesifikasi & Catatan\n';
       (state.filteredAssets || state.assets || []).forEach(a => {
         const dep = calcAssetDepreciation(a);
-        csv += `"${a.asset_id}","${a.asset_name}","${a.category}","${a.location_id || ''}","${a.purchase_date}","${a.purchase_cost}","${a.useful_life_years}","${dep.accumDeprec}","${dep.bookValue}","${a.status}","${a.notes || ''}"\n`;
+        csv += `"${a.asset_id}","${a.asset_name}","${a.model || '-'}","${a.serial_number || '-'}","${a.category}","${a.location_id || ''}","${a.purchase_date}","${a.purchase_cost}","${a.useful_life_years}","${dep.accumDeprec}","${dep.bookValue}","${a.status}","${a.notes || ''}"\n`;
       });
       downloadCsv(csv, `Monitoring_Asset_Villa_Agranusa_${state.currentPeriod}.csv`);
+    };
+
+    // ==========================================
+    // ASSET REPAIR HISTORY MODULE
+    // ==========================================
+    window.switchAssetTab = function(tab) {
+      state.assetSubTab = tab;
+      const listSec = document.getElementById('subtab-asset-list-content');
+      const repSec = document.getElementById('subtab-asset-repairs-content');
+      const btnList = document.getElementById('tab-btn-asset-list');
+      const btnRep = document.getElementById('tab-btn-asset-repairs');
+
+      if (tab === 'repairs') {
+        if (listSec) listSec.classList.add('hidden');
+        if (repSec) repSec.classList.remove('hidden');
+        if (btnList) btnList.className = 'px-3.5 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-1.5 transition-all font-semibold';
+        if (btnRep) btnRep.className = 'px-3.5 py-2 rounded-xl bg-white text-primary shadow-sm flex items-center gap-1.5 transition-all font-bold';
+        filterAssetRepairs();
+        recalcAssetRepairKPIs();
+      } else {
+        if (listSec) listSec.classList.remove('hidden');
+        if (repSec) repSec.classList.add('hidden');
+        if (btnList) btnList.className = 'px-3.5 py-2 rounded-xl bg-white text-primary shadow-sm flex items-center gap-1.5 transition-all font-bold';
+        if (btnRep) btnRep.className = 'px-3.5 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-1.5 transition-all font-semibold';
+        renderAssets();
+      }
+    };
+
+    window.openAssetRepairModal = function(preselectedAssetId = '') {
+      const sel = document.getElementById('form-repair-asset');
+      if (sel) {
+        sel.innerHTML = '';
+        (state.assets || []).forEach(a => {
+          const opt = document.createElement('option');
+          opt.value = a.asset_id;
+          opt.textContent = `${a.asset_id} — ${a.asset_name}`;
+          if (preselectedAssetId && a.asset_id === preselectedAssetId) opt.selected = true;
+          sel.appendChild(opt);
+        });
+      }
+      onRepairAssetSelect();
+      openModal('modal-asset-repair');
+    };
+
+    window.onRepairAssetSelect = function() {
+      const sel = document.getElementById('form-repair-asset');
+      const locInp = document.getElementById('form-repair-location');
+      if (!sel || !locInp) return;
+      const ast = (state.assets || []).find(a => a.asset_id === sel.value);
+      if (ast) locInp.value = ast.location_id || '';
+    };
+
+    window.submitAssetRepair = async function(e) {
+      e.preventDefault();
+      const assetId = document.getElementById('form-repair-asset').value;
+      const ast = (state.assets || []).find(a => a.asset_id === assetId);
+      const assetName = ast ? ast.asset_name : assetId;
+      const loc = document.getElementById('form-repair-location').value;
+      const damage = document.getElementById('form-repair-damage').value;
+      const reportedDate = document.getElementById('form-repair-reported-date').value;
+      const repairedDate = document.getElementById('form-repair-date').value;
+      const byType = document.getElementById('form-repair-by-type').value;
+      const byName = document.getElementById('form-repair-by-name').value;
+      const cost = parseFloat(document.getElementById('form-repair-cost').value) || 0;
+      const status = document.getElementById('form-repair-status').value;
+      const notes = document.getElementById('form-repair-notes').value || '-';
+
+      showToast('Menyimpan riwayat perbaikan asset...');
+
+      const nextId = 'RPR-' + state.currentPeriod.replace('-', '') + '-' + String((state.assetRepairs || []).length + 1).padStart(3, '0');
+      const newRep = {
+        repair_id: nextId,
+        asset_id: assetId,
+        asset_name: assetName,
+        location_id: loc,
+        damage_description: damage,
+        reported_date: reportedDate,
+        repaired_date: repairedDate,
+        repaired_by_type: byType,
+        repaired_by_name: byName,
+        repair_cost: cost,
+        status: status,
+        notes: notes
+      };
+
+      if (!state.assetRepairs) state.assetRepairs = [];
+      state.assetRepairs.unshift(newRep);
+
+      // Update status aset otomatis jika perbaikan selesai / sedang dikerjakan
+      if (ast) {
+        const nextAssetStatus = status === 'Selesai' ? 'Baik / Normal' : 'Perlu Perbaikan';
+        ast.status = nextAssetStatus;
+        renderAssets();
+        recalcAssetKPIs();
+        ApiClient.call('asset.update', { asset_id: assetId, status: nextAssetStatus });
+      }
+
+      filterAssetRepairs();
+      recalcAssetRepairKPIs();
+      closeModal('modal-asset-repair');
+      e.target.reset();
+      showToast(`Riwayat perbaikan ${nextId} berhasil dicatat!`);
+      switchAssetTab('repairs');
+
+      const res = await ApiClient.call('asset.repairCreate', newRep);
+      if (res && res.data && res.data.repair_id) {
+        newRep.repair_id = res.data.repair_id;
+        renderAssetRepairs();
+      }
+    };
+
+    window.recalcAssetRepairKPIs = function() {
+      const list = state.assetRepairs || [];
+      const totalCost = list.reduce((acc, r) => acc + (parseFloat(r.repair_cost) || 0), 0);
+      const internalCount = list.filter(r => String(r.repaired_by_type || '').toLowerCase().includes('engineering')).length;
+      const vendorCount = list.length - internalCount;
+
+      const elTot = document.getElementById('repair-kpi-total');
+      if (elTot) elTot.innerText = `${list.length} Kali`;
+      const elCost = document.getElementById('repair-kpi-cost');
+      if (elCost) elCost.innerText = `Rp ${Math.round(totalCost).toLocaleString('id-ID')}`;
+      const elTV = document.getElementById('repair-kpi-team-vs-vendor');
+      if (elTV) elTV.innerText = `${internalCount} Internal • ${vendorCount} Vendor`;
+      const elBadge = document.getElementById('asset-repair-tab-badge');
+      if (elBadge) elBadge.innerText = list.length;
+    };
+
+    window.filterAssetRepairs = function() {
+      const q = (document.getElementById('repair-search') ? document.getElementById('repair-search').value : '').toLowerCase();
+      const byFilter = document.getElementById('repair-filter-by') ? document.getElementById('repair-filter-by').value : 'Semua';
+
+      state.filteredAssetRepairs = (state.assetRepairs || []).filter(r => {
+        if (byFilter !== 'Semua' && r.repaired_by_type !== byFilter) return false;
+        if (q) {
+          const m = String(r.repair_id || '').toLowerCase().includes(q) ||
+                    String(r.asset_name || '').toLowerCase().includes(q) ||
+                    String(r.asset_id || '').toLowerCase().includes(q) ||
+                    String(r.location_id || '').toLowerCase().includes(q) ||
+                    String(r.damage_description || '').toLowerCase().includes(q) ||
+                    String(r.repaired_by_name || '').toLowerCase().includes(q) ||
+                    String(r.notes || '').toLowerCase().includes(q);
+          if (!m) return false;
+        }
+        return true;
+      });
+      renderAssetRepairs();
+    };
+
+    window.resetAssetRepairFilters = function() {
+      const q = document.getElementById('repair-search'); if (q) q.value = '';
+      const f = document.getElementById('repair-filter-by'); if (f) f.value = 'Semua';
+      filterAssetRepairs();
+      showToast('Filter riwayat perbaikan di-reset.');
+    };
+
+    function renderAssetRepairs() {
+      const tbody = document.getElementById('asset-repair-table-body');
+      const countEl = document.getElementById('asset-repair-table-count');
+      if (!tbody) return;
+
+      const list = state.filteredAssetRepairs || [];
+      if (countEl) countEl.innerText = `Menampilkan ${list.length} dari ${(state.assetRepairs || []).length} Riwayat Perbaikan Asset`;
+
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-outline">Belum ada catatan riwayat perbaikan asset pada kriteria ini.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      list.forEach(r => {
+        const isVendor = String(r.repaired_by_type || '').toLowerCase().includes('vendor');
+        const byBadge = isVendor
+          ? `<span class="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[10.5px] font-bold">Vendor</span>`
+          : `<span class="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10.5px] font-bold">Tim Engineering</span>`;
+
+        let stBadge = `<span class="px-2 py-0.5 rounded-lg bg-green-100 text-green-700 font-semibold text-[11px]">Selesai</span>`;
+        if (r.status === 'Sedang Dikerjakan') stBadge = `<span class="px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700 font-semibold text-[11px]">Sedang Dikerjakan</span>`;
+        else if (r.status === 'Menunggu Sparepart') stBadge = `<span class="px-2 py-0.5 rounded-lg bg-red-100 text-red-700 font-semibold text-[11px]">Menunggu Sparepart</span>`;
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-surface-container-low/40 transition-colors border-b border-surface-container/50';
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono font-bold text-primary">${r.repair_id}</td>
+          <td class="py-3 px-4">
+            <div class="font-bold text-on-surface">${r.asset_name}</div>
+            <div class="text-[11px] text-outline flex items-center gap-1 mt-0.5">
+              <span class="font-mono text-primary font-semibold">${r.asset_id}</span> • <span>📍 ${r.location_id || '-'}</span>
+            </div>
+          </td>
+          <td class="py-3 px-4 max-w-xs text-[12px] text-on-surface">${r.damage_description || '-'}</td>
+          <td class="py-3 px-4">
+            <div>${byBadge}</div>
+            <div class="font-semibold text-[12px] text-on-surface mt-1">${r.repaired_by_name || '-'}</div>
+          </td>
+          <td class="py-3 px-4 font-mono text-[12px] text-outline">${r.reported_date || '-'}</td>
+          <td class="py-3 px-4 font-mono text-[12px] font-semibold text-on-surface">${r.repaired_date || '-'}</td>
+          <td class="py-3 px-4 font-bold text-error">Rp ${Number(r.repair_cost || 0).toLocaleString('id-ID')}</td>
+          <td class="py-3 px-4">
+            <div>${stBadge}</div>
+            <div class="text-[11px] text-outline mt-1 max-w-xs truncate">${r.notes || '-'}</div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.exportAssetRepairsCsv = function() {
+      let csv = 'ID Perbaikan,Asset ID,Nama Asset,Lokasi,Kerusakan,Diketahui Tanggal,Dikerjakan Tanggal,Pelaksana,Nama Teknisi/Vendor,Biaya Perbaikan (Rp),Status,Catatan\n';
+      (state.filteredAssetRepairs || state.assetRepairs || []).forEach(r => {
+        csv += `"${r.repair_id}","${r.asset_id}","${r.asset_name}","${r.location_id}","${r.damage_description}","${r.reported_date}","${r.repaired_date}","${r.repaired_by_type}","${r.repaired_by_name}","${r.repair_cost}","${r.status}","${r.notes || ''}"\n`;
+      });
+      downloadCsv(csv, `Riwayat_Perbaikan_Asset_Agranusa_${state.currentPeriod}.csv`);
     };
 
     window.submitMeterReading = async function(e) {
