@@ -98,6 +98,10 @@
           <span class="material-symbols-outlined text-[20px]">assignment</span>
           <span>Activity & Work Order</span>
         </button>
+        <button onclick="navigateTo('material-usage')" data-path="material-usage" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
+          <span class="material-symbols-outlined text-[20px]">construction</span>
+          <span>Pemakaian Barang</span>
+        </button>
         <button onclick="navigateTo('project-monitoring')" data-path="project-monitoring" class="nav-item text-on-primary/85 hover:bg-primary/80 hover:text-white flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full">
           <span class="material-symbols-outlined text-[20px]">build</span>
           <span>Project Monitoring</span>
@@ -562,16 +566,83 @@
           </div>
 
           <!-- Sub-Tabs: Aktivitas Teknisi VS Laporan Work Order -->
-          <div class="inline-flex p-1 rounded-2xl bg-surface-container-high/80 text-[13px] font-bold shadow-inner" id="act-subtabs">
-            <button id="tab-btn-activity" onclick="switchActivityTab('activity')" class="px-4 py-2 rounded-xl bg-white text-primary shadow-sm flex items-center gap-2 transition-all font-bold">
-              <span class="material-symbols-outlined text-[19px]">engineering</span>
-              <span>Aktivitas Teknisi</span>
+          <div class="flex flex-wrap items-center gap-3">
+            <button onclick="navigateTo('material-usage')" class="px-3.5 py-2 rounded-xl bg-secondary-container/50 hover:bg-secondary-container text-on-secondary-container text-[12.5px] font-bold flex items-center gap-1.5 transition-all">
+              <span class="material-symbols-outlined text-[18px]">construction</span>
+              <span>Dashboard Barang Operasional</span>
             </button>
-            <button id="tab-btn-wo" onclick="switchActivityTab('wo')" class="px-4 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-2 transition-all">
-              <span class="material-symbols-outlined text-[19px]">task_alt</span>
-              <span>Laporan Work Order</span>
-              <span id="wo-subtab-badge" class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold">0</span>
-            </button>
+            <div class="inline-flex p-1 rounded-2xl bg-surface-container-high/80 text-[13px] font-bold shadow-inner" id="act-subtabs">
+              <button id="tab-btn-activity" onclick="switchActivityTab('activity')" class="px-4 py-2 rounded-xl bg-white text-primary shadow-sm flex items-center gap-2 transition-all font-bold">
+                <span class="material-symbols-outlined text-[19px]">engineering</span>
+                <span>Aktivitas Teknisi</span>
+              </button>
+              <button id="tab-btn-wo" onclick="switchActivityTab('wo')" class="px-4 py-2 rounded-xl text-outline hover:text-on-surface flex items-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-[19px]">task_alt</span>
+                <span>Laporan Work Order</span>
+                <span id="wo-subtab-badge" class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold">0</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ======================================================== -->
+        <!-- ANALITIK GABUNGAN: PEKERJAAN BERULANG & PERFORMA STAFF   -->
+        <!-- ======================================================== -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
+          <!-- 1. Ringkasan & Peringatan Pekerjaan Berulang -->
+          <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <h2 class="text-[15px] font-bold text-primary flex items-center gap-2">
+                  <span class="material-symbols-outlined text-error text-[20px]">notification_important</span>
+                  <span>Ringkasan & Peringatan Pekerjaan Berulang</span>
+                </h2>
+                <span id="recurring-alert-count" class="px-2.5 py-0.5 rounded-full bg-error-container text-error text-[11px] font-bold">0 Peringatan</span>
+              </div>
+              <p class="text-[11.5px] text-outline mb-3">Deteksi otomatis pekerjaan yang muncul berulang kali di lokasi yang sama (Activity & Work Order).</p>
+
+              <div id="recurring-jobs-list" class="flex flex-col gap-2.5 max-h-[240px] overflow-y-auto pr-1">
+                <!-- Populated dynamically by renderRecurringJobAlerts() -->
+              </div>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
+              <span>Sumber: Gabungan Aktivitas Teknisi + Work Order</span>
+              <span class="font-semibold text-primary" id="recurring-top-category">Kategori Terbanyak: —</span>
+            </div>
+          </div>
+
+          <!-- 2. Performa Staff (Bulan Ini vs Bulan Kemarin) -->
+          <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <h2 class="text-[15px] font-bold text-primary flex items-center gap-2">
+                  <span class="material-symbols-outlined text-secondary text-[20px]">leaderboard</span>
+                  <span>Performa Staff (Bulan Ini vs Bulan Kemarin)</span>
+                </h2>
+                <span id="staff-perf-period-label" class="px-2.5 py-0.5 rounded-full bg-surface-container text-primary text-[11px] font-bold">Mei 2026 vs Apr 2026</span>
+              </div>
+              <p class="text-[11.5px] text-outline mb-3">Total pekerjaan yang diambil per staff (Activity + WO) & tren kenaikan/penurunan performa.</p>
+
+              <div class="overflow-x-auto max-h-[240px] overflow-y-auto">
+                <table class="w-full text-left text-[12px] border-collapse">
+                  <thead>
+                    <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[10.5px] uppercase font-bold">
+                      <th class="py-2 px-3">Nama Staff</th>
+                      <th class="py-2 px-3 text-center">Bulan Kemarin</th>
+                      <th class="py-2 px-3 text-center">Bulan Ini</th>
+                      <th class="py-2 px-3 text-right">Performa (Tren)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="staff-performance-table-body" class="divide-y divide-surface-container">
+                    <!-- Populated dynamically by renderStaffPerformance() -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-surface-container flex items-center justify-between text-[11px] text-outline">
+              <span><span class="text-green-600 font-bold">▲ Hijau</span> = Naik/Stabil • <span class="text-red-600 font-bold">▼ Merah</span> = Turun</span>
+              <span id="staff-perf-summary" class="font-semibold text-primary">Total: 0 Pekerjaan</span>
+            </div>
           </div>
         </div>
 
@@ -914,6 +985,138 @@
             <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline bg-surface-container-low/30">
               <span id="wo-table-count">Menampilkan 0 Work Orders</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VIEW 2B: DASHBOARD PEMAKAIAN BARANG OPERASIONAL -->
+      <!-- ========================================== -->
+      <section id="view-material-usage" class="view-panel hidden flex flex-col gap-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h1 class="text-[26px] font-bold text-primary tracking-tight">Dashboard Pemakaian Barang Operasional</h1>
+              <span class="px-2.5 py-0.5 rounded-full bg-secondary-container/50 text-on-secondary-container text-[11px] font-semibold">
+                Sumber: Activity & Work Order
+              </span>
+            </div>
+            <p class="text-[13px] text-outline mt-0.5">Rekap otomatis sparepart, material, dan barang yang paling sering dipakai dalam pekerjaan operasional harian & Work Order.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <button onclick="navigateTo('activity-report'); switchActivityTab('activity');" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-on-surface text-[13px] font-semibold shadow-sm transition-all">
+              <span class="material-symbols-outlined text-[18px] text-primary">arrow_back</span>
+              <span>Activity & Work Order</span>
+            </button>
+            <button onclick="exportMaterialUsageCsv()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container text-[13px] font-semibold shadow-sm transition-all">
+              <span class="material-symbols-outlined text-[18px] text-secondary-fixed">download</span>
+              <span>Export CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Jenis Barang</span>
+              <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[20px]">category</span>
+              </div>
+            </div>
+            <div class="my-3 text-[26px] font-bold text-on-surface" id="mat-kpi-unique">0 Jenis</div>
+            <div class="pt-2 border-t border-surface-container text-[11px] text-outline">Barang / sparepart terdeteksi</div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Frekuensi Pemakaian</span>
+              <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-on-secondary-container">
+                <span class="material-symbols-outlined text-[20px]">construction</span>
+              </div>
+            </div>
+            <div class="my-3 text-[26px] font-bold text-secondary" id="mat-kpi-total-uses">0 Kali</div>
+            <div class="pt-2 border-t border-surface-container text-[11px] text-outline">Akumulasi pemakaian di lapangan</div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Barang Terbanyak (#1)</span>
+              <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center text-amber-800">
+                <span class="material-symbols-outlined text-[20px]">star</span>
+              </div>
+            </div>
+            <div class="my-3 text-[18px] font-bold text-primary truncate" id="mat-kpi-top-item">—</div>
+            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
+              <span class="text-outline">Wajib stok aman</span>
+              <span class="font-bold text-amber-800" id="mat-kpi-top-count">0x dipakai</span>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Lokasi Konsumsi Tertinggi</span>
+              <div class="w-9 h-9 rounded-xl bg-surface-container-high flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[20px]">location_on</span>
+              </div>
+            </div>
+            <div class="my-3 text-[18px] font-bold text-on-surface truncate" id="mat-kpi-top-loc">—</div>
+            <div class="pt-2 border-t border-surface-container flex items-center justify-between text-[11px]">
+              <span class="text-outline">Area paling aktif</span>
+              <span class="font-bold text-primary" id="mat-kpi-top-loc-count">0x pemakaian</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top 6 Most Used Materials Chart -->
+        <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm">
+          <h2 class="text-[15px] font-bold text-primary flex items-center gap-2 mb-1">
+            <span class="material-symbols-outlined text-secondary text-[20px]">bar_chart</span>
+            <span>Top 6 Barang / Sparepart Paling Sering Dipakai</span>
+          </h2>
+          <p class="text-[11.5px] text-outline mb-4">Membantu tim purchasing/engineering menjaga stok barang yang paling cepat habis.</p>
+          <div id="mat-top-bars" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="bg-white rounded-2xl p-4 border border-surface-container shadow-sm flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-3 flex-1">
+            <div class="relative min-w-[240px]">
+              <span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[18px]">search</span>
+              <input id="mat-search" oninput="filterMaterialUsage()" class="w-full pl-9 pr-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] focus:outline-none focus:bg-white border border-transparent focus:border-secondary/40" placeholder="Cari nama barang, lokasi, atau pekerjaan..." type="text"/>
+            </div>
+            <select id="mat-filter-source" onchange="filterMaterialUsage()" class="px-3 py-2 bg-surface-container-low rounded-xl text-[12.5px] text-on-surface focus:outline-none border border-transparent">
+              <option value="Semua">Semua Sumber (Activity + WO)</option>
+              <option value="Activity">Hanya Aktivitas Teknisi</option>
+              <option value="Work Order">Hanya Work Order</option>
+            </select>
+          </div>
+          <button onclick="resetMaterialFilters()" class="text-[12px] text-outline hover:text-primary underline">Reset Filter</button>
+        </div>
+
+        <!-- Material Usage Table -->
+        <div class="bg-white rounded-2xl border border-surface-container shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-[12.5px] border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low/70 border-b border-surface-container text-outline text-[11px] uppercase tracking-wider font-bold">
+                  <th class="py-3 px-4 w-16 text-center">Rank</th>
+                  <th class="py-3 px-4">Nama Barang / Sparepart</th>
+                  <th class="py-3 px-4 text-center">Frekuensi Dipakai</th>
+                  <th class="py-3 px-4">Sumber Data</th>
+                  <th class="py-3 px-4">Lokasi & Pekerjaan Terkait</th>
+                  <th class="py-3 px-4">Terakhir Dipakai</th>
+                </tr>
+              </thead>
+              <tbody id="material-usage-table-body" class="divide-y divide-surface-container">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+          <div class="p-4 border-t border-surface-container flex items-center justify-between text-[12px] text-outline bg-surface-container-low/30">
+            <span id="mat-table-count">Menampilkan 0 Jenis Barang</span>
           </div>
         </div>
       </section>
@@ -1821,6 +2024,10 @@
           </div>
         </div>
         <div>
+          <label class="block text-outline font-semibold mb-1">Barang / Sparepart yang Dipakai (Opsional)</label>
+          <input id="form-wo-materials" type="text" placeholder="Pisahkan dengan koma, contoh: Driver LED 12W, Seal Tape" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
+        </div>
+        <div>
           <label class="block text-outline font-semibold mb-1">Catatan Tambahan</label>
           <input id="form-wo-notes" type="text" placeholder="Catatan part / instruksi khusus..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
         </div>
@@ -1843,7 +2050,7 @@
           <span class="material-symbols-outlined text-[20px]">close</span>
         </button>
       </div>
-      <form onsubmit="submitDailyActivity(event)" class="p-5 flex flex-col gap-4 text-[13px]">
+      <form onsubmit="submitDailyActivity(event)" class="p-5 flex flex-col gap-3.5 text-[13px] max-h-[82vh] overflow-y-auto">
         <div>
           <label class="block text-outline font-semibold mb-1">Tanggal Aktivitas *</label>
           <input id="form-act-date" type="date" required value="2026-05-19" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
@@ -1889,6 +2096,10 @@
         <div>
           <label class="block text-outline font-semibold mb-1">Deskripsi Pekerjaan</label>
           <textarea id="form-act-desc" rows="2" placeholder="Uraian teknis pekerjaan..." class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-outline font-semibold mb-1">Barang / Sparepart yang Dipakai (Opsional)</label>
+          <input id="form-act-materials" type="text" placeholder="Pisahkan koma, contoh: Freon R32, Mechanical Seal 2 Inch" class="w-full p-2.5 rounded-xl bg-surface-container-low border border-transparent focus:border-secondary focus:bg-white focus:outline-none"/>
         </div>
         <div>
           <label class="block text-outline font-semibold mb-1" id="label-act-notes">Catatan / Alasan (Wajib jika status Pending)</label>
@@ -2499,12 +2710,19 @@
 
     const mockStore = {
       activities: [
-        { activity_id: 'ACT-202605-042', activity_date: '2026-05-19', input_mode: 'Daily', job_name: 'Penggantian Seal Mechanical Pompa Kolam', location_id: 'Villa 12', workers: ['Wayan G.', 'Made S.'], status: 'Pending', notes: 'Menunggu sparepart mechanical seal dari supplier Denpasar' },
-        { activity_id: 'ACT-202605-041', activity_date: '2026-05-19', input_mode: 'Weekly', job_name: 'Overhaul & Kalibrasi Valve Chiller Unit 1', location_id: 'Central Plant', workers: ['Made S.', 'Ketut A.'], status: 'In Progress', notes: 'Tahap pressure testing s.d. sore ini' },
-        { activity_id: 'ACT-202605-040', activity_date: '2026-05-18', input_mode: 'Daily', job_name: 'Flushing Water Heater Solar & Backup Tank', location_id: 'Villa 08', workers: ['Komang D.'], status: 'Done', notes: 'Selesai 100%, temperatur air stabil 60°C' },
-        { activity_id: 'ACT-202605-039', activity_date: '2026-05-18', input_mode: 'Daily', job_name: 'Uji Beban Rutin Genset Perkins 250 kVA & ATS Panel', location_id: 'Genset House', workers: ['Wayan G.', 'Komang D.'], status: 'Done', notes: 'Level solar tangki harian 820 Liter, tegangan 385V stabil' },
-        { activity_id: 'ACT-202605-038', activity_date: '2026-05-17', input_mode: 'Daily', job_name: 'Penggantian Papan Deck Kayu Ulin Gazebo Pool', location_id: 'Public Area', workers: ['Ketut A.'], status: 'Pending', notes: 'Area sedang dipakai wedding setup.' },
-        { activity_id: 'ACT-202605-037', activity_date: '2026-05-17', input_mode: 'Weekly', job_name: 'Deep Cleaning & Pemipaan Bio-Enzim Grease Trap', location_id: 'Kitchen', workers: ['Komang D.', 'Ketut A.'], status: 'In Progress', notes: 'Dikerjakan shift malam pukul 23:00' }
+        { activity_id: 'ACT-202605-044', activity_date: '2026-05-19', input_mode: 'Daily', job_category: 'Mechanical', job_name: 'AC Leaking & Pembersihan Drainase', location_id: 'Kamar 303 (Kamar Atas)', workers: ['Wayan G.', 'Made S.'], status: 'Done', materials_used: 'Pipa Drainase AC, Isolasi Armaflex, Freon R32', notes: 'Flushing saluran pembuangan indoor unit' },
+        { activity_id: 'ACT-202605-043', activity_date: '2026-05-18', input_mode: 'Daily', job_category: 'Mechanical', job_name: 'Perbaikan AC Leaking', location_id: 'Kamar 303 (Kamar Atas)', workers: ['Wayan G.'], status: 'Done', materials_used: 'Isolasi Armaflex, Sealant Silikon', notes: 'Kondensasi berlebih pada talang AC atas' },
+        { activity_id: 'ACT-202605-042', activity_date: '2026-05-19', input_mode: 'Daily', job_category: 'Mechanical', job_name: 'Penggantian Seal Mechanical Pompa Kolam', location_id: 'Villa 12', workers: ['Wayan G.', 'Made S.'], status: 'Pending', materials_used: 'Mechanical Seal 2 Inch, Seal Tape', notes: 'Menunggu sparepart mechanical seal dari supplier Denpasar' },
+        { activity_id: 'ACT-202605-041', activity_date: '2026-05-19', input_mode: 'Weekly', job_category: 'Mechanical', job_name: 'Overhaul & Kalibrasi Valve Chiller Unit 1', location_id: 'Central Plant', workers: ['Made S.', 'Ketut A.'], status: 'In Progress', materials_used: 'Valve Gasket, Oli Kompresor', notes: 'Tahap pressure testing s.d. sore ini' },
+        { activity_id: 'ACT-202605-040', activity_date: '2026-05-18', input_mode: 'Daily', job_category: 'Plumbing', job_name: 'Flushing Water Heater Solar & Backup Tank', location_id: 'Villa 08', workers: ['Komang D.'], status: 'Done', materials_used: 'Seal Tape, Valve Kuningan 3/4', notes: 'Selesai 100%, temperatur air stabil 60°C' },
+        { activity_id: 'ACT-202605-039', activity_date: '2026-05-18', input_mode: 'Daily', job_category: 'Electrical', job_name: 'Uji Beban Rutin Genset Perkins 250 kVA & ATS Panel', location_id: 'Genset House', workers: ['Wayan G.', 'Komang D.'], status: 'Done', materials_used: 'Filter Solar, Oli Mesin 15W-40', notes: 'Level solar tangki harian 820 Liter, tegangan 385V stabil' },
+        { activity_id: 'ACT-202605-038', activity_date: '2026-05-17', input_mode: 'Daily', job_category: 'Civil', job_name: 'Penggantian Papan Deck Kayu Ulin Gazebo Pool', location_id: 'Public Area', workers: ['Ketut A.'], status: 'Pending', materials_used: 'Sekrup Stainless, Papan Kayu Ulin', notes: 'Area sedang dipakai wedding setup.' },
+        { activity_id: 'ACT-202605-037', activity_date: '2026-05-17', input_mode: 'Weekly', job_category: 'Plumbing', job_name: 'Deep Cleaning & Pemipaan Bio-Enzim Grease Trap', location_id: 'Kitchen', workers: ['Komang D.', 'Ketut A.'], status: 'In Progress', materials_used: 'Bio-Enzim Cair, Pipa PVC 2 Inch', notes: 'Dikerjakan shift malam pukul 23:00' },
+        { activity_id: 'ACT-202604-021', activity_date: '2026-04-26', input_mode: 'Daily', job_category: 'Electrical', job_name: 'Penggantian Lampu Taman & Timer Koridor', location_id: 'Public Area', workers: ['Nyoman Sudiarta', 'Ketut A.'], status: 'Done', materials_used: 'Bohlam LED 12W, Kabel NYM', notes: 'Selesai seluruh jalur barat' },
+        { activity_id: 'ACT-202604-020', activity_date: '2026-04-22', input_mode: 'Daily', job_category: 'Mechanical', job_name: 'Service Rutin AC & Isi Freon', location_id: 'Villa 05', workers: ['Made S.', 'Ketut A.'], status: 'Done', materials_used: 'Freon R32, Cairan Pembersih Coil', notes: 'Tekanan normal 140 PSI' },
+        { activity_id: 'ACT-202604-019', activity_date: '2026-04-18', input_mode: 'Daily', job_category: 'Plumbing', job_name: 'Penggantian Seal Mechanical Pompa Kolam', location_id: 'Villa 12', workers: ['Ketut A.', 'Komang D.'], status: 'Done', materials_used: 'Mechanical Seal 2 Inch', notes: 'Selesai tanpa kebocoran' },
+        { activity_id: 'ACT-202604-018', activity_date: '2026-04-12', input_mode: 'Daily', job_category: 'Electrical', job_name: 'Perbaikan Panel MCB & Socket Dapur', location_id: 'Kitchen', workers: ['Nyoman Sudiarta', 'Made S.'], status: 'Done', materials_used: 'MCB 16A Schneider, Kabel NYM', notes: 'Beban seimbang' },
+        { activity_id: 'ACT-202604-017', activity_date: '2026-04-09', input_mode: 'Daily', job_category: 'IT', job_name: 'Crimping Kabel LAN Access Point Lobby', location_id: 'Lobby Area', workers: ['Ketut A.', 'Nyoman Sudiarta'], status: 'Done', materials_used: 'Konektor RJ45, Kabel UTP Cat6', notes: 'Kecepatan WiFi normal' }
       ],
       projects: [
         { project_id: 'PRJ-2026-004', project_name: 'Upgrade Chillers & HVAC Villa Suite 01-08', location_id: 'Villa Area Cluster Timur', start_date: '2026-05-02', target_end_date: '2026-05-28', owner: 'Made Kartayasa (HVAC Spec.)', budget: 45000000, project_cost: 38200000, progress: 75, status: 'In Progress', isOverBudget: false },
@@ -2531,11 +2749,14 @@
         { evaluation_id: 'EVL-3', evaluation_category: 'Activity', title: 'HVAC Filter Replacement Selesai Tepat Waktu', finding: 'Pembersihan & penggantian media filter AHU Unit 01-08 selesai tanpa kendala.', actual_value: '100% Selesai', comparison_value: 'Target 100%', severity: 'Informasi', recommendation: 'Pertahankan jadwal preventative maintenance 2 mingguan.' }
       ],
       workOrders: [
-        { wo_id: 'WO-202605-001', order_date: '2026-05-19', department: 'Housekeeping', location_id: 'Villa 05', title: 'AC Kamar Tidur Utama Bocor Air', description: 'Tetesan air dari indoor unit mengenai meja samping tempat tidur tamu.', job_category: 'Mechanical', priority: 'Urgent', pic_technician: 'Wayan G.', status: 'In Progress', notes: 'Pembersihan pipa drainase sedang dikerjakan' },
-        { wo_id: 'WO-202605-002', order_date: '2026-05-18', department: 'Front Office', location_id: 'Lobby Area', title: 'Lampu Sorot Drop-off Padam', description: '2 spot downlight di area drop-off mobil kedip-kedip lalu mati.', job_category: 'Electrical', priority: 'High', pic_technician: 'Nyoman Sudiarta', status: 'Completed', notes: 'Penggantian driver LED selesai' },
-        { wo_id: 'WO-202605-003', order_date: '2026-05-18', department: 'Villa Manager', location_id: 'Villa 12', title: 'Kran Sink Kitchenette Macet', description: 'Handle kran air panas tidak bisa diputar ke kanan.', job_category: 'Plumbing', priority: 'Normal', pic_technician: 'Made S.', status: 'Open', notes: 'Menunggu tamu checkout jam 12:00' },
-        { wo_id: 'WO-202605-004', order_date: '2026-05-17', department: 'Security', location_id: 'Pos Jaga Timur', title: 'CCTV Channel 4 Main Gate Offline', description: 'Tampilan kamera monitor blank hitam sejak hujan sore kemarin.', job_category: 'IT', priority: 'High', pic_technician: 'Ketut A.', status: 'Completed', notes: 'Konektor RJ45 diganti & switch direboot' },
-        { wo_id: 'WO-202605-005', order_date: '2026-05-17', department: 'F&B / Kitchen', location_id: 'Main Kitchen', title: 'Keramik Lantai Retak Dekat Dishwasher', description: 'Beberapa ubin terangkat dan berpotensi membahayakan staf.', job_category: 'Civil', priority: 'Normal', pic_technician: 'Komang D.', status: 'Open', notes: 'Dijadwalkan perbaikan saat break afternoon' }
+        { wo_id: 'WO-202605-006', order_date: '2026-05-19', department: 'Housekeeping', location_id: 'Kamar 303 (Kamar Atas)', title: 'AC Leaking Netes di Atas Tempat Tidur', description: 'Tamu komplain AC kembali meneteskan air dari unit indoor.', job_category: 'Mechanical', priority: 'Urgent', pic_technician: 'Wayan G.', status: 'Open', materials_used: 'Pipa Drainase AC, Isolasi Armaflex', notes: 'Perlu cek kemiringan pipa drainase permanen' },
+        { wo_id: 'WO-202605-001', order_date: '2026-05-19', department: 'Housekeeping', location_id: 'Villa 05', title: 'AC Kamar Tidur Utama Bocor Air', description: 'Tetesan air dari indoor unit mengenai meja samping tempat tidur tamu.', job_category: 'Mechanical', priority: 'Urgent', pic_technician: 'Wayan G.', status: 'In Progress', materials_used: 'Pipa Drainase AC, Seal Tape', notes: 'Pembersihan pipa drainase sedang dikerjakan' },
+        { wo_id: 'WO-202605-002', order_date: '2026-05-18', department: 'Front Office', location_id: 'Lobby Area', title: 'Lampu Sorot Drop-off Padam', description: '2 spot downlight di area drop-off mobil kedip-kedip lalu mati.', job_category: 'Electrical', priority: 'High', pic_technician: 'Nyoman Sudiarta', status: 'Completed', materials_used: 'Driver LED 12W, Bohlam LED 12W', notes: 'Penggantian driver LED selesai' },
+        { wo_id: 'WO-202605-003', order_date: '2026-05-18', department: 'Villa Manager', location_id: 'Villa 12', title: 'Kran Sink Kitchenette Macet', description: 'Handle kran air panas tidak bisa diputar ke kanan.', job_category: 'Plumbing', priority: 'Normal', pic_technician: 'Made S.', status: 'Open', materials_used: 'Kran Sink Air Panas, Seal Tape', notes: 'Menunggu tamu checkout jam 12:00' },
+        { wo_id: 'WO-202605-004', order_date: '2026-05-17', department: 'Security', location_id: 'Pos Jaga Timur', title: 'CCTV Channel 4 Main Gate Offline', description: 'Tampilan kamera monitor blank hitam sejak hujan sore kemarin.', job_category: 'IT', priority: 'High', pic_technician: 'Ketut A.', status: 'Completed', materials_used: 'Konektor RJ45, Isolasi Listrik', notes: 'Konektor RJ45 diganti & switch direboot' },
+        { wo_id: 'WO-202605-005', order_date: '2026-05-17', department: 'F&B / Kitchen', location_id: 'Main Kitchen', title: 'Keramik Lantai Retak Dekat Dishwasher', description: 'Beberapa ubin terangkat dan berpotensi membahayakan staf.', job_category: 'Civil', priority: 'Normal', pic_technician: 'Komang D.', status: 'Open', materials_used: 'Semen Nat, Lem Keramik', notes: 'Dijadwalkan perbaikan saat break afternoon' },
+        { wo_id: 'WO-202604-011', order_date: '2026-04-24', department: 'Front Office', location_id: 'Lobby Area', title: 'Penggantian Driver LED Lampu Resepsionis', description: 'Lampu meja resepsionis redup.', job_category: 'Electrical', priority: 'Normal', pic_technician: 'Nyoman Sudiarta', status: 'Completed', materials_used: 'Driver LED 12W', notes: 'Selesai diganti' },
+        { wo_id: 'WO-202604-010', order_date: '2026-04-15', department: 'Housekeeping', location_id: 'Villa 05', title: 'AC Kamar Tidur Utama Bocor Air', description: 'Air kondensasi menetes di dekat tirai.', job_category: 'Mechanical', priority: 'High', pic_technician: 'Made S.', status: 'Completed', materials_used: 'Pipa Drainase AC', notes: 'Sudah disemprot tekanan tinggi' }
       ],
       opexDaily: [
         { opex_id: 'OPX-202605-001', record_date: '2026-05-19', reporting_period: '2026-05', category: 'Material / Sparepart', item_name: 'Mechanical Seal Pompa Kolam 2 Inch', qty: 2, unit: 'Pcs', unit_price: 350000, total_amount: 700000, vendor: 'Mitra10 Bali', receipt_no: 'INV-88910', notes: 'Untuk maintenance pompa sirkulasi Villa 12' },
@@ -2964,6 +3185,13 @@
         }
       });
 
+      if (viewId === 'activity-report') {
+        renderRecurringJobAlerts();
+        renderStaffPerformance();
+      }
+      if (viewId === 'material-usage') {
+        renderMaterialUsageDashboard();
+      }
       if (viewId === 'asset-management') {
         renderAssets();
         recalcAssetKPIs();
@@ -3246,6 +3474,9 @@
         filterAssets();
         recalcAssetKPIs();
       }
+      renderRecurringJobAlerts();
+      renderStaffPerformance();
+      renderMaterialUsageDashboard();
     }
 
     function applySyncedBundle(bundle, saveToCache = true) {
@@ -3297,6 +3528,9 @@
         state.evaluations = bundle.evaluations;
         renderEvaluations(bundle.evaluations);
       }
+      renderRecurringJobAlerts();
+      renderStaffPerformance();
+      renderMaterialUsageDashboard();
       if (saveToCache) {
         try {
           localStorage.setItem('agranusa_bundle_' + state.currentPeriod, JSON.stringify(bundle));
@@ -4132,6 +4366,13 @@
     window.submitWorkOrder = async function(e) {
       e.preventDefault();
       showToast('Menyimpan Work Order baru...');
+      const matEl = document.getElementById('form-wo-materials');
+      const materials = matEl ? matEl.value.trim() : '';
+      let notes = document.getElementById('form-wo-notes').value.trim();
+      if (materials && !notes.includes('[Barang:')) {
+        notes = (notes ? notes + ' ' : '') + `[Barang: ${materials}]`;
+      }
+
       const res = await ApiClient.call('workorder.create', {
         order_date: document.getElementById('form-wo-date').value,
         department: document.getElementById('form-wo-dept').value,
@@ -4142,7 +4383,8 @@
         priority: document.getElementById('form-wo-priority').value,
         pic_technician: document.getElementById('form-wo-pic').value,
         status: document.getElementById('form-wo-status').value,
-        notes: document.getElementById('form-wo-notes').value
+        materials_used: materials,
+        notes: notes
       });
 
       if (res && res.success) {
@@ -4171,7 +4413,9 @@
       const category = document.getElementById('form-act-category') ? document.getElementById('form-act-category').value : 'Electrical';
       const status = document.getElementById('form-act-status').value;
       const desc = document.getElementById('form-act-desc').value;
-      const notes = document.getElementById('form-act-notes').value;
+      const matEl = document.getElementById('form-act-materials');
+      const materials = matEl ? matEl.value.trim() : '';
+      let notes = document.getElementById('form-act-notes').value.trim();
 
       const checkedWorkers = [];
       document.querySelectorAll('#form-act-workers-checkboxes input:checked').forEach(cb => checkedWorkers.push(cb.value));
@@ -4180,9 +4424,13 @@
         alert('Wajib memilih minimal satu nama teknisi!');
         return;
       }
-      if (status === 'Pending' && !notes.trim()) {
+      if (status === 'Pending' && !notes) {
         alert('Wajib mengisi catatan/alasan untuk status Pending!');
         return;
+      }
+
+      if (materials && !notes.includes('[Barang:')) {
+        notes = (notes ? notes + ' ' : '') + `[Barang: ${materials}]`;
       }
 
       showToast('Menyimpan aktivitas...');
@@ -4193,6 +4441,7 @@
         job_category: category,
         status: status,
         description: desc,
+        materials_used: materials,
         notes: notes,
         input_mode: 'Daily',
         workers: checkedWorkers
@@ -4200,6 +4449,8 @@
 
       if (res && res.success) {
         closeModal('modal-daily');
+        e.target.reset();
+        document.getElementById('form-act-date').value = '2026-05-19';
         showToast(res.message);
         loadAllData();
       }
@@ -4986,6 +5237,421 @@
       showToast(`File ${fileName} berhasil diunduh.`);
     }
 
+    // ========================================================
+    // ANALITIK: PEKERJAAN BERULANG, PERFORMA STAFF & BARANG OPS
+    // ========================================================
+    function normalizeIssueKey(text) {
+      const t = String(text || '').toLowerCase().trim();
+      if (t.includes('ac leaking') || (t.includes('ac') && (t.includes('bocor') || t.includes('netes') || t.includes('leaking')))) {
+        return 'AC Leaking / Bocor';
+      }
+      if (t.includes('pompa kolam') || (t.includes('seal') && t.includes('pompa'))) {
+        return 'Pompa Kolam / Mechanical Seal';
+      }
+      const stopwords = ['perbaikan', 'pengecekan', 'penggantian', 'pembersihan', 'service', 'rutin', 'dan', 'di', 'pada', 'yang', 'kembali', 'atas', 'bawah', 'kamar', 'unit'];
+      const words = t.replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w && !stopwords.includes(w));
+      return words.slice(0, 4).join(' ') || t;
+    }
+
+    window.renderRecurringJobAlerts = function() {
+      const container = document.getElementById('recurring-jobs-list');
+      const countBadge = document.getElementById('recurring-alert-count');
+      const topCatEl = document.getElementById('recurring-top-category');
+      if (!container) return;
+
+      const combined = [];
+      (state.activities || []).forEach(a => {
+        combined.push({
+          id: a.activity_id,
+          source: 'Activity',
+          date: a.activity_date || '',
+          title: a.job_name || '',
+          location: a.location_id || 'Umum',
+          category: a.job_category || 'Umum'
+        });
+      });
+      (state.workOrders || []).forEach(w => {
+        combined.push({
+          id: w.wo_id,
+          source: 'Work Order',
+          date: w.order_date || '',
+          title: w.title || '',
+          location: w.location_id || 'Umum',
+          category: w.job_category || 'Umum'
+        });
+      });
+
+      const groups = {};
+      const catCount = {};
+      combined.forEach(item => {
+        catCount[item.category] = (catCount[item.category] || 0) + 1;
+        const locNorm = String(item.location).toLowerCase().trim();
+        const issueNorm = normalizeIssueKey(item.title);
+        const key = `${locNorm}::${issueNorm.toLowerCase()}`;
+        if (!groups[key]) {
+          groups[key] = {
+            issueLabel: issueNorm,
+            location: item.location,
+            count: 0,
+            sources: new Set(),
+            titles: new Set(),
+            lastDate: item.date,
+            ids: []
+          };
+        }
+        groups[key].count++;
+        groups[key].sources.add(item.source);
+        groups[key].titles.add(item.title);
+        groups[key].ids.push(item.id);
+        if (item.date > groups[key].lastDate) groups[key].lastDate = item.date;
+      });
+
+      const recurring = Object.values(groups)
+        .filter(g => g.count >= 2)
+        .sort((a, b) => b.count - a.count || b.lastDate.localeCompare(a.lastDate));
+
+      if (countBadge) {
+        countBadge.innerText = `${recurring.length} Peringatan`;
+        countBadge.className = recurring.length > 0
+          ? 'px-2.5 py-0.5 rounded-full bg-error-container text-error text-[11px] font-bold animate-pulse'
+          : 'px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[11px] font-bold';
+      }
+
+      const topCat = Object.entries(catCount).sort((a, b) => b[1] - a[1])[0];
+      if (topCatEl) {
+        topCatEl.innerText = topCat ? `Kategori Terbanyak: ${topCat[0]} (${topCat[1]}x)` : 'Kategori Terbanyak: —';
+      }
+
+      if (recurring.length === 0) {
+        container.innerHTML = `<div class="p-4 rounded-xl bg-surface-container-low text-center text-[12px] text-outline">Belum ditemukan pekerjaan berulang (≥2x) pada lokasi yang sama.</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      recurring.forEach(g => {
+        const isCritical = g.count >= 3;
+        const div = document.createElement('div');
+        div.className = `p-3 rounded-xl border ${isCritical ? 'bg-error-container/25 border-error/40' : 'bg-amber-50/80 border-amber-200'} flex items-start justify-between gap-3`;
+        div.innerHTML = `
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2 py-0.5 rounded-md ${isCritical ? 'bg-error text-white' : 'bg-amber-600 text-white'} text-[10px] font-bold uppercase">⚠️ BERULANG ${g.count}x</span>
+              <span class="font-bold text-[12.5px] text-on-surface truncate">${g.issueLabel}</span>
+            </div>
+            <div class="text-[11.5px] text-primary font-semibold mt-1 flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">location_on</span>
+              <span>${g.location}</span>
+              <span class="text-outline font-normal">• Sumber: ${[...g.sources].join(' + ')}</span>
+            </div>
+            <div class="text-[11px] text-outline mt-0.5 truncate">Riwayat: ${[...g.titles].slice(0, 2).join('; ')}</div>
+          </div>
+          <div class="text-right shrink-0">
+            <div class="text-[10.5px] text-outline">Terakhir</div>
+            <div class="text-[11.5px] font-mono font-bold text-on-surface">${g.lastDate || '-'}</div>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    };
+
+    window.renderStaffPerformance = function() {
+      const tbody = document.getElementById('staff-performance-table-body');
+      const labelEl = document.getElementById('staff-perf-period-label');
+      const sumEl = document.getElementById('staff-perf-summary');
+      if (!tbody) return;
+
+      const curPeriod = state.currentPeriod || '2026-05';
+      const [yStr, mStr] = curPeriod.split('-');
+      let y = parseInt(yStr, 10) || 2026;
+      let m = parseInt(mStr, 10) || 5;
+      let prevY = m === 1 ? y - 1 : y;
+      let prevM = m === 1 ? 12 : m - 1;
+      const prevPeriod = `${prevY}-${String(prevM).padStart(2, '0')}`;
+
+      if (labelEl) labelEl.innerText = `${curPeriod} vs ${prevPeriod}`;
+
+      const staffStats = {};
+      const ensureStaff = (name) => {
+        const clean = String(name || '').trim();
+        if (!clean || clean === 'Belum Ditugaskan') return null;
+        if (!staffStats[clean]) staffStats[clean] = { name: clean, cur: 0, prev: 0 };
+        return staffStats[clean];
+      };
+
+      ['Wayan G.', 'Made S.', 'Ketut A.', 'Komang D.', 'Nyoman Sudiarta'].forEach(ensureStaff);
+
+      (state.activities || []).forEach(a => {
+        const dt = String(a.activity_date || '');
+        const isCur = dt.startsWith(curPeriod);
+        const isPrev = dt.startsWith(prevPeriod);
+        if (!isCur && !isPrev) return;
+        (a.workers || []).forEach(w => {
+          const st = ensureStaff(w);
+          if (!st) return;
+          if (isCur) st.cur++;
+          if (isPrev) st.prev++;
+        });
+      });
+
+      (state.workOrders || []).forEach(w => {
+        const dt = String(w.order_date || '');
+        const isCur = dt.startsWith(curPeriod);
+        const isPrev = dt.startsWith(prevPeriod);
+        if (!isCur && !isPrev) return;
+        const st = ensureStaff(w.pic_technician);
+        if (!st) return;
+        if (isCur) st.cur++;
+        if (isPrev) st.prev++;
+      });
+
+      const list = Object.values(staffStats).sort((a, b) => b.cur - a.cur || b.prev - a.prev);
+      let totalCur = 0;
+      let totalPrev = 0;
+      tbody.innerHTML = '';
+
+      list.forEach(s => {
+        totalCur += s.cur;
+        totalPrev += s.prev;
+        const diff = s.cur - s.prev;
+        let pctStr = '0%';
+        if (s.prev > 0) {
+          pctStr = `${((diff / s.prev) * 100).toFixed(0)}%`;
+        } else if (s.cur > 0) {
+          pctStr = '+100%';
+        }
+
+        let trendHtml = '';
+        if (diff > 0) {
+          trendHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-bold text-[11.5px]">▲ +${diff} (${pctStr.startsWith('+') ? pctStr : '+' + pctStr})</span>`;
+        } else if (diff < 0) {
+          trendHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-bold text-[11.5px]">▼ ${diff} (${pctStr})</span>`;
+        } else {
+          trendHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 font-semibold text-[11.5px]">▲ 0 (0%)</span>`;
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-surface-container-low/40 transition-colors';
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-bold text-on-surface">● ${s.name}</td>
+          <td class="py-2.5 px-3 text-center font-medium text-outline">${s.prev}</td>
+          <td class="py-2.5 px-3 text-center font-bold text-primary text-[13px]">${s.cur}</td>
+          <td class="py-2.5 px-3 text-right">${trendHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (sumEl) sumEl.innerText = `Bulan Ini: ${totalCur} Pekerjaan • Bulan Lalu: ${totalPrev} Pekerjaan`;
+    };
+
+    function extractMaterialsFromRecord(rec) {
+      const items = [];
+      if (rec.materials_used) {
+        String(rec.materials_used).split(',').forEach(m => {
+          const clean = m.trim();
+          if (clean) items.push(clean);
+        });
+      }
+      const notes = String(rec.notes || '');
+      const bracketMatch = notes.match(/\[Barang:\s*([^\]]+)\]/i);
+      if (bracketMatch && bracketMatch[1]) {
+        bracketMatch[1].split(',').forEach(m => {
+          const clean = m.trim();
+          if (clean && !items.some(x => x.toLowerCase() === clean.toLowerCase())) items.push(clean);
+        });
+      }
+      if (items.length === 0) {
+        const hay = `${rec.title || ''} ${rec.description || ''} ${rec.notes || ''}`.toLowerCase();
+        const dict = [
+          { kw: 'mechanical seal', label: 'Mechanical Seal 2 Inch' },
+          { kw: 'driver led', label: 'Driver LED 12W' },
+          { kw: 'bohlam', label: 'Bohlam LED' },
+          { kw: 'rj45', label: 'Konektor RJ45' },
+          { kw: 'kran', label: 'Kran Air / Seal Tape' },
+          { kw: 'freon', label: 'Freon R32' },
+          { kw: 'pipa drainase', label: 'Pipa Drainase AC' },
+          { kw: 'bio-enzim', label: 'Bio-Enzim Cair' },
+          { kw: 'kayu ulin', label: 'Papan Kayu Ulin' },
+          { kw: 'keramik', label: 'Semen Nat / Keramik' }
+        ];
+        dict.forEach(d => {
+          if (hay.includes(d.kw)) items.push(d.label);
+        });
+      }
+      return items;
+    }
+
+    function computeMaterialAggregation(sourceFilter = 'Semua') {
+      const matMap = {};
+      const locFreq = {};
+      let totalUses = 0;
+
+      const processRow = (source, date, title, location, materialsList) => {
+        materialsList.forEach(matName => {
+          const key = matName.toLowerCase();
+          totalUses++;
+          locFreq[location] = (locFreq[location] || 0) + 1;
+          if (!matMap[key]) {
+            matMap[key] = {
+              name: matName,
+              count: 0,
+              sources: new Set(),
+              locations: new Set(),
+              jobs: new Set(),
+              lastDate: date || ''
+            };
+          }
+          matMap[key].count++;
+          matMap[key].sources.add(source);
+          if (location) matMap[key].locations.add(location);
+          if (title) matMap[key].jobs.add(title);
+          if (date && date > matMap[key].lastDate) matMap[key].lastDate = date;
+        });
+      };
+
+      if (sourceFilter === 'Semua' || sourceFilter === 'Activity') {
+        (state.activities || []).forEach(a => {
+          const mats = extractMaterialsFromRecord({
+            materials_used: a.materials_used,
+            title: a.job_name,
+            description: a.description,
+            notes: a.notes
+          });
+          processRow('Activity', a.activity_date, a.job_name, a.location_id, mats);
+        });
+      }
+
+      if (sourceFilter === 'Semua' || sourceFilter === 'Work Order') {
+        (state.workOrders || []).forEach(w => {
+          const mats = extractMaterialsFromRecord({
+            materials_used: w.materials_used,
+            title: w.title,
+            description: w.description,
+            notes: w.notes
+          });
+          processRow('Work Order', w.order_date, w.title, w.location_id, mats);
+        });
+      }
+
+      const sorted = Object.values(matMap).sort((a, b) => b.count - a.count || b.lastDate.localeCompare(a.lastDate));
+      return { sorted, totalUses, locFreq };
+    }
+
+    window.renderMaterialUsageDashboard = function() {
+      filterMaterialUsage();
+    };
+
+    window.filterMaterialUsage = function() {
+      const q = (document.getElementById('mat-search') ? document.getElementById('mat-search').value : '').toLowerCase();
+      const src = document.getElementById('mat-filter-source') ? document.getElementById('mat-filter-source').value : 'Semua';
+
+      const { sorted, totalUses, locFreq } = computeMaterialAggregation(src);
+
+      // Update KPI Cards
+      const elUnique = document.getElementById('mat-kpi-unique');
+      if (elUnique) elUnique.innerText = `${sorted.length} Jenis`;
+      const elTotalUses = document.getElementById('mat-kpi-total-uses');
+      if (elTotalUses) elTotalUses.innerText = `${totalUses} Kali`;
+
+      const topItem = sorted[0];
+      const elTopItem = document.getElementById('mat-kpi-top-item');
+      const elTopCount = document.getElementById('mat-kpi-top-count');
+      if (elTopItem) elTopItem.innerText = topItem ? topItem.name : '—';
+      if (elTopCount) elTopCount.innerText = topItem ? `${topItem.count}x dipakai` : '0x dipakai';
+
+      const topLoc = Object.entries(locFreq).sort((a, b) => b[1] - a[1])[0];
+      const elTopLoc = document.getElementById('mat-kpi-top-loc');
+      const elTopLocCount = document.getElementById('mat-kpi-top-loc-count');
+      if (elTopLoc) elTopLoc.innerText = topLoc ? topLoc[0] : '—';
+      if (elTopLocCount) elTopLocCount.innerText = topLoc ? `${topLoc[1]}x pemakaian` : '0x pemakaian';
+
+      // Render Top 6 Bar Chart
+      const barsEl = document.getElementById('mat-top-bars');
+      if (barsEl) {
+        const top6 = sorted.slice(0, 6);
+        const maxC = top6.length > 0 ? top6[0].count : 1;
+        if (top6.length === 0) {
+          barsEl.innerHTML = `<div class="col-span-2 text-center py-4 text-outline text-[12px]">Belum ada data barang operasional tercatat.</div>`;
+        } else {
+          barsEl.innerHTML = top6.map((item, idx) => {
+            const pct = Math.max(12, Math.round((item.count / maxC) * 100));
+            return `
+              <div class="p-3 rounded-xl bg-surface-container-low/50 border border-surface-container">
+                <div class="flex items-center justify-between text-[12.5px] font-bold mb-1.5">
+                  <span class="text-on-surface truncate">#${idx + 1} ${item.name}</span>
+                  <span class="text-primary shrink-0">${item.count}x dipakai</span>
+                </div>
+                <div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+                  <div class="bg-secondary h-2 rounded-full transition-all" style="width: ${pct}%"></div>
+                </div>
+                <div class="text-[11px] text-outline mt-1 truncate">Lokasi: ${[...item.locations].join(', ')}</div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // Filter Table
+      const filtered = sorted.filter(item => {
+        if (!q) return true;
+        return item.name.toLowerCase().includes(q) ||
+               [...item.locations].join(' ').toLowerCase().includes(q) ||
+               [...item.jobs].join(' ').toLowerCase().includes(q);
+      });
+
+      const tbody = document.getElementById('material-usage-table-body');
+      const countEl = document.getElementById('mat-table-count');
+      if (countEl) countEl.innerText = `Menampilkan ${filtered.length} dari ${sorted.length} Jenis Barang Operasional`;
+      if (!tbody) return;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-outline">Tidak ada barang operasional yang sesuai filter.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      filtered.forEach((item, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-surface-container-low/40 transition-colors';
+        const srcBadges = [...item.sources].map(s =>
+          s === 'Activity'
+            ? `<span class="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10.5px] font-bold mr-1">Activity</span>`
+            : `<span class="px-2 py-0.5 rounded-md bg-secondary-container text-on-secondary-container text-[10.5px] font-bold mr-1">Work Order</span>`
+        ).join('');
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 text-center font-mono font-bold text-primary">#${idx + 1}</td>
+          <td class="py-3 px-4 font-bold text-on-surface">${item.name}</td>
+          <td class="py-3 px-4 text-center">
+            <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[12px]">${item.count}x</span>
+          </td>
+          <td class="py-3 px-4">${srcBadges}</td>
+          <td class="py-3 px-4">
+            <div class="font-medium text-on-surface text-[12px]">${[...item.locations].join(', ')}</div>
+            <div class="text-[11px] text-outline truncate max-w-xs">${[...item.jobs].slice(0, 2).join('; ')}</div>
+          </td>
+          <td class="py-3 px-4 font-mono text-[12px] text-outline">${item.lastDate || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    };
+
+    window.resetMaterialFilters = function() {
+      const q = document.getElementById('mat-search'); if (q) q.value = '';
+      const s = document.getElementById('mat-filter-source'); if (s) s.value = 'Semua';
+      filterMaterialUsage();
+      showToast('Filter pemakaian barang di-reset.');
+    };
+
+    window.exportMaterialUsageCsv = function() {
+      const src = document.getElementById('mat-filter-source') ? document.getElementById('mat-filter-source').value : 'Semua';
+      const { sorted } = computeMaterialAggregation(src);
+      let csv = 'Peringkat,Nama Barang,Frekuensi Dipakai,Sumber,Lokasi Terkait,Terakhir Dipakai\n';
+      sorted.forEach((item, idx) => {
+        csv += `"${idx + 1}","${item.name}","${item.count}","${[...item.sources].join(' + ')}","${[...item.locations].join('; ')}","${item.lastDate}"\n`;
+      });
+      downloadCsv(csv, `Pemakaian_Barang_Operasional_${state.currentPeriod}.csv`);
+    };
+
     window.handleGlobalSearch = function(q) {
       if (!q) return;
       q = q.toLowerCase();
@@ -5016,6 +5682,10 @@
         const inp = document.getElementById('asset-search');
         if (inp) inp.value = q;
         filterAssets();
+      } else if (state.activeView === 'material-usage') {
+        const inp = document.getElementById('mat-search');
+        if (inp) inp.value = q;
+        filterMaterialUsage();
       }
     };
 
