@@ -115,9 +115,11 @@ code{background:#2c2115;padding:1px 6px;border-radius:6px}
       try {
         var rp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: 'api_ping', args: [], kode: (function () { try { return localStorage.getItem('kode') || ''; } catch (e) { return ''; } })() }) });
         var jp = null; try { jp = JSON.parse(await rp.text()); } catch (e) { jp = null; }
-        if (jp && jp.result && /^K([6-9]|[1-9]\d)/.test(jp.result.versi || '')) tambah('OK', 'Versi Code.gs di server', 'Versi terbaru aktif (' + esc(jp.result.versi) + '). Perbaikan penyimpanan sudah terpasang.');
+        var vs = jp && jp.result && jp.result.versi ? String(jp.result.versi) : '';
+        if (/^K([6-9]|[1-9]\d)/.test(vs)) tambah('OK', 'Versi Code.gs di server', 'Versi terbaru aktif (' + esc(vs) + '). Fitur penyusutan dan perbaikan sudah terpasang.');
+        else if (vs) tambah('GAGAL', 'Versi Code.gs di server', 'Server menjawab versi ' + esc(vs) + ', padahal yang dibutuhkan K6 atau lebih baru. Artinya Code.gs terbaru belum aktif di alamat /exec ini.', 'Pastikan isi Code.gs sudah diganti dengan yang terbaru, lalu Deploy > Kelola deployment > ikon pensil pada deployment yang alamatnya sama dengan config.js > Version: Versi baru > Deploy. Jika Anda memilih Deployment baru, alamat /exec berubah dan config.js harus diganti.');
         else if (jp && jp.error === 'KODE_AKSES') tambah('INFO', 'Versi Code.gs di server', 'Tidak bisa dicek karena kode akses belum dimasukkan. Buka aplikasi, masukkan kode, lalu buka halaman ini lagi.');
-        else tambah('GAGAL', 'Versi Code.gs di server', 'Server masih memakai Code.gs LAMA. Inilah sebabnya pesan \"format nomor sel\" masih muncul.', 'Di Apps Script: Deploy > Kelola deployment > ikon pensil > Version: Versi baru > Deploy. Pastikan alamat /exec di config.js adalah alamat deployment yang sama.');
+        else tambah('GAGAL', 'Versi Code.gs di server', 'Server menjawab tanpa penanda versi (' + esc(String(jp && (jp.pesan || jp.error) || 'jawaban tidak terbaca')) + '). Code.gs di server lebih lama dari versi yang dibutuhkan.', 'Ganti seluruh isi Code.gs dengan yang terbaru, lalu Deploy > Kelola deployment > ikon pensil > Version: Versi baru > Deploy. Pastikan alamat /exec di config.js adalah deployment yang sama.');
       } catch (e) { tambah('GAGAL', 'Versi Code.gs di server', 'Permintaan gagal dikirim.'); }
     }
     // 7. assetlinks (informasi saja)
