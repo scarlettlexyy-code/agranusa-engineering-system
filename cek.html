@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Cek Pemasangan - Agranusa Aset</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#120d07;color:#f6edda;font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif;padding:20px;max-width:680px;margin:auto}
+h1{font:600 26px Georgia,serif;color:#f0dc9b;margin:6px 0 2px}
+.sub{color:#b3a27f;font-size:13px;margin:0 0 16px;word-break:break-all}
+#ring{padding:16px;border-radius:16px;margin-bottom:16px;border:1px solid #9a7a2e;background:#211910}
+#ring b{display:block;font-size:18px;margin-bottom:4px}
+#ring.ok{border-color:#a8d18f}#ring.bad{border-color:#ee8b78}
+.row{padding:12px 14px;border-radius:14px;background:#211910;border:1px solid #3d2f1a;margin-bottom:10px}
+.row .t{display:flex;gap:10px;align-items:center}
+.tag{font:700 11px system-ui;padding:3px 9px;border-radius:99px;border:1px solid;white-space:nowrap}
+.OK{color:#a8d18f}.GAGAL{color:#ee8b78}.INFO{color:#f0dc9b}.TUNGGU{color:#b3a27f}
+.row .d{color:#b3a27f;font-size:13px;margin-top:6px;word-break:break-word}
+.row .s{color:#f0dc9b;font-size:13px;margin-top:6px}
+.ic{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}.ic div{text-align:center;font-size:11px;color:#b3a27f}
+.ic img{width:64px;height:64px;border-radius:12px;display:block;margin-bottom:2px;background:#000}
+a{color:#f0dc9b}
+code{background:#2c2115;padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<h1>Cek pemasangan</h1>
+<p class="sub" id="alamat"></p>
+<div id="ring"><b>Memeriksa...</b><span>Mohon tunggu beberapa detik.</span></div>
+<div id="hasil"></div>
+<p class="sub">Halaman ini hanya membaca situs Anda sendiri. Aman dibuka kapan saja. Jika ada yang GAGAL, ikuti saran di bawah barisnya lalu muat ulang halaman ini (Ctrl+F5).</p>
+<script src="/config.js"></script>
+<script>
+(function () {
+  var rows = [], $ = function (s) { return document.querySelector(s); };
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function tambah(st, judul, detail, saran, ikon) { rows.push({ st: st, judul: judul, detail: detail || '', saran: saran || '', ikon: ikon || '' }); gambar(); }
+  function gambar() {
+    $('#hasil').innerHTML = rows.map(function (r) {
+      return '<div class="row"><div class="t"><span class="tag ' + r.st + '">' + r.st + '</span><b>' + esc(r.judul) + '</b></div>' +
+        (r.detail ? '<div class="d">' + esc(r.detail) + '</div>' : '') + (r.ikon || '') +
+        (r.saran && r.st === 'GAGAL' ? '<div class="s">Saran: ' + r.saran + '</div>' : '') + '</div>';
+    }).join('');
+    var g = rows.filter(function (r) { return r.st === 'GAGAL'; }).length, t = rows.filter(function (r) { return r.st === 'TUNGGU'; }).length;
+    var ring = $('#ring');
+    if (t) { ring.className = ''; ring.innerHTML = '<b>Memeriksa...</b><span>Mohon tunggu.</span>'; return; }
+    if (!g) { ring.className = 'ok'; ring.innerHTML = '<b>SIAP dibuat APK</b><span>Semua pemeriksaan lulus. Tempel alamat ini di PWABuilder: <code>' + esc(location.origin) + '</code></span>'; }
+    else { ring.className = 'bad'; ring.innerHTML = '<b>Ada ' + g + ' hal yang perlu diperbaiki</b><span>Lihat baris bertanda GAGAL dan ikuti sarannya, lalu muat ulang halaman ini.</span>'; }
+  }
+  $('#alamat').textContent = 'Alamat situs: ' + location.origin;
+  function ambil(u, opsi) { return fetch(u, Object.assign({ cache: 'no-store' }, opsi || {})); }
+  function muatGambar(src) {
+    return new Promise(function (ok) { var i = new Image(); i.onload = function () { ok({ w: i.naturalWidth, h: i.naturalHeight }); }; i.onerror = function () { ok(null); }; i.src = src; });
+  }
+  async function jalan() {
+    // 1. HTTPS
+    var aman = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    tambah(aman ? 'OK' : 'GAGAL', 'Alamat memakai HTTPS', location.protocol, 'PWABuilder hanya menerima alamat https. Pakai alamat yang berakhiran .vercel.app.');
+    // 2. index.html
+    try {
+      var r = await ambil('/index.html'), t = await r.text();
+      var lengkap = r.ok && t.indexOf('manifest.webmanifest') > -1 && t.indexOf('config.js') > -1;
+      tambah(lengkap ? 'OK' : 'GAGAL', 'Halaman utama (index.html) lengkap', 'Status ' + r.status, 'File index.html harus berada di baris paling atas repositori GitHub, bukan di dalam folder lain. Unggah ulang sesuai panduan.');
+    } catch (e) { tambah('GAGAL', 'Halaman utama (index.html) lengkap', String(e), 'Periksa koneksi lalu muat ulang.'); }
+    // 3. manifest + ikon
+    var man = null, manUrl = new URL('/manifest.webmanifest', location.origin).href;
+    try {
+      var rm = await ambil('/manifest.webmanifest'), tm = await rm.text();
+      if (!rm.ok) throw new Error('Status ' + rm.status);
+      man = JSON.parse(tm);
+      var perlu = ['name', 'short_name', 'start_url', 'display', 'icons'].filter(function (k) { return !man[k]; });
+      tambah(perlu.length ? 'GAGAL' : 'OK', 'File manifest terbaca', 'Nama: ' + (man.name || '-') + ' | tampilan: ' + (man.display || '-'), 'Isi manifest kurang: ' + perlu.join(', ') + '. Unggah ulang file manifest.webmanifest dari paket.');
+    } catch (e) { tambah('GAGAL', 'File manifest terbaca', String(e.message || e), 'File manifest.webmanifest harus ada di baris paling atas repositori dan berisi JSON yang benar. Unggah ulang dari paket.'); }
+    if (man && man.icons) {
+      var thumbs = '', buruk = [], punya192 = false, punya512 = false;
+      for (var k = 0; k < man.icons.length; k++) {
+        var ic = man.icons[k], u = new URL(ic.src, manUrl).href, res = null;
+        try { var rr = await ambil(u); res = rr.ok ? await muatGambar(u) : null; if (!rr.ok) buruk.push(ic.src + ' (status ' + rr.status + ')'); else if (!res) buruk.push(ic.src + ' (bukan gambar valid)'); } catch (e) { buruk.push(ic.src + ' (gagal dimuat)'); }
+        if (res) { var tulis = String(ic.sizes || ''); if (tulis !== res.w + 'x' + res.h) buruk.push(ic.src + ' (ukuran asli ' + res.w + 'x' + res.h + ', tertulis ' + tulis + ')'); if (tulis === '192x192') punya192 = true; if (tulis === '512x512') punya512 = true; }
+        thumbs += '<div>' + (res ? '<img src="' + esc(u) + '" alt="">' : '<img alt="" style="outline:2px solid #ee8b78">') + esc(String(ic.sizes) + (ic.purpose === 'maskable' ? ' maskable' : '')) + '</div>';
+      }
+      var okIkon = !buruk.length && punya192 && punya512;
+      tambah(okIkon ? 'OK' : 'GAGAL', 'Ikon aplikasi (192 dan 512) tampil', buruk.length ? 'Bermasalah: ' + buruk.join('; ') : man.icons.length + ' ikon termuat dengan ukuran benar', 'Kelima gambar PNG (icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png, favicon-32.png) harus berada di baris paling atas repositori, sejajar dengan index.html, bukan di dalam folder. Unggah ulang kelima gambar itu dari paket.', '<div class="ic">' + thumbs + '</div>');
+    }
+    // 4. service worker
+    try {
+      var rs = await ambil('/sw.js'), ts = await rs.text();
+      var reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
+      var swok = rs.ok && ts.indexOf('addEventListener') > -1;
+      tambah(swok ? 'OK' : 'GAGAL', 'Service worker (sw.js) tersedia', swok ? (reg ? 'Sudah aktif di perangkat ini' : 'File ada. Aktif setelah halaman utama dibuka sekali.') : 'Status ' + rs.status, 'Unggah ulang file sw.js dari paket ke baris paling atas repositori.');
+    } catch (e) { tambah('GAGAL', 'Service worker (sw.js) tersedia', String(e), 'Unggah ulang file sw.js.'); }
+    // 5. config.js
+    var cfg = (window.APP_CONFIG || {}), url = String(cfg.API_URL || '').trim();
+    if (!window.APP_CONFIG) tambah('GAGAL', 'Pengaturan config.js terbaca', 'config.js tidak ditemukan', 'File config.js harus ada di baris paling atas repositori.');
+    else if (!url) tambah('GAGAL', 'Alamat API terisi di config.js', 'API_URL masih kosong (aplikasi berjalan MODE DEMO)', 'Buka config.js di GitHub (ikon pensil), isi API_URL dengan alamat Apps Script yang berakhiran /exec, lalu Commit.');
+    else if (/\/dev(\?|$)/.test(url) || !/^https:\/\/script\.google\.com\/macros\/s\/[^\/]+\/exec$/.test(url)) tambah('GAGAL', 'Format alamat API benar', url, 'Alamat harus berbentuk https://script.google.com/macros/s/.../exec . Jangan memakai alamat yang berakhiran /dev. Salin ulang dari Deploy > Kelola deployment.');
+    else tambah('OK', 'Alamat API terisi di config.js', url);
+    // 6. koneksi API
+    if (url) {
+      try {
+        var ra = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: 'api_snapshot', args: ['', false], kode: (function () { try { return localStorage.getItem('kode') || ''; } catch (e) { return ''; } })() }) });
+        var ta = await ra.text(), ja = null;
+        try { ja = JSON.parse(ta); } catch (e) { ja = null; }
+        if (!ja) tambah('GAGAL', 'Terhubung ke Apps Script', 'Server membalas halaman web, bukan data.', 'Di Apps Script buka Deploy > Kelola deployment > Edit, pastikan "Siapa yang memiliki akses" = Siapa saja, buat Versi baru, lalu Deploy. Pastikan juga alamat di config.js adalah alamat deployment terbaru.');
+        else if (ja.error === 'KODE_AKSES') tambah('OK', 'Terhubung ke Apps Script', 'Terhubung. Kode akses aktif (' + esc(ja.pesan || '') + ').');
+        else if (ja.error && /tidak dikenal/i.test(ja.error)) tambah('GAGAL', 'Terhubung ke Apps Script', 'Server aktif tetapi Code.gs masih versi lama.', 'Ganti isi Code.gs dengan versi terbaru, lalu Deploy > Kelola deployment > Edit > Versi baru > Deploy.');
+        else if (ja.error) tambah('GAGAL', 'Terhubung ke Apps Script', String(ja.error), 'Jalankan fungsi cekSistem di Apps Script untuk melihat detailnya.');
+        else tambah('OK', 'Terhubung ke Apps Script', 'Terhubung. Data terbaca' + (ja.result && ja.result.master ? ' (' + ja.result.master.length + ' unit di gudang).' : '.'));
+      } catch (e) { tambah('GAGAL', 'Terhubung ke Apps Script', 'Permintaan gagal dikirim.', 'Periksa internet, alamat /exec di config.js, dan pastikan deployment Apps Script berakses "Siapa saja" serta sudah memakai Versi baru.'); }
+    }
+    // 6b. versi Code.gs yang aktif
+    if (url) {
+      try {
+        var rp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn: 'api_ping', args: [], kode: (function () { try { return localStorage.getItem('kode') || ''; } catch (e) { return ''; } })() }) });
+        var jp = null; try { jp = JSON.parse(await rp.text()); } catch (e) { jp = null; }
+        var vs = jp && jp.result && jp.result.versi ? String(jp.result.versi) : '';
+        if (/^K([6-9]|[1-9]\d)/.test(vs)) tambah('OK', 'Versi Code.gs di server', 'Versi terbaru aktif (' + esc(vs) + '). Fitur penyusutan dan perbaikan sudah terpasang.');
+        else if (vs) tambah('GAGAL', 'Versi Code.gs di server', 'Server menjawab versi ' + esc(vs) + ', padahal yang dibutuhkan K6 atau lebih baru. Artinya Code.gs terbaru belum aktif di alamat /exec ini.', 'Pastikan isi Code.gs sudah diganti dengan yang terbaru, lalu Deploy > Kelola deployment > ikon pensil pada deployment yang alamatnya sama dengan config.js > Version: Versi baru > Deploy. Jika Anda memilih Deployment baru, alamat /exec berubah dan config.js harus diganti.');
+        else if (jp && jp.error === 'KODE_AKSES') tambah('INFO', 'Versi Code.gs di server', 'Tidak bisa dicek karena kode akses belum dimasukkan. Buka aplikasi, masukkan kode, lalu buka halaman ini lagi.');
+        else tambah('GAGAL', 'Versi Code.gs di server', 'Server menjawab tanpa penanda versi (' + esc(String(jp && (jp.pesan || jp.error) || 'jawaban tidak terbaca')) + '). Code.gs di server lebih lama dari versi yang dibutuhkan.', 'Ganti seluruh isi Code.gs dengan yang terbaru, lalu Deploy > Kelola deployment > ikon pensil > Version: Versi baru > Deploy. Pastikan alamat /exec di config.js adalah deployment yang sama.');
+      } catch (e) { tambah('GAGAL', 'Versi Code.gs di server', 'Permintaan gagal dikirim.'); }
+    }
+    // 7. assetlinks (informasi saja)
+    try {
+      var rl = await ambil('/.well-known/assetlinks.json');
+      if (rl.ok) { var jl = await rl.json(); tambah('INFO', 'assetlinks.json (untuk APK tanpa bilah alamat)', Array.isArray(jl) && jl.length ? 'Sudah terisi. Bagus.' : 'Ada tetapi masih kosong. Isi setelah APK dibuat (langkah terakhir di panduan).'); }
+      else tambah('INFO', 'assetlinks.json (untuk APK tanpa bilah alamat)', 'Belum ada. Ini normal sebelum APK dibuat. Pembuatannya ada di langkah terakhir panduan.');
+    } catch (e) { tambah('INFO', 'assetlinks.json (untuk APK tanpa bilah alamat)', 'Belum ada.'); }
+    gambar();
+  }
+  tambah('TUNGGU', 'Memulai pemeriksaan', '');
+  rows = [];
+  jalan().catch(function (e) { tambah('GAGAL', 'Pemeriksaan terhenti', String(e), 'Muat ulang halaman ini.'); });
+})();
+</script>
+</body>
+</html>
