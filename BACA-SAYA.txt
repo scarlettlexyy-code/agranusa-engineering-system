@@ -1,0 +1,21 @@
+PEMBARUAN: USIA ASET, PENYUSUTAN, RIWAYAT PERBAIKAN (untuk repositori yang sudah ada)
+
+URUTAN PENTING: lakukan LANGKAH 1 dulu, baru langkah 2.
+
+LANGKAH 1 - Apps Script
+  a. Buka proyek Apps Script Anda. Hapus seluruh isi Code.gs lalu tempel isi Code.gs TERBARU dari saya. Simpan.
+  b. Deploy > Kelola deployment > ikon pensil (Edit) > Version: Versi baru > Deploy.
+  c. Jangan ubah pengaturan akses (tetap Siapa saja). Alamat /exec tidak berubah.
+  d. Pakai versi Apps Script langsung? Tempel juga Index.html terbaru.
+  e. Sheet baru Perbaikan dan Penyusutan dibuat otomatis saat aplikasi dibuka pertama kali.
+
+LANGKAH 2 - GitHub
+  a. Ekstrak zip ini. Hasilnya 9 file tanpa folder.
+  b. Di GitHub buka repositori Anda > Add file > Upload files.
+  c. Seret semua file hasil ekstrak, lalu Commit changes.
+     (File config.js Anda yang sudah terisi TIDAK ikut tertimpa karena tidak ada di zip ini.)
+
+LANGKAH 3 - Periksa
+  a. Tunggu Vercel selesai deploy.
+  b. Buka https://ALAMAT-ANDA.vercel.app/cek.html - semua harus OK. Baris "Versi Code.gs di server" harus hijau.
+  c. Pengguna APK: tutup lalu buka aplikasi dua kali agar versi baru terpakai.
