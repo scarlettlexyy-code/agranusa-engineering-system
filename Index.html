@@ -147,7 +147,7 @@
         <span class="text-[11px] text-on-primary-container font-medium" id="sidebar-db-status">Sheets DB Live</span>
       </div>
       <div class="flex items-center justify-between text-on-primary-container text-[11px] px-1 font-medium">
-        <span>Vercel + PWA Mode</span>
+        <span>Desktop Web App</span>
         <span>v2.4.0</span>
       </div>
     </div>
@@ -164,15 +164,9 @@
         </div>
       </div>
       <div class="flex items-center gap-4">
-        <!-- PWA Install Button Header Pill -->
-        <button id="pwa-install-banner" onclick="promptPwaInstall()" class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-secondary-container text-on-secondary-container text-[12px] font-bold shadow-sm hover:bg-secondary-fixed transition-all">
-          <span class="material-symbols-outlined text-[17px]">download_for_offline</span>
-          <span>Install PWA App</span>
-        </button>
-
         <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-container-low text-[13px] text-on-surface">
           <span class="material-symbols-outlined text-[18px] text-secondary">calendar_today</span>
-          <span id="current-date-badge">18 Mei 2026, WITA</span>
+          <span id="current-date-badge">-</span>
         </div>
         <button onclick="showToast('Semua notifikasi telemetry up-to-date')" class="relative p-2 rounded-xl text-on-surface-variant hover:bg-surface-container-high transition-colors">
           <span class="material-symbols-outlined text-[22px]">notifications</span>
@@ -196,353 +190,288 @@
       <!-- ========================================== -->
       <!-- VIEW 1: DASHBOARD MANAGEMENT -->
       <!-- ========================================== -->
-      <section id="view-dashboard" class="view-panel flex flex-col gap-6">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section id="view-dashboard" class="view-panel flex flex-col gap-5">
+        <!-- Header & Controls -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2.5">
-              <h1 class="text-[26px] font-bold text-primary tracking-tight">Ringkasan Performa Engineering</h1>
+              <h1 class="text-[24px] font-bold text-primary tracking-tight">Ringkasan Operasional Engineering</h1>
               <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-secondary-container/50 text-on-secondary-container text-[11px] font-semibold">
-                <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span> Live Telemetry
+                <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span> Live
               </span>
             </div>
-            <p class="text-[13px] text-outline mt-0.5">Executive telemetry & evaluasi operasional Agranusa Signature Villa • Google Sheets Realtime DB</p>
+            <p class="text-[12.5px] text-outline mt-0.5">Prioritas harian, Work Order aktif, pemakaian energi, OPEX & kondisi asset — <span id="dash-period-label" class="font-semibold text-primary">Periode Aktif</span></p>
           </div>
-          <div class="flex flex-wrap items-center gap-3">
+          <div class="flex flex-wrap items-center gap-2.5">
             <!-- Period Selector Tabs -->
             <div class="inline-flex p-1 rounded-full bg-surface-container-high/80 text-[12px] font-medium shadow-inner" id="dash-timeframe-pills">
-              <button onclick="setDashboardTimeframe('today', this)" class="dash-tf-btn px-3.5 py-1.5 rounded-full text-outline hover:text-on-surface">Hari Ini</button>
-              <button onclick="setDashboardTimeframe('week', this)" class="dash-tf-btn px-3.5 py-1.5 rounded-full text-outline hover:text-on-surface">Minggu Ini</button>
-              <button onclick="setDashboardTimeframe('month', this)" class="dash-tf-btn px-3.5 py-1.5 rounded-full bg-white text-primary font-semibold shadow-sm">Bulan Ini</button>
-              <button onclick="setDashboardTimeframe('year', this)" class="dash-tf-btn px-3.5 py-1.5 rounded-full text-outline hover:text-on-surface">Tahun Ini</button>
+              <button onclick="setDashboardTimeframe('today', this)" class="dash-tf-btn px-3 py-1.5 rounded-full text-outline hover:text-on-surface">Hari Ini</button>
+              <button onclick="setDashboardTimeframe('week', this)" class="dash-tf-btn px-3 py-1.5 rounded-full text-outline hover:text-on-surface">Minggu Ini</button>
+              <button onclick="setDashboardTimeframe('month', this)" class="dash-tf-btn px-3 py-1.5 rounded-full bg-white text-primary font-semibold shadow-sm">Bulan Ini</button>
+              <button onclick="setDashboardTimeframe('year', this)" class="dash-tf-btn px-3 py-1.5 rounded-full text-outline hover:text-on-surface">Tahun Ini</button>
             </div>
-            <!-- Month Selector Dropdown -->
+            <!-- Dynamic Month Selector Dropdown -->
             <select id="dash-period-select" onchange="changeReportingPeriod(this.value)" class="px-3.5 py-2 rounded-xl bg-white shadow-sm border border-surface-container text-[13px] font-semibold text-on-surface focus:outline-none focus:ring-1 focus:ring-secondary">
-              <option value="2026-05" selected>Mei 2026, Bulanan</option>
-              <option value="2026-04">April 2026, Bulanan</option>
-              <option value="2026-03">Maret 2026, Bulanan</option>
             </select>
-            <button onclick="exportMonthlyReportPdf()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-container shadow-sm text-[13px] font-semibold transition-all">
-              <span class="material-symbols-outlined text-[18px]">download</span>
+            <button onclick="exportMonthlyReportPdf()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-white hover:bg-primary-container shadow-sm text-[12.5px] font-semibold transition-all">
+              <span class="material-symbols-outlined text-[17px]">download</span>
               <span>Export PDF</span>
             </button>
           </div>
         </div>
 
-        <!-- 4 Top KPI Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          <!-- Card 1: Total Aktivitas -->
+        <!-- Quick Actions Bar (Laptop Daily Shortcuts) -->
+        <div class="flex flex-wrap items-center gap-2.5 p-3 rounded-2xl bg-white border border-surface-container shadow-sm">
+          <span class="text-[11px] uppercase tracking-wider text-outline font-bold px-2">Aksi Cepat:</span>
+          <button onclick="navigateTo('energy-consumption'); openEnergyUsageModal();" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-secondary-container/40 hover:bg-secondary-container text-on-secondary-container text-[12px] font-bold transition-all">
+            <span class="material-symbols-outlined text-[16px]">bolt</span>
+            <span>+ Input Pemakaian Hari Ini</span>
+          </button>
+          <button onclick="navigateTo('activity-report'); switchActivityTab('wo'); openWorkOrderModal();" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-[12px] font-bold transition-all">
+            <span class="material-symbols-outlined text-[16px]">assignment_add</span>
+            <span>+ Buat Work Order</span>
+          </button>
+          <button onclick="navigateTo('opex'); switchOpexTab('daily'); openOpexModal();" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-tertiary-fixed/60 hover:bg-tertiary-fixed text-tertiary text-[12px] font-bold transition-all">
+            <span class="material-symbols-outlined text-[16px]">payments</span>
+            <span>+ Catat OPEX Harian</span>
+          </button>
+          <button onclick="navigateTo('asset-management'); openAssetRepairModal();" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-error-container/60 hover:bg-error-container text-on-error-container text-[12px] font-bold transition-all">
+            <span class="material-symbols-outlined text-[16px]">build_circle</span>
+            <span>+ Lapor Perbaikan Asset</span>
+          </button>
+        </div>
+
+        <!-- Row 1: 4 Core KPI Cards (100% Live Data) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Card 1: Work Order & Aktivitas -->
           <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between cursor-pointer hover:border-secondary transition-all" onclick="navigateTo('activity-report')">
             <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total Aktivitas</span>
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Activity & Work Order</span>
               <div class="w-9 h-9 rounded-xl bg-secondary-container/40 flex items-center justify-center text-secondary">
                 <span class="material-symbols-outlined text-[20px]">assignment_turned_in</span>
               </div>
             </div>
-            <div class="my-3 flex items-baseline gap-2">
-              <span class="text-[28px] font-bold text-on-surface tracking-tight" id="dash-kpi-total-tasks">148</span>
-              <span class="text-[13px] text-outline font-normal">Task</span>
+            <div class="my-2.5 flex items-baseline gap-2">
+              <span class="text-[28px] font-bold text-on-surface tracking-tight" id="dash-kpi-total-tasks">0</span>
+              <span class="text-[13px] text-outline font-normal">Pekerjaan</span>
             </div>
             <div class="pt-2 border-t border-surface-container flex flex-col gap-1">
-              <div class="flex items-center gap-1 text-[12px] text-secondary font-semibold">
-                <span class="material-symbols-outlined text-[15px]">arrow_upward</span> +5.2% vs Bulan Lalu
+              <div class="flex items-center justify-between text-[11.5px] font-semibold">
+                <span class="text-secondary" id="dash-kpi-done-tasks">0 Selesai</span>
+                <span class="text-on-tertiary-container" id="dash-kpi-wo-open">0 WO Open</span>
               </div>
-              <div class="text-[11.5px] text-on-surface-variant font-medium">
-                <span class="text-secondary font-bold" id="dash-kpi-done-tasks">118 Selesai</span> • <span id="dash-kpi-prog-tasks">22 Berjalan</span> • <span id="dash-kpi-pend-tasks">8 Tertunda</span>
+              <div class="text-[11px] text-on-surface-variant font-medium flex items-center justify-between">
+                <span><span id="dash-kpi-prog-tasks">0 Berjalan</span> • <span id="dash-kpi-pend-tasks">0 Tertunda</span></span>
+                <span id="dash-kpi-recurring-badge" class="hidden px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">0 Berulang</span>
               </div>
             </div>
           </div>
 
-          <!-- Card 2: Proyek Capex -->
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between cursor-pointer hover:border-secondary transition-all" onclick="navigateTo('project-monitoring')">
-            <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Proyek Rekayasa & Capex</span>
-              <div class="w-9 h-9 rounded-xl bg-primary-container/20 flex items-center justify-center text-primary-container">
-                <span class="material-symbols-outlined text-[20px]">architecture</span>
-              </div>
-            </div>
-            <div class="my-3 flex items-baseline gap-2">
-              <span class="text-[28px] font-bold text-on-surface tracking-tight" id="dash-kpi-projects">12</span>
-              <span class="text-[13px] text-outline font-normal">Proyek</span>
-            </div>
-            <div class="pt-2 border-t border-surface-container flex flex-col gap-1">
-              <div class="flex items-center gap-1 text-[12px] text-secondary font-semibold">
-                <span class="material-symbols-outlined text-[15px]">add_circle</span> +2 Proyek Baru (Q2)
-              </div>
-              <div class="text-[11.5px] text-on-surface-variant font-medium">
-                Realisasi: <strong class="text-on-surface" id="dash-kpi-project-cost">Rp 142,5 Jt</strong> / <span id="dash-kpi-project-budget">Rp 185 Jt</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 3: Konsumsi Energi -->
+          <!-- Card 2: Energi Hari Ini vs Kemarin -->
           <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between cursor-pointer hover:border-secondary transition-all" onclick="navigateTo('energy-consumption')">
             <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Estimasi Biaya Energi</span>
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Biaya Energi Periode Ini</span>
               <div class="w-9 h-9 rounded-xl bg-tertiary-fixed/60 flex items-center justify-center text-on-tertiary-container">
                 <span class="material-symbols-outlined text-[20px]">bolt</span>
               </div>
             </div>
-            <div class="my-3 flex items-baseline gap-2">
-              <span class="text-[28px] font-bold text-on-surface tracking-tight" id="dash-kpi-energy-cost">Rp 71,76</span>
-              <span class="text-[14px] text-outline font-semibold">Jt</span>
+            <div class="my-2.5 flex items-baseline gap-1.5">
+              <span class="text-[26px] font-bold text-on-surface tracking-tight" id="dash-kpi-energy-cost">Rp 0</span>
+              <span class="text-[13px] text-outline font-semibold">Jt</span>
             </div>
             <div class="pt-2 border-t border-surface-container flex flex-col gap-1">
-              <div class="flex items-center gap-1 text-[12px] text-secondary font-semibold">
-                <span class="material-symbols-outlined text-[15px]">arrow_downward</span> -2.4% vs Plafon Budget
+              <div class="flex items-center gap-1 text-[11.5px] font-semibold" id="dash-kpi-energy-diff">
+                <span class="text-secondary">Hari ini vs kemarin: -</span>
               </div>
-              <div class="text-[11.5px] text-on-surface-variant font-medium">
-                Plafon Rp 78 Jt • Tersisa Rp 6,23 Jt
+              <div class="text-[11px] text-on-surface-variant font-medium" id="dash-kpi-energy-budget-sub">
+                Plafon Budget Energi: -
               </div>
             </div>
           </div>
 
-          <!-- Card 4: Belanja Opex -->
-          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between cursor-pointer hover:border-secondary transition-all" onclick="navigateTo('monthly-purchase')">
+          <!-- Card 3: OPEX & Budget Control -->
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between cursor-pointer hover:border-secondary transition-all" onclick="navigateTo('opex')">
             <div class="flex items-center justify-between">
-              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Belanja Operasional (Opex)</span>
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Total OPEX (Daily + Monthly)</span>
               <div class="w-9 h-9 rounded-xl bg-secondary-container/30 flex items-center justify-center text-secondary">
-                <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+                <span class="material-symbols-outlined text-[20px]">payments</span>
               </div>
             </div>
-            <div class="my-3 flex items-baseline gap-2">
-              <span class="text-[28px] font-bold text-on-surface tracking-tight" id="dash-kpi-purchase">Rp 35,40</span>
-              <span class="text-[14px] text-outline font-semibold">Jt</span>
+            <div class="my-2.5 flex items-baseline gap-1.5">
+              <span class="text-[26px] font-bold text-on-surface tracking-tight" id="dash-kpi-purchase">Rp 0</span>
+              <span class="text-[13px] text-outline font-semibold">Jt</span>
             </div>
             <div class="pt-2 border-t border-surface-container flex flex-col gap-1">
-              <div class="flex items-center gap-1 text-[12px] text-secondary font-semibold">
-                <span class="material-symbols-outlined text-[15px]">check_circle</span> Status Terkendali
+              <div class="flex items-center gap-1 text-[11.5px] font-semibold" id="dash-kpi-opex-status">
+                <span class="material-symbols-outlined text-[15px] text-secondary">check_circle</span>
+                <span class="text-secondary">Status Terkendali</span>
               </div>
-              <div class="text-[11.5px] text-on-surface-variant font-medium">
-                Hemat 8.7% dari pagu bulanan
+              <div class="text-[11px] text-on-surface-variant font-medium" id="dash-kpi-opex-budget">
+                Daily: Rp 0 • Monthly: Rp 0
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: Asset & Perbaikan Aktif -->
+          <div class="p-5 rounded-2xl bg-white border border-surface-container shadow-sm flex flex-col justify-between cursor-pointer hover:border-secondary transition-all" onclick="navigateTo('asset-management')">
+            <div class="flex items-center justify-between">
+              <span class="text-[11.5px] uppercase tracking-wider text-outline font-semibold">Asset & Perbaikan</span>
+              <div class="w-9 h-9 rounded-xl bg-primary-container/15 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+              </div>
+            </div>
+            <div class="my-2.5 flex items-baseline gap-2">
+              <span class="text-[28px] font-bold text-on-surface tracking-tight" id="dash-kpi-assets-total">0</span>
+              <span class="text-[13px] text-outline font-normal">Unit Asset</span>
+            </div>
+            <div class="pt-2 border-t border-surface-container flex flex-col gap-1">
+              <div class="flex items-center justify-between text-[11.5px] font-semibold">
+                <span class="text-error" id="dash-kpi-assets-issue">0 Perlu Perbaikan / Rusak</span>
+              </div>
+              <div class="text-[11px] text-on-surface-variant font-medium">
+                Biaya Perbaikan: <strong class="text-on-surface" id="dash-kpi-repair-cost">Rp 0</strong>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Middle Row: Telemetry Visual & Project Donut -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Telemetry Curve Card (2 cols) -->
-          <div class="lg:col-span-2 bg-white rounded-2xl p-6 border border-surface-container shadow-sm flex flex-col justify-between">
-            <div class="flex items-center justify-between mb-4">
+        <!-- Row 2: Prioritas Operasional (Work Order Aktif + Energi Hari Ini vs Kemarin) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Left (2 cols): Work Order Terbuka & Peringatan Berulang -->
+          <div class="lg:col-span-2 bg-white rounded-2xl p-5 border border-surface-container shadow-sm flex flex-col justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <h3 class="text-[16px] font-bold text-primary">Tren Telemetry Daya & Aktivitas (Mei 2026)</h3>
-                <p class="text-[12px] text-outline">Korelasi pemakaian listrik harian (kWh) vs aktivitas terselesaikan</p>
+                <h3 class="text-[15.5px] font-bold text-primary flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[20px] text-secondary">priority_high</span>
+                  <span>Work Order Aktif & Peringatan Berulang</span>
+                </h3>
+                <p class="text-[12px] text-outline">Daftar keluhan departemen (FO, HK, Security, Villa Manager, F&B) yang perlu ditindaklanjuti</p>
               </div>
-              <div class="flex items-center gap-4 text-[12px] font-medium">
-                <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-primary-container"></span> Listrik PLN (kWh)</span>
-                <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-secondary"></span> Selesai (Task)</span>
-              </div>
+              <button onclick="navigateTo('activity-report'); switchActivityTab('wo');" class="text-[12px] font-bold text-secondary hover:underline flex items-center gap-1 shrink-0">
+                <span>Lihat Semua WO</span>
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </button>
             </div>
 
-            <!-- SVG Visual Curve matching Screenshot 2 -->
-            <div class="relative w-full h-56 bg-surface-container-low/40 rounded-xl p-4 overflow-hidden flex flex-col justify-between">
-              <!-- Peak Marker tooltip -->
-              <div class="absolute left-1/2 top-4 -translate-x-1/2 bg-white/95 px-3 py-1.5 rounded-xl shadow-md border border-surface-container flex flex-col items-center text-[11px] z-10">
-                <span class="font-bold text-primary">Puncak 16 Mei 20:00 WITA</span>
-                <div class="flex items-center gap-2 font-semibold">
-                  <span class="text-primary-container">● Listrik: 1.020 kWh</span>
-                  <span class="text-secondary">● Selesai: 18 Task</span>
-                </div>
-              </div>
-
-              <!-- SVG Line Curves -->
-              <svg viewBox="0 0 700 160" class="w-full h-40 overflow-visible mt-6">
-                <defs>
-                  <linearGradient id="elecGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#004d40" stop-opacity="0.3"/>
-                    <stop offset="100%" stop-color="#004d40" stop-opacity="0.0"/>
-                  </linearGradient>
-                  <linearGradient id="taskGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#006c49" stop-opacity="0.25"/>
-                    <stop offset="100%" stop-color="#006c49" stop-opacity="0.0"/>
-                  </linearGradient>
-                </defs>
-                <line x1="0" y1="40" x2="700" y2="40" stroke="#e0e3e2" stroke-dasharray="4"/>
-                <line x1="0" y1="80" x2="700" y2="80" stroke="#e0e3e2" stroke-dasharray="4"/>
-                <line x1="0" y1="120" x2="700" y2="120" stroke="#e0e3e2" stroke-dasharray="4"/>
-
-                <!-- Electricity Curve Area & Line -->
-                <path d="M 0,130 Q 150,120 280,100 T 350,20 T 420,95 T 560,110 T 700,125 L 700,150 L 0,150 Z" fill="url(#elecGrad)" />
-                <path d="M 0,130 Q 150,120 280,100 T 350,20 T 420,95 T 560,110 T 700,125" fill="none" stroke="#004d40" stroke-width="3" stroke-linecap="round"/>
-
-                <!-- Task Curve Area & Line -->
-                <path d="M 0,140 Q 140,135 280,115 T 350,35 T 420,105 T 560,120 T 700,135 L 700,150 L 0,150 Z" fill="url(#taskGrad)" />
-                <path d="M 0,140 Q 140,135 280,115 T 350,35 T 420,105 T 560,120 T 700,135" fill="none" stroke="#006c49" stroke-width="2.5" stroke-dasharray="6 3"/>
-
-                <circle cx="350" cy="20" r="5" fill="#004d40" stroke="#fff" stroke-width="2"/>
-                <circle cx="350" cy="35" r="4" fill="#006c49" stroke="#fff" stroke-width="2"/>
-                <line x1="350" y1="20" x2="350" y2="150" stroke="#004d40" stroke-width="1.5" stroke-dasharray="3 3"/>
-              </svg>
-
-              <!-- X-Axis Labels -->
-              <div class="flex items-center justify-between text-[11px] text-outline font-medium px-2 pt-1 border-t border-surface-container">
-                <span>01 Mei</span>
-                <span>06 Mei</span>
-                <span>11 Mei</span>
-                <span class="font-bold text-primary">16 Mei (Peak)</span>
-                <span>21 Mei</span>
-                <span>26 Mei</span>
-                <span>31 Mei</span>
-              </div>
+            <!-- Recurring Alert Strip (Dynamic) -->
+            <div id="dash-recurring-alert-box" class="hidden p-3 rounded-xl bg-error-container/50 border border-error/25 flex items-start gap-2.5">
+              <span class="material-symbols-outlined text-error text-[20px] shrink-0 mt-0.5">warning</span>
+              <div class="flex-1 text-[12px]" id="dash-recurring-alert-content"></div>
             </div>
 
-            <!-- Bottom Summary Bar inside Card -->
-            <div class="mt-4 p-3 bg-primary text-white rounded-xl flex items-center justify-between text-[12px]">
-              <div>
-                <span class="font-bold">Summary Periode</span>
-                <span class="ml-2 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold">Mei 2026 Valid</span>
-              </div>
-              <div class="flex items-center gap-6">
-                <span>Puncak: <strong class="text-secondary-fixed">16 Mei • 1.020 kWh</strong></span>
-                <span>Tugas Tertutup: <strong id="dash-bar-closed-tasks">118 Pekerjaan</strong></span>
-                <span>Efisiensi: <strong class="text-secondary-fixed">94% Sesuai Rencana</strong></span>
-              </div>
+            <!-- Active WO Table -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-[12.5px]">
+                <thead>
+                  <tr class="border-b border-surface-container text-[11px] uppercase tracking-wider text-outline">
+                    <th class="py-2 pr-3 font-semibold">Tanggal / Dept</th>
+                    <th class="py-2 px-3 font-semibold">Lokasi & Pekerjaan</th>
+                    <th class="py-2 px-3 font-semibold">Prioritas</th>
+                    <th class="py-2 px-3 font-semibold">PIC</th>
+                    <th class="py-2 pl-3 text-right font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-active-wo-body" class="divide-y divide-surface-container/60">
+                  <tr><td colspan="5" class="py-6 text-center text-outline">Memuat data Work Order...</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
-          <!-- Project Donut Distribution Card (1 col) -->
-          <div class="bg-white rounded-2xl p-6 border border-surface-container shadow-sm flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between">
-                <h3 class="text-[16px] font-bold text-primary">Distribusi Proyek Capex</h3>
-                <span class="text-[11px] text-outline font-semibold" id="dash-donut-total-label">12 Total</span>
+          <!-- Right (1 col): Energi Hari Ini vs Kemarin & Budget -->
+          <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm flex flex-col justify-between gap-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-[15.5px] font-bold text-primary">Energi: Hari Ini vs Kemarin</h3>
+                <p class="text-[11.5px] text-outline">Pembandingan pemakaian harian & kontrol budget</p>
               </div>
-              <p class="text-[12px] text-outline mt-0.5">Komposisi siklus proyek aktif</p>
+              <button onclick="navigateTo('energy-consumption')" class="p-1.5 rounded-lg hover:bg-surface-container-low text-secondary" title="Buka Energy Consumption">
+                <span class="material-symbols-outlined text-[19px]">open_in_new</span>
+              </button>
             </div>
 
-            <!-- Donut Visual -->
-            <div class="flex items-center justify-center my-4 relative">
-              <svg viewBox="0 0 100 100" class="w-36 h-36 -rotate-90">
-                <circle cx="50" cy="50" r="38" fill="none" stroke="#e0e3e2" stroke-width="14"/>
-                <circle cx="50" cy="50" r="38" fill="none" stroke="#004d40" stroke-width="14" stroke-dasharray="131.3 238.7" stroke-dashoffset="0"/>
-                <circle cx="50" cy="50" r="38" fill="none" stroke="#006c49" stroke-width="14" stroke-dasharray="95.5 238.7" stroke-dashoffset="-131.3"/>
-                <circle cx="50" cy="50" r="38" fill="none" stroke="#f49d0a" stroke-width="14" stroke-dasharray="11.9 238.7" stroke-dashoffset="-226.8"/>
-              </svg>
-              <div class="absolute flex flex-col items-center">
-                <span class="text-[24px] font-bold text-primary leading-none" id="dash-donut-total-count">12</span>
-                <span class="text-[9.5px] uppercase tracking-wider text-outline font-semibold">TOTAL PROYEK</span>
-              </div>
+            <div class="flex flex-col gap-3" id="dash-energy-comparison-list">
+              <!-- Populated dynamically -->
             </div>
 
-            <!-- Status Legend Breakdown -->
-            <div class="flex flex-col gap-2 pt-2 border-t border-surface-container text-[12px]">
-              <div class="flex items-center justify-between">
-                <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span> Selesai (Completed)</span>
-                <span class="font-bold text-on-surface" id="dash-donut-completed-count">55% (7 Proyek)</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-secondary"></span> Sedang Berjalan</span>
-                <span class="font-bold text-on-surface" id="dash-donut-inprogress-count">40% (4 Proyek)</span>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-on-tertiary-container"></span> Perencanaan / Review</span>
-                <span class="font-bold text-on-surface" id="dash-donut-planning-count">5% (1 Proyek)</span>
-              </div>
+            <!-- Budget Progress Summary -->
+            <div class="pt-3 border-t border-surface-container flex flex-col gap-2.5" id="dash-budget-bars">
+              <!-- Populated dynamically -->
             </div>
           </div>
         </div>
 
-        <!-- Bottom Row: Auto Evaluation, Utility Data Validation & Executive Insights -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- Card 1: Temuan Evaluasi Otomatis -->
-          <div class="bg-white rounded-2xl p-6 border border-surface-container shadow-sm flex flex-col justify-between">
+        <!-- Row 3: Asset Bermasalah, Barang & Performa Staff, Evaluasi & Proyek -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Col 1: Asset Perlu Perhatian & Riwayat Perbaikan -->
+          <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm flex flex-col justify-between gap-3">
             <div>
               <div class="flex items-center justify-between">
-                <h3 class="text-[15px] font-bold text-primary">Temuan Evaluasi Otomatis</h3>
-                <span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-container text-[10.5px] font-bold" id="dash-eval-alert-badge">2 Perhatian</span>
+                <h3 class="text-[15px] font-bold text-primary">Asset & Perbaikan Terbaru</h3>
+                <span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container text-[10.5px] font-bold" id="dash-asset-issue-badge">0 Perhatian</span>
               </div>
-              <p class="text-[11.5px] text-outline mt-0.5">Automatic Evaluation Engine (Rule-based)</p>
-
-              <div class="flex flex-col gap-3.5 mt-4" id="dash-evaluations-list">
-                <!-- Dynamically populated from evaluations -->
+              <p class="text-[11.5px] text-outline mt-0.5">Unit rusak/perlu perbaikan & riwayat servis terakhir</p>
+              <div class="flex flex-col gap-2.5 mt-3.5" id="dash-asset-repairs-list">
+                <!-- Populated dynamically -->
               </div>
             </div>
-
-            <button onclick="navigateTo('automatic-evaluation')" class="mt-4 inline-flex items-center justify-between text-[12px] font-bold text-primary hover:text-secondary transition-colors pt-2 border-t border-surface-container">
-              <span>Buka Laporan Evaluasi Lengkap</span>
+            <button onclick="navigateTo('asset-management')" class="mt-2 inline-flex items-center justify-between text-[12px] font-bold text-primary hover:text-secondary transition-colors pt-2.5 border-t border-surface-container">
+              <span>Kelola Asset & Riwayat Perbaikan</span>
               <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
             </button>
           </div>
 
-          <!-- Card 2: Validasi Data Utilitas -->
-          <div class="bg-white rounded-2xl p-6 border border-surface-container shadow-sm flex flex-col justify-between">
+          <!-- Col 2: Top Barang Dipakai & Performa Staff -->
+          <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm flex flex-col justify-between gap-3">
             <div>
               <div class="flex items-center justify-between">
-                <h3 class="text-[15px] font-bold text-primary">Validasi Data Utilitas</h3>
-                <span class="text-[11px] text-outline font-semibold">Integritas Meter</span>
+                <h3 class="text-[15px] font-bold text-primary">Barang Sering Dipakai & Staff</h3>
+                <span class="text-[11px] text-outline font-semibold">Operasional</span>
               </div>
-              <p class="text-[11.5px] text-outline mt-0.5">Rasio kepatuhan input daily meter & daily usage tanpa konflik.</p>
+              <p class="text-[11.5px] text-outline mt-0.5">Top material terpakai & pengambilan kerja teknisi (bulan ini vs lalu)</p>
 
-              <!-- Radial Gauges Row -->
-              <div class="grid grid-cols-3 gap-2 my-5 text-center">
-                <div class="p-3 rounded-xl bg-surface-container-low flex flex-col items-center">
-                  <div class="w-12 h-12 rounded-full border-4 border-secondary flex items-center justify-center font-bold text-[14px] text-primary">
-                    94%
-                  </div>
-                  <span class="text-[11px] font-semibold text-on-surface mt-2">Listrik</span>
-                  <span class="text-[9.5px] text-secondary font-medium">Valid Teruji</span>
-                </div>
-                <div class="p-3 rounded-xl bg-surface-container-low flex flex-col items-center">
-                  <div class="w-12 h-12 rounded-full border-4 border-on-tertiary-container flex items-center justify-center font-bold text-[14px] text-primary">
-                    04%
-                  </div>
-                  <span class="text-[11px] font-semibold text-on-surface mt-2">Air PDAM</span>
-                  <span class="text-[9.5px] text-on-tertiary-container font-medium">Perlu Review</span>
-                </div>
-                <div class="p-3 rounded-xl bg-surface-container-low flex flex-col items-center">
-                  <div class="w-12 h-12 rounded-full border-4 border-primary-container flex items-center justify-center font-bold text-[14px] text-primary">
-                    02%
-                  </div>
-                  <span class="text-[11px] font-semibold text-on-surface mt-2">Fuel Genset</span>
-                  <span class="text-[9.5px] text-outline font-medium">Kalibrasi</span>
-                </div>
+              <div class="mt-3.5">
+                <div class="text-[10.5px] uppercase tracking-wider text-outline font-bold mb-1.5">Top Material Terpakai</div>
+                <div class="flex flex-col gap-1.5" id="dash-top-materials-list"></div>
+              </div>
+
+              <div class="mt-3.5 pt-3 border-t border-surface-container">
+                <div class="text-[10.5px] uppercase tracking-wider text-outline font-bold mb-1.5">Performa Tim Engineering</div>
+                <div class="flex flex-col gap-1.5" id="dash-staff-perf-list"></div>
               </div>
             </div>
-
-            <div class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low text-[11px] font-medium text-outline">
-              <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-secondary"></span> LockService Active</span>
-              <span>Tanpa Double-Counting</span>
-            </div>
+            <button onclick="navigateTo('material-usage')" class="mt-2 inline-flex items-center justify-between text-[12px] font-bold text-primary hover:text-secondary transition-colors pt-2.5 border-t border-surface-container">
+              <span>Buka Dashboard Barang</span>
+              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </button>
           </div>
 
-          <!-- Card 3: Executive Insights -->
-          <div class="bg-white rounded-2xl p-6 border border-surface-container shadow-sm flex flex-col justify-between">
+          <!-- Col 3: Evaluasi Otomatis & Ringkasan Proyek Capex -->
+          <div class="bg-white rounded-2xl p-5 border border-surface-container shadow-sm flex flex-col justify-between gap-3">
             <div>
               <div class="flex items-center justify-between">
-                <h3 class="text-[15px] font-bold text-primary">Executive Insights</h3>
-                <div class="w-7 h-7 rounded-lg bg-secondary-container/40 flex items-center justify-center text-secondary">
-                  <span class="material-symbols-outlined text-[17px]">lightbulb</span>
-                </div>
+                <h3 class="text-[15px] font-bold text-primary">Evaluasi & Proyek Capex</h3>
+                <span class="px-2 py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-container text-[10.5px] font-bold" id="dash-eval-alert-badge">Info</span>
               </div>
-              <p class="text-[11.5px] text-outline mt-0.5">Rangkuman tren kinerja otomatis untuk panduan pengambilan keputusan Management.</p>
+              <p class="text-[11.5px] text-outline mt-0.5">Temuan otomatis & status proyek rekayasa aktif</p>
 
-              <div class="grid grid-cols-2 gap-3 my-4">
-                <div class="p-3 rounded-xl bg-surface-container-low/60 border border-surface-container">
-                  <span class="text-[10.5px] uppercase text-outline font-semibold">Efisiensi Energi</span>
-                  <div class="text-[18px] font-bold text-secondary mt-0.5">+4.2%</div>
-                  <span class="text-[10px] text-outline">vs Target Bulanan</span>
+              <!-- Compact Project Summary -->
+              <div class="mt-3 p-3 rounded-xl bg-surface-container-low/70 border border-surface-container flex items-center justify-between">
+                <div>
+                  <div class="text-[10.5px] uppercase text-outline font-semibold">Proyek Capex (<span id="dash-kpi-projects">0</span>)</div>
+                  <div class="text-[13px] font-bold text-primary mt-0.5"><span id="dash-kpi-project-cost">Rp 0</span> / <span id="dash-kpi-project-budget" class="text-outline font-medium">Rp 0</span></div>
                 </div>
-                <div class="p-3 rounded-xl bg-surface-container-low/60 border border-surface-container">
-                  <span class="text-[10.5px] uppercase text-outline font-semibold">Vendor Terunggul</span>
-                  <div class="text-[13px] font-bold text-primary truncate mt-0.5">PT Tirta Jaya</div>
-                  <span class="text-[10px] text-secondary font-medium">Skor SLA 98.4%</span>
-                </div>
-                <div class="p-3 rounded-xl bg-surface-container-low/60 border border-surface-container">
-                  <span class="text-[10.5px] uppercase text-outline font-semibold">Beban Tertinggi</span>
-                  <div class="text-[13px] font-bold text-on-surface mt-0.5">19:00 - 22:00</div>
-                  <span class="text-[10px] text-outline">Peak Dinner Hours</span>
-                </div>
-                <div class="p-3 rounded-xl bg-surface-container-low/60 border border-surface-container">
-                  <span class="text-[10.5px] uppercase text-outline font-semibold">Status Belanja (Opex)</span>
-                  <div class="text-[13px] font-bold text-secondary mt-0.5">Terkendali</div>
-                  <span class="text-[10px] text-secondary font-medium">Hemat 8.7%</span>
-                </div>
+                <button onclick="navigateTo('project-monitoring')" class="px-2.5 py-1 rounded-lg bg-white border border-surface-container text-[11px] font-bold text-primary hover:border-secondary">Detail</button>
+              </div>
+
+              <div class="flex flex-col gap-2.5 mt-3" id="dash-evaluations-list">
+                <!-- Dynamically populated from evaluations -->
               </div>
             </div>
 
-            <button onclick="navigateTo('report-generator')" class="w-full py-2.5 rounded-xl bg-primary text-white hover:bg-primary-container font-semibold text-[12.5px] flex items-center justify-center gap-2 shadow-sm transition-all">
-              <span class="material-symbols-outlined text-[18px]">menu_book</span>
-              <span>Lihat Draft Laporan Bulanan</span>
+            <button onclick="navigateTo('automatic-evaluation')" class="mt-2 inline-flex items-center justify-between text-[12px] font-bold text-primary hover:text-secondary transition-colors pt-2.5 border-t border-surface-container">
+              <span>Buka Evaluasi Otomatis</span>
+              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
             </button>
           </div>
         </div>
@@ -1915,8 +1844,6 @@
           </div>
           <div class="flex items-center gap-3">
             <select id="report-period-select" onchange="previewReport()" class="px-4 py-2 bg-white border border-surface-container rounded-xl text-[13px] font-semibold text-primary focus:outline-none">
-              <option value="2026-05" selected>Periode: Mei 2026</option>
-              <option value="2026-04">Periode: April 2026</option>
             </select>
             <button onclick="previewReport()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-surface-container hover:bg-surface-container-low text-[13px] font-semibold text-on-surface shadow-sm">
               <span class="material-symbols-outlined text-[18px]">visibility</span>
@@ -1991,7 +1918,7 @@
       <section id="view-settings" class="view-panel hidden flex flex-col gap-6">
         <div>
           <h1 class="text-[26px] font-bold text-primary tracking-tight">Settings & Master Data</h1>
-          <p class="text-[13px] text-outline mt-0.5">Konfigurasi arsitektur database Google Sheets, Vercel API Gateway, dan PWA Builder manifest.</p>
+          <p class="text-[13px] text-outline mt-0.5">Konfigurasi arsitektur database Google Sheets dan Vercel API Gateway.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2018,7 +1945,7 @@
             <div>
               <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-on-tertiary-container text-[22px]">cloud_sync</span>
-                <h3 class="text-[16px] font-bold text-primary">Status Hosting & PWA</h3>
+                <h3 class="text-[16px] font-bold text-primary">Status Hosting & Sistem</h3>
               </div>
               <div class="space-y-2 mt-3 text-[12px]">
                 <div class="flex justify-between p-2 rounded-lg bg-surface-container-low">
@@ -2030,8 +1957,8 @@
                   <span class="font-bold text-primary">Vercel Edge</span>
                 </div>
                 <div class="flex justify-between p-2 rounded-lg bg-surface-container-low">
-                  <span class="text-outline">PWA Builder</span>
-                  <span class="font-bold text-secondary">Ready (Manifest & SW Active)</span>
+                  <span class="text-outline">Mode Akses</span>
+                  <span class="font-bold text-secondary">Desktop Web Browser Ready</span>
                 </div>
               </div>
             </div>
@@ -2858,49 +2785,120 @@
     <span id="toast-message">Operasi berhasil dijalankan.</span>
   </div>
 
-  <!-- Application Controller & PWA Client -->
+  <!-- Application Controller -->
   <script>
     // ========================================================
-    // PWA & SERVICE WORKER LIFECYCLE
+    // DYNAMIC DATE & PERIOD HELPERS (INDONESIA / WITA)
     // ========================================================
-    let deferredPrompt = null;
+    const ID_MONTHS_FULL = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const ID_MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
-    function initPwa() {
-      if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js', { scope: '/' })
-            .then(reg => console.log('[PWA] Service Worker registered with scope:', reg.scope))
-            .catch(err => console.warn('[PWA] Service Worker registration skipped/failed:', err));
-        });
-      }
-
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        const banner = document.getElementById('pwa-install-banner');
-        if (banner) banner.classList.remove('hidden');
-      });
-
-      window.addEventListener('appinstalled', () => {
-        deferredPrompt = null;
-        const banner = document.getElementById('pwa-install-banner');
-        if (banner) banner.classList.add('hidden');
-        showToast('Agranusa Engineering System berhasil terpasang di perangkat Anda!');
-      });
+    function getTodayISO() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
     }
 
-    window.promptPwaInstall = async function() {
-      if (!deferredPrompt) {
-        showToast('Buka menu browser Anda (titik tiga) lalu pilih "Install Agranusa Eng" atau gunakan via PWA Builder.');
-        return;
+    function getYesterdayISO() {
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function getCurrentPeriodISO() {
+      return getTodayISO().substring(0, 7);
+    }
+
+    function getPrevPeriodISO(period) {
+      const p = period || getCurrentPeriodISO();
+      const [yStr, mStr] = p.split('-');
+      let y = parseInt(yStr, 10) || new Date().getFullYear();
+      let m = parseInt(mStr, 10) || (new Date().getMonth() + 1);
+      if (m === 1) { y -= 1; m = 12; } else { m -= 1; }
+      return `${y}-${String(m).padStart(2, '0')}`;
+    }
+
+    function formatDateID(dateStr, shortMonth = true) {
+      if (!dateStr) return '-';
+      const clean = String(dateStr).trim().substring(0, 10);
+      const parts = clean.split('-');
+      if (parts.length !== 3) return String(dateStr);
+      const y = parts[0];
+      const mIdx = parseInt(parts[1], 10) - 1;
+      const d = parseInt(parts[2], 10);
+      if (isNaN(mIdx) || mIdx < 0 || mIdx > 11 || isNaN(d)) return String(dateStr);
+      const monthName = shortMonth ? ID_MONTHS_SHORT[mIdx] : ID_MONTHS_FULL[mIdx];
+      return `${String(d).padStart(2, '0')} ${monthName} ${y}`;
+    }
+
+    function formatPeriodID(periodStr) {
+      if (!periodStr) return '-';
+      const parts = String(periodStr).trim().split('-');
+      if (parts.length < 2) return String(periodStr);
+      const y = parts[0];
+      const mIdx = parseInt(parts[1], 10) - 1;
+      if (isNaN(mIdx) || mIdx < 0 || mIdx > 11) return String(periodStr);
+      return `${ID_MONTHS_FULL[mIdx]} ${y}`;
+    }
+
+    function populatePeriodSelects() {
+      const now = new Date();
+      const curYear = now.getFullYear();
+      const startYear = Math.min(2026, curYear);
+      const periods = [];
+      for (let y = curYear; y >= startYear; y--) {
+        const maxM = (y === curYear) ? 12 : 12;
+        for (let m = maxM; m >= 1; m--) {
+          periods.push(`${y}-${String(m).padStart(2, '0')}`);
+        }
       }
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log('[PWA] User response:', outcome);
-      deferredPrompt = null;
-      const banner = document.getElementById('pwa-install-banner');
-      if (banner) banner.classList.add('hidden');
-    };
+      const activePeriod = state.currentPeriod || getCurrentPeriodISO();
+      const dashSelect = document.getElementById('dash-period-select');
+      if (dashSelect) {
+        dashSelect.innerHTML = periods.map(p =>
+          `<option value="${p}" ${p === activePeriod ? 'selected' : ''}>${formatPeriodID(p)}, Bulanan</option>`
+        ).join('');
+      }
+      const repSelect = document.getElementById('report-period-select');
+      if (repSelect) {
+        repSelect.innerHTML = periods.map(p =>
+          `<option value="${p}" ${p === activePeriod ? 'selected' : ''}>Periode: ${formatPeriodID(p)}</option>`
+        ).join('');
+      }
+    }
+
+    function initDynamicDates() {
+      const todayISO = getTodayISO();
+      const curPeriod = state.currentPeriod || getCurrentPeriodISO();
+      populatePeriodSelects();
+
+      const badge = document.getElementById('current-date-badge');
+      if (badge) badge.innerText = `${formatDateID(todayISO, true)}, WITA`;
+
+      const opexBadge = document.getElementById('opex-today-badge');
+      if (opexBadge) opexBadge.innerText = formatDateID(todayISO, true);
+
+      const dashPeriodLbl = document.getElementById('dash-period-label');
+      if (dashPeriodLbl) dashPeriodLbl.innerText = formatPeriodID(curPeriod);
+
+      const purPeriodTitle = document.getElementById('pur-period-title');
+      if (purPeriodTitle) purPeriodTitle.innerText = formatPeriodID(curPeriod);
+
+      const actPeriodLbl = document.getElementById('act-period-label');
+      if (actPeriodLbl) actPeriodLbl.innerText = formatPeriodID(curPeriod);
+
+      ['form-wo-date', 'form-act-date', 'usage-date', 'form-opex-date', 'meter-date', 'form-repair-reported-date', 'form-repair-date', 'weekly-start', 'weekly-end'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = todayISO;
+      });
+      const purPeriodInput = document.getElementById('purchase-period');
+      if (purPeriodInput) purPeriodInput.value = curPeriod;
+    }
 
     // ========================================================
     // API CLIENT & LOCAL REACTIVE STATE ENGINE
@@ -3150,7 +3148,7 @@
         if (action === 'opex.list') {
           const list = mockStore.opexDaily || [];
           const total = list.reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
-          const todayStr = '2026-05-19';
+          const todayStr = getTodayISO();
           const todayAmt = list.filter(o => o.record_date === todayStr).reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
           const distinctDays = [...new Set(list.map(o => o.record_date))].filter(Boolean);
           const avg = distinctDays.length > 0 ? Math.round(total / distinctDays.length) : 0;
@@ -3347,7 +3345,7 @@
     // Global application state
     const state = {
       activeView: 'dashboard',
-      currentPeriod: '2026-05',
+      currentPeriod: getCurrentPeriodISO(),
       timeframe: 'month',
       activities: [],
       filteredActivities: [],
@@ -3563,11 +3561,17 @@
       state.currentPeriod = period;
       const select = document.getElementById('dash-period-select');
       if (select) select.value = period;
-      const monthNames = { '2026-05': 'Mei 2026', '2026-04': 'April 2026', '2026-03': 'Maret 2026' };
-      const badge = document.getElementById('current-date-badge');
-      if (badge) badge.innerText = `18 ${monthNames[period] || period}, WITA`;
+      const repSelect = document.getElementById('report-period-select');
+      if (repSelect) repSelect.value = period;
+      const periodLabel = formatPeriodID(period);
+      const dashPeriodLbl = document.getElementById('dash-period-label');
+      if (dashPeriodLbl) dashPeriodLbl.innerText = periodLabel;
+      const purPeriodTitle = document.getElementById('pur-period-title');
+      if (purPeriodTitle) purPeriodTitle.innerText = periodLabel;
+      const actPeriodLbl = document.getElementById('act-period-label');
+      if (actPeriodLbl) actPeriodLbl.innerText = periodLabel;
       loadAllData();
-      showToast(`Periode diubah ke ${monthNames[period] || period}`);
+      showToast(`Periode diubah ke ${periodLabel}`);
     };
 
     // Dashboard Timeframe Pills
@@ -3707,6 +3711,7 @@
       renderRecurringJobAlerts();
       renderStaffPerformance();
       renderMaterialUsageDashboard();
+      renderDashboardLivePanels();
     }
 
     function applySyncedBundle(bundle, saveToCache = true) {
@@ -3767,6 +3772,7 @@
       renderRecurringJobAlerts();
       renderStaffPerformance();
       renderMaterialUsageDashboard();
+      renderDashboardLivePanels();
       if (saveToCache) {
         try {
           localStorage.setItem('agranusa_bundle_' + state.currentPeriod, JSON.stringify(bundle));
@@ -3775,7 +3781,8 @@
     }
 
     function renderDashboard(res) {
-      const act = res.kpiCards.activities;
+      if (!res || !res.kpiCards) return;
+      const act = res.kpiCards.activities || { total: 0, done: 0, inProgress: 0, pending: 0 };
       const elActTotal = document.getElementById('dash-kpi-total-tasks');
       if (elActTotal) elActTotal.innerText = act.total;
       const elActDone = document.getElementById('dash-kpi-done-tasks');
@@ -3784,67 +3791,329 @@
       if (elActProg) elActProg.innerText = `${act.inProgress} Berjalan`;
       const elActPend = document.getElementById('dash-kpi-pend-tasks');
       if (elActPend) elActPend.innerText = `${act.pending} Tertunda`;
-      const elActBar = document.getElementById('dash-bar-closed-tasks');
-      if (elActBar) elActBar.innerText = `${act.done} Pekerjaan`;
 
-      const prj = res.kpiCards.projects;
+      const prj = res.kpiCards.projects || { total: 0, totalCost: 0, totalBudget: 0 };
       const elPrjTotal = document.getElementById('dash-kpi-projects');
       if (elPrjTotal) elPrjTotal.innerText = prj.total;
       const elPrjCost = document.getElementById('dash-kpi-project-cost');
       if (elPrjCost) elPrjCost.innerText = `Rp ${(prj.totalCost / 1000000).toFixed(1).replace('.', ',')} Jt`;
       const elPrjBud = document.getElementById('dash-kpi-project-budget');
       if (elPrjBud) elPrjBud.innerText = `Rp ${(prj.totalBudget / 1000000).toFixed(0)} Jt`;
-      const elDonutCount = document.getElementById('dash-donut-total-count');
-      if (elDonutCount) elDonutCount.innerText = prj.total;
-      const elDonutLbl = document.getElementById('dash-donut-total-label');
-      if (elDonutLbl) elDonutLbl.innerText = `${prj.total} Total`;
 
-      const eng = res.kpiCards.energy;
+      const eng = res.kpiCards.energy || { totalCost: 0 };
       const elEngCost = document.getElementById('dash-kpi-energy-cost');
       if (elEngCost) elEngCost.innerText = `Rp ${(eng.totalCost / 1000000).toFixed(2).replace('.', ',')}`;
 
-      const pur = res.kpiCards.purchase;
+      const pur = res.kpiCards.purchase || { totalAmount: 0 };
       const elPurCost = document.getElementById('dash-kpi-purchase');
       if (elPurCost) elPurCost.innerText = `Rp ${(pur.totalAmount / 1000000).toFixed(2).replace('.', ',')}`;
 
-      // Project Donut Distribution
-      const prjCounts = {
-        completed: (state.projects || []).filter(p => p.status === 'Completed').length,
-        inProgress: (state.projects || []).filter(p => p.status === 'In Progress').length,
-        planning: (state.projects || []).filter(p => p.status === 'Planning' || p.status === 'On Hold').length,
-      };
-      const totalPrj = (state.projects || []).length || 1;
-      const compPct = Math.round((prjCounts.completed / totalPrj) * 100);
-      const progPct = Math.round((prjCounts.inProgress / totalPrj) * 100);
-      const planPct = Math.max(0, 100 - compPct - progPct);
-      const elComp = document.getElementById('dash-donut-completed-count');
-      if (elComp) elComp.innerText = `${compPct}% (${prjCounts.completed} Proyek)`;
-      const elProg = document.getElementById('dash-donut-inprogress-count');
-      if (elProg) elProg.innerText = `${progPct}% (${prjCounts.inProgress} Proyek)`;
-      const elPlan = document.getElementById('dash-donut-planning-count');
-      if (elPlan) elPlan.innerText = `${planPct}% (${prjCounts.planning} Proyek)`;
-
       // Dashboard Top Evaluations snippet
       const evalList = document.getElementById('dash-evaluations-list');
+      const evalBadge = document.getElementById('dash-eval-alert-badge');
+      if (evalBadge && res.topEvaluations) {
+        const warnCount = res.topEvaluations.filter(e => e.severity === 'Perhatian' || e.severity === 'Kritis').length;
+        evalBadge.innerText = warnCount > 0 ? `${warnCount} Perhatian` : `${res.topEvaluations.length} Info`;
+      }
       if (evalList && res.topEvaluations) {
         evalList.innerHTML = '';
-        res.topEvaluations.slice(0, 3).forEach(ev => {
+        res.topEvaluations.slice(0, 2).forEach(ev => {
+          const isWarn = ev.severity === 'Perhatian' || ev.severity === 'Kritis';
           const div = document.createElement('div');
-          div.className = 'p-3 rounded-xl bg-tertiary-fixed/30 border border-tertiary-fixed flex items-start gap-3';
+          div.className = `p-2.5 rounded-xl border flex items-start gap-2.5 ${isWarn ? 'bg-tertiary-fixed/30 border-tertiary-fixed' : 'bg-surface-container-low/60 border-surface-container'}`;
           div.innerHTML = `
-            <span class="material-symbols-outlined text-[20px] text-on-tertiary-container shrink-0 mt-0.5">warning</span>
-            <div>
-              <div class="flex items-center justify-between">
-                <span class="text-[12.5px] font-bold text-on-surface">${ev.title}</span>
-                <span class="text-[11px] font-bold text-on-tertiary-container">${ev.severity}</span>
+            <span class="material-symbols-outlined text-[18px] ${isWarn ? 'text-on-tertiary-container' : 'text-secondary'} shrink-0 mt-0.5">${isWarn ? 'warning' : 'info'}</span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[12px] font-bold text-on-surface truncate">${ev.title}</span>
+                <span class="text-[10px] font-bold ${isWarn ? 'text-on-tertiary-container' : 'text-secondary'} shrink-0">${ev.severity}</span>
               </div>
-              <p class="text-[11px] text-on-surface-variant mt-0.5">${ev.finding}</p>
+              <p class="text-[11px] text-on-surface-variant mt-0.5 line-clamp-2">${ev.finding}</p>
             </div>
           `;
           evalList.appendChild(div);
         });
       }
+
+      renderDashboardLivePanels();
     }
+
+    window.renderDashboardLivePanels = function() {
+      const curPeriod = state.currentPeriod || getCurrentPeriodISO();
+      const dashPeriodLbl = document.getElementById('dash-period-label');
+      if (dashPeriodLbl) dashPeriodLbl.innerText = formatPeriodID(curPeriod);
+
+      // 1. Load saved budget for current period
+      let budget = { listrik: 55000000, air: 15000000, fuel: 5000000, gas: 3000000, barang: 25000000, opex: 15000000 };
+      try {
+        const saved = localStorage.getItem('agranusa_budget_' + curPeriod);
+        if (saved) budget = Object.assign(budget, JSON.parse(saved));
+      } catch (e) {}
+
+      // 2. Activity & Work Order Card + Active WO Table + Recurring Alert
+      const wos = state.workOrders || [];
+      const openWOs = wos.filter(w => w.status === 'Open' || w.status === 'In Progress');
+      const elWoOpen = document.getElementById('dash-kpi-wo-open');
+      if (elWoOpen) elWoOpen.innerText = `${openWOs.length} WO Aktif`;
+
+      // Recurring job detection (reuse activity & WO data)
+      const recurringMap = {};
+      const allJobs = [
+        ...(state.activities || []).map(a => ({ loc: a.location_id || '-', title: a.job_name || '-', date: a.activity_date || '' })),
+        ...wos.map(w => ({ loc: w.location_id || '-', title: w.title || '-', date: w.order_date || '' }))
+      ];
+      allJobs.forEach(j => {
+        const normTitle = String(j.title).toLowerCase().replace(/perbaikan |pengecekan |netes.*/g, '').trim().substring(0, 28);
+        const key = `${j.loc}::${normTitle}`;
+        if (!recurringMap[key]) recurringMap[key] = { loc: j.loc, title: j.title, count: 0, lastDate: j.date };
+        recurringMap[key].count++;
+        if (j.date > recurringMap[key].lastDate) recurringMap[key].lastDate = j.date;
+      });
+      const recurringList = Object.values(recurringMap).filter(r => r.count >= 2).sort((a, b) => b.count - a.count);
+
+      const recBadge = document.getElementById('dash-kpi-recurring-badge');
+      if (recBadge) {
+        if (recurringList.length > 0) {
+          recBadge.classList.remove('hidden');
+          recBadge.innerText = `${recurringList.length} Berulang`;
+        } else {
+          recBadge.classList.add('hidden');
+        }
+      }
+
+      const recBox = document.getElementById('dash-recurring-alert-box');
+      const recContent = document.getElementById('dash-recurring-alert-content');
+      if (recBox && recContent) {
+        if (recurringList.length > 0) {
+          recBox.classList.remove('hidden');
+          const topRec = recurringList.slice(0, 2).map(r => `<strong>${r.title}</strong> di <strong>${r.loc}</strong> (${r.count}x)`).join(' • ');
+          recContent.innerHTML = `<div class="font-bold text-error">Peringatan Pekerjaan Berulang (${recurringList.length} temuan):</div><div class="text-on-surface mt-0.5">${topRec}</div>`;
+        } else {
+          recBox.classList.add('hidden');
+        }
+      }
+
+      const woBody = document.getElementById('dash-active-wo-body');
+      if (woBody) {
+        if (openWOs.length === 0) {
+          woBody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-outline">Semua Work Order telah diselesaikan.</td></tr>`;
+        } else {
+          woBody.innerHTML = openWOs.slice(0, 5).map(w => {
+            const prioClass = w.priority === 'Urgent' ? 'bg-error-container text-on-error-container' : (w.priority === 'High' ? 'bg-tertiary-fixed text-tertiary' : 'bg-surface-container text-on-surface-variant');
+            const stClass = w.status === 'Open' ? 'bg-error-container/70 text-on-error-container' : 'bg-tertiary-fixed/70 text-tertiary';
+            return `
+              <tr class="hover:bg-surface-container-low/50 cursor-pointer" onclick="navigateTo('activity-report'); switchActivityTab('wo');">
+                <td class="py-2.5 pr-3 whitespace-nowrap">
+                  <div class="font-bold text-on-surface">${w.department || '-'}</div>
+                  <div class="text-[11px] text-outline">${formatDateID(w.order_date, true)}</div>
+                </td>
+                <td class="py-2.5 px-3">
+                  <div class="font-semibold text-primary line-clamp-1">${w.title || '-'}</div>
+                  <div class="text-[11px] text-outline">${w.location_id || '-'}</div>
+                </td>
+                <td class="py-2.5 px-3 whitespace-nowrap"><span class="px-2 py-0.5 rounded-full text-[10.5px] font-bold ${prioClass}">${w.priority || 'Normal'}</span></td>
+                <td class="py-2.5 px-3 whitespace-nowrap font-medium text-on-surface">${w.pic_technician || 'Belum Ditugaskan'}</td>
+                <td class="py-2.5 pl-3 text-right whitespace-nowrap"><span class="px-2 py-0.5 rounded-full text-[10.5px] font-bold ${stClass}">${w.status}</span></td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      // 3. Energy Today vs Yesterday & Budget Bars
+      const engList = state.energy || [];
+      const totalEngCost = engList.reduce((acc, e) => acc + (parseFloat(e.calculated_cost) || 0), 0);
+      const totalEngBudget = (budget.listrik || 0) + (budget.air || 0) + (budget.fuel || 0) + (budget.gas || 0);
+      const elEngCost = document.getElementById('dash-kpi-energy-cost');
+      if (elEngCost && totalEngCost > 0) elEngCost.innerText = `Rp ${(totalEngCost / 1000000).toFixed(2).replace('.', ',')}`;
+
+      const getLatestTwoByCat = (cat) => engList.filter(e => e.category === cat).sort((a, b) => String(b.record_date).localeCompare(String(a.record_date)));
+      const listrikRecs = getLatestTwoByCat('Listrik PLN');
+      const airRecs = getLatestTwoByCat('Air PDAM');
+      const gasRecs = getLatestTwoByCat('Gas LPG');
+      const fuelRecs = getLatestTwoByCat('Fuel Genset');
+
+      const buildCompRow = (label, icon, recs, unit) => {
+        const cur = recs[0] ? (parseFloat(recs[0].usage_value) || 0) : 0;
+        const prev = recs[1] ? (parseFloat(recs[1].usage_value) || (parseFloat(recs[0]?.prev_usage) || 0)) : (parseFloat(recs[0]?.prev_usage) || 0);
+        const diff = prev > 0 ? (((cur - prev) / prev) * 100).toFixed(1) : null;
+        const badgeHtml = diff === null
+          ? `<span class="text-[11px] text-outline">Data terbaru: ${recs[0] ? formatDateID(recs[0].record_date, true) : '-'}</span>`
+          : (parseFloat(diff) > 0
+              ? `<span class="text-[11px] font-bold text-error">▲ +${diff}% vs kemarin</span>`
+              : `<span class="text-[11px] font-bold text-secondary">▼ ${diff}% vs kemarin</span>`);
+        return `
+          <div class="p-3 rounded-xl bg-surface-container-low/70 border border-surface-container flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-[19px] text-primary">${icon}</span>
+              <div>
+                <div class="text-[12.5px] font-bold text-on-surface">${label}</div>
+                ${badgeHtml}
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-[14px] font-bold text-primary">${cur.toLocaleString('id-ID')} <span class="text-[11px] font-normal text-outline">${unit}</span></div>
+              <div class="text-[10.5px] text-outline">Kemarin: ${prev > 0 ? prev.toLocaleString('id-ID') + ' ' + unit : '-'}</div>
+            </div>
+          </div>
+        `;
+      };
+
+      const engCompContainer = document.getElementById('dash-energy-comparison-list');
+      if (engCompContainer) {
+        engCompContainer.innerHTML = [
+          buildCompRow('Listrik PLN', 'bolt', listrikRecs, 'kWh'),
+          buildCompRow('Air PDAM', 'water_drop', airRecs, 'm³'),
+          buildCompRow('Gas LPG & Fuel', 'local_gas_station', gasRecs.length ? gasRecs : fuelRecs, gasRecs.length ? 'kg' : 'Liter')
+        ].join('');
+      }
+
+      const elEngDiff = document.getElementById('dash-kpi-energy-diff');
+      if (elEngDiff) {
+        if (listrikRecs[0]) {
+          elEngDiff.innerHTML = `<span class="text-primary">Listrik: ${Number(listrikRecs[0].usage_value || 0).toLocaleString('id-ID')} kWh</span> <span class="text-outline">(${formatDateID(listrikRecs[0].record_date, true)})</span>`;
+        } else {
+          elEngDiff.innerHTML = `<span class="text-outline">Belum ada input harian</span>`;
+        }
+      }
+      const elEngBudSub = document.getElementById('dash-kpi-energy-budget-sub');
+      if (elEngBudSub) {
+        const pctEng = totalEngBudget > 0 ? Math.round((totalEngCost / totalEngBudget) * 100) : 0;
+        elEngBudSub.innerText = `Plafon Rp ${(totalEngBudget / 1000000).toFixed(1).replace('.', ',')} Jt (${pctEng}% terpakai)`;
+      }
+
+      // 4. OPEX (Daily + Monthly) & Budget Bars
+      const dailyTotal = (state.opexDaily || []).reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
+      const monthlyTotal = (mockStore.purchase && mockStore.purchase.current) ? (mockStore.purchase.current.total_amount || 0) : 0;
+      const totalOpexAll = dailyTotal + monthlyTotal;
+      const opexBudgetTotal = (budget.barang || 0) + (budget.opex || 0);
+      const elPur = document.getElementById('dash-kpi-purchase');
+      if (elPur) elPur.innerText = `Rp ${(totalOpexAll / 1000000).toFixed(2).replace('.', ',')}`;
+      const elOpexBud = document.getElementById('dash-kpi-opex-budget');
+      if (elOpexBud) elOpexBud.innerText = `Daily: Rp ${(dailyTotal / 1000000).toFixed(1)} Jt • Monthly: Rp ${(monthlyTotal / 1000000).toFixed(1)} Jt`;
+      const elOpexStat = document.getElementById('dash-kpi-opex-status');
+      if (elOpexStat) {
+        const isOverOpex = opexBudgetTotal > 0 && totalOpexAll > opexBudgetTotal;
+        elOpexStat.innerHTML = isOverOpex
+          ? `<span class="material-symbols-outlined text-[15px] text-error">warning</span><span class="text-error">Melebihi Budget (Rp ${(opexBudgetTotal / 1000000).toFixed(1)} Jt)</span>`
+          : `<span class="material-symbols-outlined text-[15px] text-secondary">check_circle</span><span class="text-secondary">Terkendali (Budget Rp ${(opexBudgetTotal / 1000000).toFixed(1)} Jt)</span>`;
+      }
+
+      const budgetBars = document.getElementById('dash-budget-bars');
+      if (budgetBars) {
+        const pctE = totalEngBudget > 0 ? Math.min(100, Math.round((totalEngCost / totalEngBudget) * 100)) : 0;
+        const pctO = opexBudgetTotal > 0 ? Math.min(100, Math.round((totalOpexAll / opexBudgetTotal) * 100)) : 0;
+        budgetBars.innerHTML = `
+          <div>
+            <div class="flex justify-between text-[11px] font-semibold mb-1">
+              <span class="text-outline">Serapan Budget Energi</span>
+              <span class="${pctE > 90 ? 'text-error' : 'text-secondary'}">${pctE}%</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-surface-container overflow-hidden"><div class="h-full ${pctE > 90 ? 'bg-error' : 'bg-secondary'} rounded-full" style="width:${pctE}%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] font-semibold mb-1">
+              <span class="text-outline">Serapan Budget OPEX</span>
+              <span class="${pctO > 90 ? 'text-error' : 'text-primary'}">${pctO}%</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-surface-container overflow-hidden"><div class="h-full ${pctO > 90 ? 'bg-error' : 'bg-primary'} rounded-full" style="width:${pctO}%"></div></div>
+          </div>
+        `;
+      }
+
+      // 5. Asset & Perbaikan Terbaru
+      const assets = state.assets || [];
+      const repairs = state.assetRepairs || [];
+      const issueAssets = assets.filter(a => a.status === 'Rusak' || a.status === 'Perlu Perbaikan');
+      const totalRepairCost = repairs.reduce((acc, r) => acc + (parseFloat(r.repair_cost) || 0), 0);
+
+      const elAstTot = document.getElementById('dash-kpi-assets-total');
+      if (elAstTot) elAstTot.innerText = assets.length;
+      const elAstIss = document.getElementById('dash-kpi-assets-issue');
+      if (elAstIss) elAstIss.innerText = `${issueAssets.length} Perlu Perbaikan / Rusak`;
+      const elRprCost = document.getElementById('dash-kpi-repair-cost');
+      if (elRprCost) elRprCost.innerText = `Rp ${totalRepairCost.toLocaleString('id-ID')}`;
+      const elAstBadge = document.getElementById('dash-asset-issue-badge');
+      if (elAstBadge) elAstBadge.innerText = `${issueAssets.length} Perhatian`;
+
+      const astListEl = document.getElementById('dash-asset-repairs-list');
+      if (astListEl) {
+        if (repairs.length === 0 && issueAssets.length === 0) {
+          astListEl.innerHTML = `<div class="p-3 rounded-xl bg-surface-container-low text-[12px] text-outline">Semua asset dalam kondisi baik.</div>`;
+        } else {
+          astListEl.innerHTML = repairs.slice(0, 3).map(r => {
+            const stCls = r.status === 'Selesai' ? 'bg-secondary-container/60 text-on-secondary-container' : 'bg-error-container/70 text-on-error-container';
+            return `
+              <div class="p-2.5 rounded-xl bg-surface-container-low/60 border border-surface-container flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="text-[12px] font-bold text-on-surface truncate">${r.asset_name}</div>
+                  <div class="text-[10.5px] text-outline truncate">${r.location_id} • ${r.repaired_by_type}</div>
+                  <div class="text-[10.5px] text-primary font-semibold mt-0.5">${formatDateID(r.repaired_date || r.reported_date, true)} • Rp ${Number(r.repair_cost || 0).toLocaleString('id-ID')}</div>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${stCls}">${r.status}</span>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // 6. Top Material & Staff Performance
+      const matEl = document.getElementById('dash-top-materials-list');
+      if (matEl && typeof computeMaterialAggregation === 'function') {
+        const { sorted } = computeMaterialAggregation('Semua');
+        if (sorted.length === 0) {
+          matEl.innerHTML = `<div class="text-[11.5px] text-outline">Belum ada data pemakaian barang.</div>`;
+        } else {
+          matEl.innerHTML = sorted.slice(0, 3).map((m, idx) => `
+            <div class="flex items-center justify-between text-[12px] py-1 px-2 rounded-lg bg-surface-container-low/60">
+              <span class="font-semibold text-on-surface truncate">${idx + 1}. ${m.name}</span>
+              <span class="px-2 py-0.5 rounded-full bg-secondary-container/50 text-on-secondary-container text-[10.5px] font-bold shrink-0">${m.count}x</span>
+            </div>
+          `).join('');
+        }
+      }
+
+      const staffEl = document.getElementById('dash-staff-perf-list');
+      if (staffEl) {
+        const prevPeriod = getPrevPeriodISO(curPeriod);
+        const sMap = {};
+        const addStaff = (n) => {
+          const clean = String(n || '').trim();
+          if (!clean || clean === 'Belum Ditugaskan') return null;
+          if (!sMap[clean]) sMap[clean] = { name: clean, cur: 0, prev: 0 };
+          return sMap[clean];
+        };
+        (state.activities || []).forEach(a => {
+          const dt = String(a.activity_date || '');
+          const isC = dt.startsWith(curPeriod), isP = dt.startsWith(prevPeriod);
+          if (!isC && !isP) return;
+          (a.workers || []).forEach(w => { const s = addStaff(w); if (s) { if (isC) s.cur++; if (isP) s.prev++; } });
+        });
+        wos.forEach(w => {
+          const dt = String(w.order_date || '');
+          const isC = dt.startsWith(curPeriod), isP = dt.startsWith(prevPeriod);
+          if (!isC && !isP) return;
+          const s = addStaff(w.pic_technician); if (s) { if (isC) s.cur++; if (isP) s.prev++; }
+        });
+        const topStaff = Object.values(sMap).sort((a, b) => b.cur - a.cur || b.prev - a.prev).slice(0, 3);
+        if (topStaff.length === 0) {
+          staffEl.innerHTML = `<div class="text-[11.5px] text-outline">Belum ada aktivitas staf di periode ${formatPeriodID(curPeriod)}.</div>`;
+        } else {
+          staffEl.innerHTML = topStaff.map(s => {
+            const diff = s.cur - s.prev;
+            const arrow = diff < 0
+              ? `<span class="text-red-600 font-bold">▼ ${diff}</span>`
+              : `<span class="text-green-700 font-bold">▲ +${diff}</span>`;
+            return `
+              <div class="flex items-center justify-between text-[12px] py-1 px-2 rounded-lg bg-surface-container-low/60">
+                <span class="font-semibold text-on-surface">${s.name}</span>
+                <span class="text-[11px]"><strong class="text-primary">${s.cur}</strong> job • ${arrow}</span>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+    };
 
     // ACTIVITY MODULE LOGIC
     window.filterActivities = function() {
@@ -4626,7 +4895,7 @@
       if (res && res.success) {
         closeModal('modal-work-order');
         e.target.reset();
-        document.getElementById('form-wo-date').value = '2026-05-19';
+        document.getElementById('form-wo-date').value = getTodayISO();
         showToast(res.message);
         loadAllData();
         switchActivityTab('wo');
@@ -4686,7 +4955,7 @@
       if (res && res.success) {
         closeModal('modal-daily');
         e.target.reset();
-        document.getElementById('form-act-date').value = '2026-05-19';
+        document.getElementById('form-act-date').value = getTodayISO();
         showToast(res.message);
         loadAllData();
       }
@@ -4832,7 +5101,7 @@
     window.resetDailyUsageForm = function() {
       const f = document.getElementById('form-daily-usage');
       if (f) f.reset();
-      document.getElementById('usage-date').value = '2026-05-19';
+      document.getElementById('usage-date').value = getTodayISO();
       calcDailyUsageTotals();
       showToast('Form pemakaian harian telah dikosongkan.');
     };
@@ -4990,7 +5259,7 @@
       // Tutup modal & KOSONGKAN FORM KEMBALI SECARA OTOMATIS
       closeModal('modal-daily-usage');
       e.target.reset();
-      document.getElementById('usage-date').value = '2026-05-19';
+      document.getElementById('usage-date').value = getTodayISO();
       calcDailyUsageTotals();
 
       showToast(`Berhasil menyimpan ${itemsToSave.length} data energi & formulir telah dikosongkan!`);
@@ -5037,7 +5306,7 @@
 
       closeModal('modal-daily-opex');
       e.target.reset();
-      document.getElementById('form-opex-date').value = '2026-05-19';
+      document.getElementById('form-opex-date').value = getTodayISO();
       showToast('Opex ' + nextId + ' (Rp ' + total.toLocaleString('id-ID') + ') berhasil disimpan!');
 
       // Sync to backend
@@ -5051,7 +5320,7 @@
     function recalcOpexKPIs() {
       const list = state.opexDaily || [];
       const total = list.reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
-      const todayStr = '2026-05-19';
+      const todayStr = getTodayISO();
       const todayAmt = list.filter(o => String(o.record_date).startsWith(todayStr)).reduce((acc, o) => acc + (parseFloat(o.total_amount) || 0), 0);
       const distinctDays = [...new Set(list.map(o => String(o.record_date).substring(0, 10)))].filter(Boolean);
       const avg = distinctDays.length > 0 ? Math.round(total / distinctDays.length) : 0;
@@ -5170,7 +5439,7 @@
       const monthlyRate = cost / totalMonths;
 
       const pDate = new Date(asset.purchase_date || '2024-01-01');
-      const now = new Date('2026-05-19');
+      const now = new Date();
       let monthsElapsed = (now.getFullYear() - pDate.getFullYear()) * 12 + (now.getMonth() - pDate.getMonth());
       if (monthsElapsed < 0) monthsElapsed = 0;
 
@@ -5828,15 +6097,10 @@
       const sumEl = document.getElementById('staff-perf-summary');
       if (!tbody) return;
 
-      const curPeriod = state.currentPeriod || '2026-05';
-      const [yStr, mStr] = curPeriod.split('-');
-      let y = parseInt(yStr, 10) || 2026;
-      let m = parseInt(mStr, 10) || 5;
-      let prevY = m === 1 ? y - 1 : y;
-      let prevM = m === 1 ? 12 : m - 1;
-      const prevPeriod = `${prevY}-${String(prevM).padStart(2, '0')}`;
+      const curPeriod = state.currentPeriod || getCurrentPeriodISO();
+      const prevPeriod = getPrevPeriodISO(curPeriod);
 
-      if (labelEl) labelEl.innerText = `${curPeriod} vs ${prevPeriod}`;
+      if (labelEl) labelEl.innerText = `${formatPeriodID(curPeriod)} vs ${formatPeriodID(prevPeriod)}`;
 
       const staffStats = {};
       const ensureStaff = (name) => {
@@ -6169,7 +6433,7 @@
           document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.add('hidden'));
         }
       });
-      initPwa();
+      initDynamicDates();
       initCustomDepartments();
       loadAllData();
     });
